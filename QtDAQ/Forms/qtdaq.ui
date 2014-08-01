@@ -27,7 +27,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab1">
        <attribute name="title">
@@ -130,13 +130,26 @@
      <addaction name="actionAdd_Sorted_Pair_Plot"/>
      <addaction name="actionAdd_Figure_of_Merit_Plot"/>
     </widget>
-    <widget class="QMenu" name="menuMove_Window_to">
+    <widget class="QMenu" name="menuMoveWindow">
      <property name="title">
       <string>Move Window to...</string>
      </property>
      <addaction name="actionPage1"/>
      <addaction name="actionPage2"/>
      <addaction name="actionPage3"/>
+     <addaction name="actionPage4"/>
+    </widget>
+    <widget class="QMenu" name="menuSwitchPage">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Switch to Page...</string>
+     </property>
+     <addaction name="actionSwitchPage1"/>
+     <addaction name="actionSwitchPage2"/>
+     <addaction name="actionSwitchPage3"/>
+     <addaction name="actionSwitchPage4"/>
     </widget>
     <addaction name="menuHistograms"/>
     <addaction name="menuOther"/>
@@ -146,8 +159,9 @@
     <addaction name="separator"/>
     <addaction name="actionCascade"/>
     <addaction name="actionTileWindows"/>
-    <addaction name="menuMove_Window_to"/>
+    <addaction name="menuMoveWindow"/>
     <addaction name="actionRename_Page"/>
+    <addaction name="menuSwitchPage"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -504,6 +518,9 @@
    <property name="shortcut">
     <string>Ctrl+3</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionRename_Page">
    <property name="text">
@@ -511,6 +528,61 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F2</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionPage4">
+   <property name="text">
+    <string>Page 4</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+4</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionSwitchPage1">
+   <property name="text">
+    <string>Page 1</string>
+   </property>
+   <property name="shortcut">
+    <string>1</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionSwitchPage2">
+   <property name="text">
+    <string>Page 2</string>
+   </property>
+   <property name="shortcut">
+    <string>2</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionSwitchPage3">
+   <property name="text">
+    <string>Page 3</string>
+   </property>
+   <property name="shortcut">
+    <string>3</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionSwitchPage4">
+   <property name="text">
+    <string>Page 4</string>
+   </property>
+   <property name="shortcut">
+    <string>4</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -1066,6 +1138,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPage4</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onMoveToPage4Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSwitchPage1</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSwitchPage1Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSwitchPage2</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSwitchPage2Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSwitchPage3</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSwitchPage3Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSwitchPage4</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSwitchPage4Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onEditConfigClicked()</slot>
@@ -1102,5 +1254,10 @@
   <slot>onMoveToPage1Clicked()</slot>
   <slot>onMoveToPage2Clicked()</slot>
   <slot>onMoveToPage3Clicked()</slot>
+  <slot>onMoveToPage4Clicked()</slot>
+  <slot>onSwitchPage1Clicked()</slot>
+  <slot>onSwitchPage2Clicked()</slot>
+  <slot>onSwitchPage3Clicked()</slot>
+  <slot>onSwitchPage4Clicked()</slot>
  </slots>
 </ui>

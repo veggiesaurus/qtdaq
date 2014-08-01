@@ -6,6 +6,12 @@ QtDAQ::QtDAQ(QWidget *parent)
 {
 	ui.setupUi(this);
 
+	
+	mdiAreas[0] = ui.mdiArea1;
+	mdiAreas[1] = ui.mdiArea2;
+	mdiAreas[2] = ui.mdiArea3;
+	mdiAreas[3] = ui.mdiArea4;
+
 	showMaximized();
 	config = AcquisitionConfig::DefaultConfig();
 	analysisConfig = new AnalysisConfig();
@@ -65,6 +71,13 @@ QtDAQ::QtDAQ(QWidget *parent)
 	memset(calibrationValues, 0, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
 	ui.mdiArea1->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	ui.mdiArea1->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+	ui.menuView->removeAction(ui.menuSwitchPage->menuAction());
+	//ui.menuSwitchPage->setVisible(false);
+	new QShortcut(QKeySequence(Qt::Key_1), this, SLOT(onSwitchPage1()));
+	new QShortcut(QKeySequence(Qt::Key_2), this, SLOT(onSwitchPage2()));
+	new QShortcut(QKeySequence(Qt::Key_3), this, SLOT(onSwitchPage3()));
+	new QShortcut(QKeySequence(Qt::Key_4), this, SLOT(onSwitchPage4()));
 
 	acquisitionTime = new QTime();
 	//update timer for ui
@@ -729,11 +742,15 @@ void QtDAQ::onRemoveLinearCutClicked()
 	}
 }
 
-void QtDAQ::setupPlotWindow(PlotWindow* plotWindow, bool appendConditions)
+void QtDAQ::setupPlotWindow(PlotWindow* plotWindow, int page, bool appendConditions)
 {
-	//setCentralWidget(ui.mdiArea1);
-
-	ui.mdiArea1->addSubWindow(plotWindow);
+	//if no argument passed in, then page defaults to -1, in which case, use current tab
+	if (page == -1)
+		page = ui.tabWidget->currentIndex();
+	if (page < 0 || page >= NUM_UI_PAGES)
+		return;
+	
+	mdiAreas[page]->addSubWindow(plotWindow);
 	plotWindow->setCutVectors(&cuts, &polygonalCuts, appendConditions);
 	connect(this, SIGNAL(cutAdded(LinearCut&, bool)), plotWindow, SLOT(onLinearCutAdded(LinearCut&, bool)));
 	connect(this, SIGNAL(polygonalCutAdded(PolygonalCut&, bool)), plotWindow, SLOT(onPolygonalCutAdded(PolygonalCut&, bool)));
@@ -1019,4 +1036,59 @@ void QtDAQ::clearAllPlots()
 	{
 		(*it)->clearValues();
 	}
+}
+
+void QtDAQ::onMoveToPage1Clicked(){ moveCurrentWindowToPage(0); }
+void QtDAQ::onMoveToPage2Clicked(){ moveCurrentWindowToPage(1); }
+void QtDAQ::onMoveToPage3Clicked(){ moveCurrentWindowToPage(2); }
+void QtDAQ::onMoveToPage4Clicked(){ moveCurrentWindowToPage(3); }
+
+void QtDAQ::onSwitchPage1(){ switchToPage(0); }
+void QtDAQ::onSwitchPage2(){ switchToPage(1); }
+void QtDAQ::onSwitchPage3(){ switchToPage(2); }
+void QtDAQ::onSwitchPage4(){ switchToPage(3); }
+
+void QtDAQ::moveCurrentWindowToPage(int page)
+{
+	if (page < 0 || page >= NUM_UI_PAGES)
+		return;
+
+	int activeTabIndex = ui.tabWidget->currentIndex();
+	if (activeTabIndex == page || activeTabIndex < 0 || activeTabIndex >= NUM_UI_PAGES)
+		return;
+
+	QMdiSubWindow* currentSubWindow = mdiAreas[activeTabIndex]->activeSubWindow();
+	if (!currentSubWindow)
+		return;
+
+	QWidget* windowWidget = currentSubWindow->widget();
+	if (!windowWidget)
+		return;
+
+	mdiAreas[activeTabIndex]->removeSubWindow(currentSubWindow);
+	QMdiSubWindow* newSubWindow = mdiAreas[page]->addSubWindow(windowWidget);
+	windowWidget->setParent(newSubWindow);
+	SAFE_DELETE(currentSubWindow);
+
+}
+
+void QtDAQ::switchToPage(int page)
+{
+	if (page < 0 || page >= NUM_UI_PAGES)
+		return;
+
+	ui.tabWidget->setCurrentIndex(page);
+}
+
+void QtDAQ::onRenamePageClicked()
+{
+	int activeTabIndex = ui.tabWidget->currentIndex();
+	if (activeTabIndex < 0 || activeTabIndex >= NUM_UI_PAGES)
+		return;
+	bool ok;
+	QString text = QInputDialog::getText(this, "Page heading",
+		"New heading:", QLineEdit::Normal,
+		ui.tabWidget->tabText(activeTabIndex), &ok);
+	if (ok && !text.isEmpty())
+		ui.tabWidget->setTabText(activeTabIndex, text);
 }

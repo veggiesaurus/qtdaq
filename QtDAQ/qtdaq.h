@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
+#include <QMdiSubWindow>
+#include <QShortcut>
 #include <QFileDialog>
 #include <QVector>
 #include <QString>
@@ -56,6 +58,8 @@ enum DataMode
 	Vx1761_MODE = 2
 };
 
+//
+#define NUM_UI_PAGES 4
 
 class QtDAQ : public QMainWindow
 {
@@ -111,6 +115,16 @@ public:
 	void onRestoreUIClicked();
 	void onCascadeClicked();
 	void onTileClicked();
+	//tabs
+	void onMoveToPage1Clicked();
+	void onMoveToPage2Clicked();
+	void onMoveToPage3Clicked();
+	void onMoveToPage4Clicked();
+	void onSwitchPage1();
+	void onSwitchPage2();
+	void onSwitchPage3();
+	void onSwitchPage4();
+	void onRenamePageClicked();
 	//inter-window
 	void onHistogramClosed();
 	void onHistogram2DClosed();
@@ -144,10 +158,13 @@ signals:
 private:
 	void addSortedPairPlotFromSave(int chPrimary, int chSecondary, HistogramParameter parameter, QVector<Condition> conditions, QByteArray geometry);
 	bool initSerial(QString portName);
-	void setupPlotWindow(PlotWindow*  plotWindow, bool appendConditions = true);
+	void setupPlotWindow(PlotWindow*  plotWindow, int page=-1, bool appendConditions = true);
+	void moveCurrentWindowToPage(int page);
+	void switchToPage(int page);
 	void clearAllPlots();
 private:
 	Ui::QtDAQClass ui;
+	QMdiArea* mdiAreas[4];
 	Ui::DialogConfig uiDialogConfig;
 	Ui::DialogAnalysisConfig uiDialogAnalysisConfig;
 	AcquisitionConfig* config;
