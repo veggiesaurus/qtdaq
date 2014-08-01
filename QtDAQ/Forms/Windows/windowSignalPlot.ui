@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WindowSignalPlot</class>
+ <widget class="QMainWindow" name="WindowSignalPlot">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>562</width>
+    <height>471</height>
+   </rect>
+  </property>
+  <property name="cursor">
+   <cursorShape>UpArrowCursor</cursorShape>
+  </property>
+  <property name="windowTitle">
+   <string>Signal</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="SignalPlot" name="qwtPlotSignal">
+      <property name="canvasBackground" stdset="0">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>562</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuConfigure">
+    <property name="title">
+     <string>Configure</string>
+    </property>
+    <addaction name="actionOptions"/>
+    <addaction name="actionRefresh"/>
+    <addaction name="actionDisplay_average_waveform"/>
+    <addaction name="separator"/>
+    <addaction name="actionActiveCuts"/>
+   </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Plot</string>
+    </property>
+    <addaction name="actionSaveImage"/>
+    <addaction name="actionSaveData"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionRename_window"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuConfigure"/>
+   <addaction name="menuView"/>
+  </widget>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
+   </property>
+   <property name="shortcut">
+    <string>C, O</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="text">
+    <string>Save image</string>
+   </property>
+   <property name="shortcut">
+    <string>P, I</string>
+   </property>
+  </action>
+  <action name="actionSaveData">
+   <property name="text">
+    <string>Save data</string>
+   </property>
+   <property name="shortcut">
+    <string>P, D, Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>C, R</string>
+   </property>
+  </action>
+  <action name="actionDisplay_average_waveform">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Display average waveform</string>
+   </property>
+   <property name="shortcut">
+    <string>C, D</string>
+   </property>
+  </action>
+  <action name="actionActiveCuts">
+   <property name="text">
+    <string>Active cuts</string>
+   </property>
+   <property name="shortcut">
+    <string>C, A</string>
+   </property>
+  </action>
+  <action name="actionRename_window">
+   <property name="text">
+    <string>Rename window</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SignalPlot</class>
+   <extends>QwtPlot</extends>
+   <header>SignalPlot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionClose</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onCloseClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveData</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onSaveDataClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveImage</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onSaveImageClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRefresh</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onRefreshClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOptions</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onOptionsClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDisplay_average_waveform</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onDisplayAverageClicked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionActiveCuts</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onActiveCutsClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRename_window</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onRenameClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onCloseClicked()</slot>
+  <slot>onSaveDataClicked()</slot>
+  <slot>onSaveImageClicked()</slot>
+  <slot>onRefreshClicked()</slot>
+  <slot>onOptionsClicked()</slot>
+  <slot>onDisplayAverageClicked(bool)</slot>
+  <slot>onActiveCutsClicked()</slot>
+  <slot>onRenameClicked()</slot>
+ </slots>
+</ui>

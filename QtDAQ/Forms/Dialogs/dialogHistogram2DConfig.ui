@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogHistogram2DConfig</class>
+ <widget class="QDialog" name="DialogHistogram2DConfig">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>277</width>
+    <height>275</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>2D Histogram Configuration</string>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+   </property>
+   <item row="0" column="0">
+    <widget class="QLabel" name="labelChannel">
+     <property name="text">
+      <string>Channel:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="comboBoxChannel">
+     <item>
+      <property name="text">
+       <string>0</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>2</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>3</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>4</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>5</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>6</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>7</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>8</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>9</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>10</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>11</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>12</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>13</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>14</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>15</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>16</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>17</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>18</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>19</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>20</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>21</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>22</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>23</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>24</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>25</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>26</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>27</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>28</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>29</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>30</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>31</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="labelParameterX">
+     <property name="text">
+      <string>X Parameter:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="comboBoxParameterX">
+     <item>
+      <property name="text">
+       <string>Long Integral</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Short Integral</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>PSD Factor</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Filtered PSD Factor</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Baseline</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of CFD Crossing</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>CFD Delta (Prev Channel)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Max Value</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Min Value</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Max</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Min</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Half-Rise Value</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Half-Rise</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Temperature</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Seconds from First Event</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Flight</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 1</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 2</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 3</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 4</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 5</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="labelMinX">
+     <property name="text">
+      <string>X Parameter Min:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxMinX">
+     <property name="minimum">
+      <double>-250000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>250000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>100.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="labelMaxX">
+     <property name="text">
+      <string>X Parameter Max:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxMaxX">
+     <property name="minimum">
+      <double>-250000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>250000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>100.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>100000.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="labelChannelsX">
+     <property name="text">
+      <string>X Bins:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QSpinBox" name="spinBoxChannelsX">
+     <property name="minimum">
+      <number>32</number>
+     </property>
+     <property name="maximum">
+      <number>4096</number>
+     </property>
+     <property name="singleStep">
+      <number>32</number>
+     </property>
+     <property name="value">
+      <number>512</number>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="labelParameterY">
+     <property name="text">
+      <string>Y Parameter:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QComboBox" name="comboBoxParameterY">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>Long Integral</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Short Integral</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>PSD Factor</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Filtered PSD Factor</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Baseline</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of CFD Crossing</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>CFD Delta (Prev Channel)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Max Value</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Min Value</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Max</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Min</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Half-Rise Value</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Half-Rise</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Temperature</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Seconds from First Event</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of Flight</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 1</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 2</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 3</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 4</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Variable 5</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="labelMinY">
+     <property name="text">
+      <string>Y Parameter Min:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxMinY">
+     <property name="minimum">
+      <double>-250000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>250000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>100.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="labelMaxY">
+     <property name="text">
+      <string>Y Parameter Max:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxMaxY">
+     <property name="minimum">
+      <double>-250000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>250000.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>100.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>100.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="labelChannelsY">
+     <property name="text">
+      <string>Y Bins:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QSpinBox" name="spinBoxChannelsY">
+     <property name="minimum">
+      <number>32</number>
+     </property>
+     <property name="maximum">
+      <number>4096</number>
+     </property>
+     <property name="singleStep">
+      <number>32</number>
+     </property>
+     <property name="value">
+      <number>384</number>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>comboBoxChannel</tabstop>
+  <tabstop>comboBoxParameterX</tabstop>
+  <tabstop>doubleSpinBoxMinX</tabstop>
+  <tabstop>doubleSpinBoxMaxX</tabstop>
+  <tabstop>spinBoxChannelsX</tabstop>
+  <tabstop>comboBoxParameterY</tabstop>
+  <tabstop>doubleSpinBoxMinY</tabstop>
+  <tabstop>doubleSpinBoxMaxY</tabstop>
+  <tabstop>spinBoxChannelsY</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>DialogHistogram2DConfig</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>DialogHistogram2DConfig</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

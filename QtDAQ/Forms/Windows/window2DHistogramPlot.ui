@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Window2DHistogramPlot</class>
+ <widget class="QMainWindow" name="Window2DHistogramPlot">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>954</width>
+    <height>567</height>
+   </rect>
+  </property>
+  <property name="cursor">
+   <cursorShape>UpArrowCursor</cursorShape>
+  </property>
+  <property name="windowTitle">
+   <string>2D Histogram</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="Histogram2DPlot" name="qwtPlotHistogram2D">
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="canvasBackground" stdset="0">
+       <brush brushstyle="NoBrush">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>954</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuConfigure">
+    <property name="title">
+     <string>Configure</string>
+    </property>
+    <addaction name="actionOptions"/>
+    <addaction name="actionRefresh"/>
+    <addaction name="actionClear"/>
+    <addaction name="actionDuplicate"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Plot</string>
+    </property>
+    <addaction name="actionSaveImage"/>
+    <addaction name="actionSaveData"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menuCuts">
+    <property name="title">
+     <string>Cuts</string>
+    </property>
+    <widget class="QMenu" name="menuLinear">
+     <property name="title">
+      <string>Linear</string>
+     </property>
+     <addaction name="actionAddLinearCut"/>
+     <addaction name="actionEditLinearCut"/>
+     <addaction name="actionRemoveLinearCut"/>
+    </widget>
+    <widget class="QMenu" name="menuPolygonal">
+     <property name="title">
+      <string>Polygonal</string>
+     </property>
+     <addaction name="actionAddPolygonalCut"/>
+     <addaction name="actionEditPolygonalCut"/>
+     <addaction name="actionRemovePolygonalCut"/>
+    </widget>
+    <addaction name="menuLinear"/>
+    <addaction name="menuPolygonal"/>
+    <addaction name="separator"/>
+    <addaction name="actionActiveCuts"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionLogarithmicColourScale"/>
+    <addaction name="actionBilinearSmoothing"/>
+    <addaction name="separator"/>
+    <addaction name="actionRename_window"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuConfigure"/>
+   <addaction name="menuCuts"/>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
+   </property>
+   <property name="shortcut">
+    <string>C, O</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="text">
+    <string>Save image</string>
+   </property>
+   <property name="shortcut">
+    <string>P, I</string>
+   </property>
+  </action>
+  <action name="actionSaveData">
+   <property name="text">
+    <string>Save data</string>
+   </property>
+   <property name="shortcut">
+    <string>P, D</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>C, R</string>
+   </property>
+  </action>
+  <action name="actionActiveCuts">
+   <property name="text">
+    <string>Active cuts</string>
+   </property>
+   <property name="shortcut">
+    <string>C, A</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+   <property name="shortcut">
+    <string>C, C</string>
+   </property>
+  </action>
+  <action name="actionAddLinearCut">
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="shortcut">
+    <string>L, A</string>
+   </property>
+  </action>
+  <action name="actionEditLinearCut">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="shortcut">
+    <string>L, E</string>
+   </property>
+  </action>
+  <action name="actionRemoveLinearCut">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="shortcut">
+    <string>L, R</string>
+   </property>
+  </action>
+  <action name="actionAddPolygonalCut">
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="shortcut">
+    <string>P, A</string>
+   </property>
+  </action>
+  <action name="actionEditPolygonalCut">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="shortcut">
+    <string>P, E</string>
+   </property>
+  </action>
+  <action name="actionRemovePolygonalCut">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="shortcut">
+    <string>P, R</string>
+   </property>
+  </action>
+  <action name="actionLogarithmicColourScale">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Logarithmic colour scale</string>
+   </property>
+   <property name="shortcut">
+    <string>V, L</string>
+   </property>
+  </action>
+  <action name="actionBilinearSmoothing">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bilinear smoothing</string>
+   </property>
+   <property name="shortcut">
+    <string>V, B</string>
+   </property>
+  </action>
+  <action name="actionRename_window">
+   <property name="text">
+    <string>Rename window</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
+  <action name="actionDuplicate">
+   <property name="text">
+    <string>Duplicate</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Histogram2DPlot</class>
+   <extends>QwtPlot</extends>
+   <header>Histogram2DPlot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionClose</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onCloseClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveData</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onSaveDataClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveImage</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onSaveImageClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRefresh</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onRefreshClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOptions</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onOptionsClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionActiveCuts</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onActiveCutsClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClear</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>clearValues()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAddLinearCut</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onAddLinearCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEditLinearCut</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onEditLinearCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRemoveLinearCut</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onRemoveLinearCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAddPolygonalCut</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onAddPolygonalCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEditPolygonalCut</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onEditPolygonalCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRemovePolygonalCut</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onRemovePolygonalCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBilinearSmoothing</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onBilinearSmoothingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLogarithmicColourScale</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onLogColoursToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRename_window</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onRenameClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDuplicate</sender>
+   <signal>triggered()</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onDuplicateClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onCloseClicked()</slot>
+  <slot>onSaveDataClicked()</slot>
+  <slot>onSaveImageClicked()</slot>
+  <slot>onRefreshClicked()</slot>
+  <slot>onOptionsClicked()</slot>
+  <slot>onActiveCutsClicked()</slot>
+  <slot>clearValues()</slot>
+  <slot>onAddLinearCutClicked()</slot>
+  <slot>onEditLinearCutClicked()</slot>
+  <slot>onRemoveLinearCutClicked()</slot>
+  <slot>onAddPolygonalCutClicked()</slot>
+  <slot>onEditPolygonalCutClicked()</slot>
+  <slot>onRemovePolygonalCutClicked()</slot>
+  <slot>onBilinearSmoothingToggled(bool)</slot>
+  <slot>onLogColoursToggled(bool)</slot>
+  <slot>onRenameClicked()</slot>
+  <slot>onDuplicateClicked()</slot>
+ </slots>
+</ui>

@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QtDAQClass</class>
+ <widget class="QMainWindow" name="QtDAQClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>881</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>QtDAQ</string>
+  </property>
+  <property name="iconSize">
+   <size>
+    <width>24</width>
+    <height>24</height>
+   </size>
+  </property>
+  <property name="documentMode">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>3</number>
+      </property>
+      <widget class="QWidget" name="tab1">
+       <attribute name="title">
+        <string>Page 1</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QMdiArea" name="mdiArea1"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab2">
+       <attribute name="title">
+        <string>Page 2</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QMdiArea" name="mdiArea2"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab3">
+       <attribute name="title">
+        <string>Page 3</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QMdiArea" name="mdiArea3"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab4">
+       <attribute name="title">
+        <string>Page 4</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QMdiArea" name="mdiArea4"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>881</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionRead_File"/>
+    <addaction name="actionRead_Vx1761_File"/>
+    <addaction name="actionReplay_Current_File"/>
+    <addaction name="separator"/>
+    <addaction name="actionRead_Statistics_File"/>
+    <addaction name="actionSet_Output_File"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuAcquisition">
+    <property name="title">
+     <string>Acquisition</string>
+    </property>
+    <addaction name="actionLoad_Config"/>
+    <addaction name="actionSave_Config"/>
+    <addaction name="actionEdit_Config"/>
+    <addaction name="separator"/>
+    <addaction name="actionSerial_Interface"/>
+    <addaction name="separator"/>
+    <addaction name="actionInit"/>
+    <addaction name="actionStart"/>
+    <addaction name="actionStop"/>
+    <addaction name="actionReset"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuHistograms">
+     <property name="title">
+      <string>Histograms</string>
+     </property>
+     <addaction name="actionAddHistogram"/>
+     <addaction name="actionAdd2DHistogram"/>
+    </widget>
+    <widget class="QMenu" name="menuOther">
+     <property name="title">
+      <string>Other</string>
+     </property>
+     <addaction name="actionAddSignalPlot"/>
+     <addaction name="actionAdd_Sorted_Pair_Plot"/>
+     <addaction name="actionAdd_Figure_of_Merit_Plot"/>
+    </widget>
+    <widget class="QMenu" name="menuMove_Window_to">
+     <property name="title">
+      <string>Move Window to...</string>
+     </property>
+     <addaction name="actionPage1"/>
+     <addaction name="actionPage2"/>
+     <addaction name="actionPage3"/>
+    </widget>
+    <addaction name="menuHistograms"/>
+    <addaction name="menuOther"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_UI"/>
+    <addaction name="actionRestore_UI"/>
+    <addaction name="separator"/>
+    <addaction name="actionCascade"/>
+    <addaction name="actionTileWindows"/>
+    <addaction name="menuMove_Window_to"/>
+    <addaction name="actionRename_Page"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Analysis</string>
+    </property>
+    <widget class="QMenu" name="menuLinearCuts">
+     <property name="title">
+      <string>Linear Cuts</string>
+     </property>
+     <addaction name="actionLinearCutAdd"/>
+     <addaction name="actionLinearCutEdit"/>
+     <addaction name="actionLinearCutRemove"/>
+    </widget>
+    <addaction name="actionAnalysis_Config"/>
+    <addaction name="actionLoad_Analysis_Config"/>
+    <addaction name="actionSave_Analysis_Config"/>
+    <addaction name="separator"/>
+    <addaction name="actionEnergy_Callibration"/>
+    <addaction name="menuLinearCuts"/>
+    <addaction name="separator"/>
+    <addaction name="actionPause_File_Reading"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuAcquisition"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionLoad_Config">
+   <property name="text">
+    <string>Load Acquisition Config</string>
+   </property>
+   <property name="shortcut">
+    <string>Q, L</string>
+   </property>
+  </action>
+  <action name="actionSave_Config">
+   <property name="text">
+    <string>Save Acquisition Config</string>
+   </property>
+   <property name="shortcut">
+    <string>Q, S</string>
+   </property>
+  </action>
+  <action name="actionEdit_Config">
+   <property name="text">
+    <string>Edit Acquisition Config</string>
+   </property>
+   <property name="shortcut">
+    <string>Q, E</string>
+   </property>
+  </action>
+  <action name="actionStart">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+   <property name="shortcut">
+    <string>Q, S</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Q, Shift+S</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Reset</string>
+   </property>
+   <property name="shortcut">
+    <string>Q, R</string>
+   </property>
+  </action>
+  <action name="actionSet_Output_File">
+   <property name="text">
+    <string>Set Output File</string>
+   </property>
+   <property name="shortcut">
+    <string>F, O</string>
+   </property>
+  </action>
+  <action name="actionRead_File">
+   <property name="text">
+    <string>Read DRS File</string>
+   </property>
+   <property name="shortcut">
+    <string>F, D</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="actionAddSignalPlot">
+   <property name="text">
+    <string>Add Signal Plot</string>
+   </property>
+   <property name="shortcut">
+    <string>O, S</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionEnergy_Callibration">
+   <property name="text">
+    <string>Energy Callibration</string>
+   </property>
+   <property name="shortcut">
+    <string>A, C</string>
+   </property>
+  </action>
+  <action name="actionShort_Integrals">
+   <property name="text">
+    <string>Short Integrals</string>
+   </property>
+  </action>
+  <action name="actionLong_Integrals">
+   <property name="text">
+    <string>Long Integrals</string>
+   </property>
+  </action>
+  <action name="actionPSD_Configuration">
+   <property name="text">
+    <string>PSD Configuration</string>
+   </property>
+  </action>
+  <action name="actionPSD_Map">
+   <property name="text">
+    <string>PSD Map</string>
+   </property>
+  </action>
+  <action name="actionPSD_Projection">
+   <property name="text">
+    <string>PSD Projection</string>
+   </property>
+  </action>
+  <action name="actionReplay_Current_File">
+   <property name="text">
+    <string>Replay Current File</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionInit">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Init</string>
+   </property>
+   <property name="shortcut">
+    <string>Q, I</string>
+   </property>
+  </action>
+  <action name="actionSave_UI">
+   <property name="text">
+    <string>Save UI</string>
+   </property>
+   <property name="shortcut">
+    <string>U, S</string>
+   </property>
+  </action>
+  <action name="actionRestore_UI">
+   <property name="text">
+    <string>Restore UI</string>
+   </property>
+   <property name="shortcut">
+    <string>U, R</string>
+   </property>
+  </action>
+  <action name="actionAddHistogram">
+   <property name="text">
+    <string>Add Histogram</string>
+   </property>
+   <property name="shortcut">
+    <string>H, 1</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionRead_Statistics_File">
+   <property name="text">
+    <string>Read Statistics File</string>
+   </property>
+  </action>
+  <action name="actionLinearCutAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+L, A</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="actionLinearCutRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+L, R</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="actionAdd_Sorted_Pair_Plot">
+   <property name="text">
+    <string>Add Sorted Pair Plot</string>
+   </property>
+  </action>
+  <action name="actionAnalysis_Config">
+   <property name="text">
+    <string>Edit Analysis Config</string>
+   </property>
+   <property name="shortcut">
+    <string>A, E</string>
+   </property>
+  </action>
+  <action name="actionRead_Vx1761_File">
+   <property name="text">
+    <string>Read Vx1761 File</string>
+   </property>
+   <property name="shortcut">
+    <string>F, V</string>
+   </property>
+  </action>
+  <action name="actionAdd2DHistogram">
+   <property name="text">
+    <string>Add Histogram (2D)</string>
+   </property>
+   <property name="shortcut">
+    <string>H, 2</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionLinearCutEdit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+L, E</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="action1">
+   <property name="text">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="actionAdd_Figure_of_Merit_Plot">
+   <property name="text">
+    <string>Add Figure of Merit Plot</string>
+   </property>
+   <property name="shortcut">
+    <string>O, F</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionSerial_Interface">
+   <property name="text">
+    <string>Serial Interface</string>
+   </property>
+  </action>
+  <action name="actionLoad_Analysis_Config">
+   <property name="text">
+    <string>Load Analysis Config</string>
+   </property>
+   <property name="shortcut">
+    <string>A, L</string>
+   </property>
+  </action>
+  <action name="actionSave_Analysis_Config">
+   <property name="text">
+    <string>Save Analysis Config</string>
+   </property>
+   <property name="shortcut">
+    <string>A, S</string>
+   </property>
+  </action>
+  <action name="actionCascade">
+   <property name="text">
+    <string>Cascade Windows</string>
+   </property>
+   <property name="shortcut">
+    <string>V, C</string>
+   </property>
+  </action>
+  <action name="actionTileWindows">
+   <property name="text">
+    <string>Tile Windows</string>
+   </property>
+   <property name="shortcut">
+    <string>V, T</string>
+   </property>
+  </action>
+  <action name="actionPause_File_Reading">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Pause File Reading</string>
+   </property>
+   <property name="shortcut">
+    <string>Pause</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionPage1">
+   <property name="text">
+    <string>Page 1</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
+  </action>
+  <action name="actionPage2">
+   <property name="text">
+    <string>Page 2</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
+   </property>
+  </action>
+  <action name="actionPage3">
+   <property name="text">
+    <string>Page 3</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+3</string>
+   </property>
+  </action>
+  <action name="actionRename_Page">
+   <property name="text">
+    <string>Rename Page</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F2</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="../qtdaq.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionEdit_Config</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onEditConfigClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_Config</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onLoadConfigClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_Config</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSaveConfigClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEnergy_Callibration</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onCalibrateClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAddSignalPlot</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onAddSignalPlotClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAddHistogram</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onAddHistogramClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_UI</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSaveUIClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRestore_UI</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onRestoreUIClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onExitClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRead_File</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onReadDRSFileClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReplay_Current_File</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onReplayCurrentFileClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLinearCutRemove</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onRemoveLinearCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLinearCutAdd</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onAddLinearCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRead_Statistics_File</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onReadStatisticsFileClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReset</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onResetClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStart</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onStartClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStop</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onStopClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionInit</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onInitClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAdd_Sorted_Pair_Plot</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onAddSortedPairPlotClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAnalysis_Config</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onEditAnalysisConfigClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRead_Vx1761_File</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onReadVx1761FileClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAdd2DHistogram</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onAddHistogram2DClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLinearCutEdit</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onEditLinearCutClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAdd_Figure_of_Merit_Plot</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onAddFigureOfMeritClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSerial_Interface</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSerialInterfaceClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_Analysis_Config</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onLoadAnalysisConfigClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_Analysis_Config</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSaveAnalysisConfigClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCascade</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onCascadeClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTileWindows</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onTileClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPause_File_Reading</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onPauseReadingToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>441</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPage1</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onMoveToPage1Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPage2</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onMoveToPage2Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPage3</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onMoveToPage3Clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRename_Page</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onRenamePageClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onEditConfigClicked()</slot>
+  <slot>onSaveConfigClicked()</slot>
+  <slot>onLoadConfigClicked()</slot>
+  <slot>onCalibrateClicked()</slot>
+  <slot>onAddSignalPlotClicked()</slot>
+  <slot>onAddHistogramClicked()</slot>
+  <slot>onSaveUIClicked()</slot>
+  <slot>onRestoreUIClicked()</slot>
+  <slot>onExitClicked()</slot>
+  <slot>onReadStatisticsFileClicked()</slot>
+  <slot>onReplayCurrentFileClicked()</slot>
+  <slot>onAddLinearCutClicked()</slot>
+  <slot>onRemoveLinearCutClicked()</slot>
+  <slot>onReadDRSFileClicked()</slot>
+  <slot>onInitClicked()</slot>
+  <slot>onStartClicked()</slot>
+  <slot>onStopClicked()</slot>
+  <slot>onResetClicked()</slot>
+  <slot>onAddSortedPairPlotClicked()</slot>
+  <slot>onEditAnalysisConfigClicked()</slot>
+  <slot>onReadVx1761FileClicked()</slot>
+  <slot>onAddHistogram2DClicked()</slot>
+  <slot>onEditLinearCutClicked()</slot>
+  <slot>onAddFigureOfMeritClicked()</slot>
+  <slot>onSerialInterfaceClicked()</slot>
+  <slot>onSaveAnalysisConfigClicked()</slot>
+  <slot>onLoadAnalysisConfigClicked()</slot>
+  <slot>onCascadeClicked()</slot>
+  <slot>onTileClicked()</slot>
+  <slot>onPauseReadingToggled(bool)</slot>
+  <slot>onRenamePageClicked()</slot>
+  <slot>onMoveToPage1Clicked()</slot>
+  <slot>onMoveToPage2Clicked()</slot>
+  <slot>onMoveToPage3Clicked()</slot>
+ </slots>
+</ui>
