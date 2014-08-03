@@ -23,7 +23,7 @@ if (ptr != NULL)            \
 }
 
 
-#define UI_SAVE_VERSION ((quint32)(0x02))
+#define UI_SAVE_VERSION ((quint32)(0x03))
 #define ANALYSIS_SAVE_VERSION ((quint32)(0x01))
 
 enum HistogramParameter
@@ -59,9 +59,9 @@ float getSecondsFromFirstEvent(EventTimestamp firstEvent, EventTimestamp current
 
 struct EnergyCalibration
 {
-	double scale;
-	double offset;
-	bool calibrated;
+	double scale=0;
+	double offset=0;
+	bool calibrated=false;
 };
 
 

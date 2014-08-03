@@ -55,7 +55,7 @@ enum DataMode
 {
 	NONE = 0,
 	DRS_MODE = 1,
-	Vx1761_MODE = 2
+	Vx_MODE = 2
 };
 
 //
@@ -78,7 +78,7 @@ public:
 	void onEventReadingFinished();
 	//file slots
 	void onReadDRSFileClicked();
-	void onReadVx1761FileClicked();
+	void onReadVxFileClicked();
 	void onReadStatisticsFileClicked();
 	void onReplayCurrentFileClicked();
 	//acquisition
@@ -113,6 +113,7 @@ public:
 	void onAddFigureOfMeritClicked();
 	void onSaveUIClicked();
 	void onRestoreUIClicked();
+	void onRestoreUILegacyClicked();
 	void onCascadeClicked();
 	void onTileClicked();
 	//tabs
@@ -157,6 +158,7 @@ signals:
 	void resumeProcessing();
 private:
 	void addSortedPairPlotFromSave(int chPrimary, int chSecondary, HistogramParameter parameter, QVector<Condition> conditions, QByteArray geometry);
+	void restoreUI(bool legacy = false);
 	bool initSerial(QString portName);
 	void setupPlotWindow(PlotWindow*  plotWindow, int page=-1, bool appendConditions = true);
 	void moveCurrentWindowToPage(int page);
@@ -177,18 +179,18 @@ private:
 	QVector<SortedPairPlotWindow*> sortedPairPlots;
 	QVector<LinearCut> cuts;
 	QVector<PolygonalCut> polygonalCuts;
-	DRSBinaryReaderThread* drsReaderThread;
-	VxBinaryReaderThread* vxReaderThread;
-	VxProcessThread* vxProcessThread;
-	DRSAcquisitionThread* drsAcquisitionThread;
-	int numEventsProcessed, prevNumEventsProcessed;
-	int numUITimerTimeouts;
+	DRSBinaryReaderThread* drsReaderThread = nullptr;
+	VxBinaryReaderThread* vxReaderThread = nullptr;
+	VxProcessThread* vxProcessThread = nullptr;
+	DRSAcquisitionThread* drsAcquisitionThread = nullptr;
+	int numEventsProcessed = 0, prevNumEventsProcessed = 0;
+	int numUITimerTimeouts = 0;
 	bool finishedReading;
 	float prevAcquisitionTime;
 	QTimer* uiUpdateTimer;
 	QTime* acquisitionTime;
-	DRS* drs;
-	DRSBoard* board;
+	DRS* drs = nullptr;
+	DRSBoard* board = nullptr;
 	QString rawFilename;
 	QString filename;
 	DAQStatus status;
@@ -196,7 +198,7 @@ private:
 	DataMode dataMode;
 
 	//Serial interface
-	QSerialPort* serial;
+	QSerialPort* serial = nullptr;
 	QString serialString;
 	float currentTemp;
 

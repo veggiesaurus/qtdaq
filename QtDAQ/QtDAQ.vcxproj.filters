@@ -95,15 +95,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="qtdaq.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtdaq.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtdaq.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_qtdaq.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -353,11 +344,17 @@
     <ClCompile Include="GeneratedFiles\Release\moc_SignalPlot.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="QtDAQ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="qtdaq.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="qtdaq.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
@@ -489,6 +486,9 @@
     </CustomBuild>
     <CustomBuild Include="Include\Plots\SignalPlot.h">
       <Filter>Header Files\Plots</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QtDAQ.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

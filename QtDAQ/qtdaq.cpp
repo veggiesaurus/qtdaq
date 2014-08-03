@@ -1,4 +1,4 @@
-#include "qtdaq.h"
+#include "QtDAQ.h"
 
 
 QtDAQ::QtDAQ(QWidget *parent)
@@ -6,7 +6,6 @@ QtDAQ::QtDAQ(QWidget *parent)
 {
 	ui.setupUi(this);
 
-	
 	mdiAreas[0] = ui.mdiArea1;
 	mdiAreas[1] = ui.mdiArea2;
 	mdiAreas[2] = ui.mdiArea3;
@@ -41,8 +40,6 @@ QtDAQ::QtDAQ(QWidget *parent)
 	memset(procBuffer1, 0, sizeof(EventStatistics)*EVENT_BUFFER_SIZE);
 	memset(procBuffer2, 0, sizeof(EventStatistics)*EVENT_BUFFER_SIZE);
 
-	vxReaderThread = NULL;
-	vxProcessThread = NULL;
 
 	drsReaderThread = new DRSBinaryReaderThread(this);
 	connect(drsReaderThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
@@ -55,10 +52,7 @@ QtDAQ::QtDAQ(QWidget *parent)
 	connect(drsAcquisitionThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
 	connect(drsAcquisitionThread, SIGNAL(eventAcquisitionFinished()), this, SLOT(onEventReadingFinished()));
 	connect(this, SIGNAL(temperatureUpdated(float)), drsReaderThread, SLOT(onTemperatureUpdated(float)), Qt::QueuedConnection);
-	drs = NULL;
-	board = NULL;
 
-	serial = NULL;
 	//restore previous temperature sensor (serial) settings
 	QVariant varSerialPort = settings.value("temperature/serialPort");
 	if (varSerialPort.isValid())
@@ -72,21 +66,16 @@ QtDAQ::QtDAQ(QWidget *parent)
 	ui.mdiArea1->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	ui.mdiArea1->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-	ui.menuView->removeAction(ui.menuSwitchPage->menuAction());
-	//ui.menuSwitchPage->setVisible(false);
-	new QShortcut(QKeySequence(Qt::Key_1), this, SLOT(onSwitchPage1()));
-	new QShortcut(QKeySequence(Qt::Key_2), this, SLOT(onSwitchPage2()));
-	new QShortcut(QKeySequence(Qt::Key_3), this, SLOT(onSwitchPage3()));
-	new QShortcut(QKeySequence(Qt::Key_4), this, SLOT(onSwitchPage4()));
+	new QShortcut(Qt::Key_1, this, SLOT(onSwitchPage1()));
+	new QShortcut(Qt::Key_2, this, SLOT(onSwitchPage2()));
+	new QShortcut(Qt::Key_3, this, SLOT(onSwitchPage3()));
+	new QShortcut(Qt::Key_4, this, SLOT(onSwitchPage4()));
 
 	acquisitionTime = new QTime();
 	//update timer for ui
 	uiUpdateTimer = new QTimer();
-	uiUpdateTimer->setInterval(1000);
-	numEventsProcessed = 0;
-	prevNumEventsProcessed = 0;
-	numUITimerTimeouts = 0;
-	connect(uiUpdateTimer, SIGNAL(timeout()), this, SLOT(onUiUpdateTimerTimeout()));
+	uiUpdateTimer->setInterval(1000);	
+	connect(uiUpdateTimer, &QTimer::timeout, this, &QtDAQ::onUiUpdateTimerTimeout);
 }
 
 QtDAQ::~QtDAQ()
@@ -98,7 +87,7 @@ void QtDAQ::onUiUpdateTimerTimeout()
 {
 	if (!rawFilename.isEmpty())
 	{
-		setWindowTitle("SolarDAQ - " + rawFilename);
+		setWindowTitle("QtDAQ - " + rawFilename);
 	}
 	if (statusBar())
 	{
@@ -224,7 +213,7 @@ void QtDAQ::onReadDRSFileClicked()
 
 }
 
-void QtDAQ::onReadVx1761FileClicked()
+void QtDAQ::onReadVxFileClicked()
 {
 	QFileDialog fileDialog(this, "Set raw data input file", "", "Compressed data (*.dtz);;All files (*.*)");
 	fileDialog.restoreState(settings.value("mainWindow/loadRawState").toByteArray());
@@ -278,8 +267,8 @@ void QtDAQ::onReadVx1761FileClicked()
 		uiUpdateTimer->start();
 		acquisitionTime->start();
 		vxProcessThread->start();
-		dataMode = Vx1761_MODE;
-		ui.actionPause_File_Reading->setChecked(false);
+		dataMode = Vx_MODE;
+		ui.actionPauseFileReading->setChecked(false);
 	}
 
 }
@@ -293,13 +282,13 @@ void QtDAQ::onReplayCurrentFileClicked()
 		numEventsProcessed = 0;
 		prevNumEventsProcessed = 0;
 		finishedReading = false;
-		ui.actionPause_File_Reading->setChecked(false);
+		ui.actionPauseFileReading->setChecked(false);
 		if (dataMode == DRS_MODE)
 		{
 			drsReaderThread->initDRSBinaryReaderThread(rawFilename, compressedOutput, analysisConfig);
 			drsReaderThread->start();
 		}
-		else if (dataMode == Vx1761_MODE)
+		else if (dataMode == Vx_MODE)
 		{
 			vxProcessThread->resetTriggerTimerAdjustments();
 			vxReaderThread->rewindFile();
@@ -498,7 +487,19 @@ void QtDAQ::onSaveUIClicked()
 			return;
 
 		QDataStream stream(&file);
+		//Version info
+		stream << (quint32)UI_SAVE_VERSION;		
 		stream << saveGeometry();
+		
+		//Newly introducted in UI Version 0x03: Begin		
+		quint32 numPages = NUM_UI_PAGES;
+		stream << numPages;
+		quint32 activePage = ui.tabWidget->currentIndex();
+		stream << activePage;
+		for (auto i = 0; i < numPages; i++)
+			stream << ui.tabWidget->tabText(i);
+		//Newly introducted in UI Version 0x03: End
+
 		//write calibration values
 		stream.writeRawData((const char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
 
@@ -531,7 +532,18 @@ void QtDAQ::onSaveUIClicked()
 	}
 }
 
+void QtDAQ::onRestoreUILegacyClicked()
+{
+	restoreUI(true);
+}
+
 void QtDAQ::onRestoreUIClicked()
+{
+	restoreUI();
+}
+
+
+void QtDAQ::restoreUI(bool legacy)
 {
 	//open a file for config input
 	QFileDialog fileDialog(this, "Set input file", "", "UI config (*.uic);;All files (*.*)");
@@ -559,31 +571,59 @@ void QtDAQ::onRestoreUIClicked()
 		polygonalCuts.clear();
 
 		//clear up old UI
-		for (int i = 0; i<histograms.size(); i++)
+		for (int i = 0; i < histograms.size(); i++)
 			histograms[i]->parentWidget()->close();
 		histograms.clear();
 
-		for (int i = 0; i<histograms2D.size(); i++)
+		for (int i = 0; i < histograms2D.size(); i++)
 			histograms2D[i]->parentWidget()->close();
 		histograms2D.clear();
 
-		for (int i = 0; i<fomPlots.size(); i++)
+		for (int i = 0; i < fomPlots.size(); i++)
 			fomPlots[i]->parentWidget()->close();
 		fomPlots.clear();
 
-		for (int i = 0; i<signalPlots.size(); i++)
+		for (int i = 0; i < signalPlots.size(); i++)
 			signalPlots[i]->parentWidget()->close();
 		signalPlots.clear();
 
-		for (int i = 0; i<sortedPairPlots.size(); i++)
+		for (int i = 0; i < sortedPairPlots.size(); i++)
 			sortedPairPlots[i]->parentWidget()->close();
 		sortedPairPlots.clear();
 
 		QDataStream stream(&file);
-
+		quint32 fileVersion;
+		if (!legacy)
+		{
+			stream >> fileVersion;
+		}
+		else
+			fileVersion = 0x02;
 		QByteArray geometryMainWindow;
 		stream >> geometryMainWindow;
 		restoreGeometry(geometryMainWindow);
+
+		if (!legacy)
+		{		
+			//Newly introducted in UI Version 0x03: Begin
+			if (fileVersion >= 0x03)
+			{
+				quint32 numPagesDefined;
+				stream >> numPagesDefined;
+				quint32 activePage;
+				stream >> activePage;				
+				for (auto i = 0; i < numPagesDefined; i++)
+				{
+					QString pageName;
+					stream >> pageName;
+					if (i < ui.tabWidget->count())
+						ui.tabWidget->setTabText(i, pageName);
+				}
+				if (activePage < ui.tabWidget->count())
+					ui.tabWidget->setCurrentIndex(activePage);
+			}
+			//Newly introducted in UI Version 0x03: End
+		}
 		//read calibration values
 		stream.readRawData((char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
 
@@ -597,8 +637,8 @@ void QtDAQ::onRestoreUIClicked()
 		for (int i = 0; i<numHists; i++)
 		{
 			HistogramWindow* histogram = new HistogramWindow(ui.mdiArea1);
-			setupPlotWindow(histogram, false);
 			stream >> *histogram;
+			setupPlotWindow(histogram, histogram->tabIndex, false);
 			histogram->onNewCalibration(histogram->chPrimary, calibrationValues[histogram->chPrimary]);
 			histograms.push_back(histogram);
 
@@ -614,8 +654,8 @@ void QtDAQ::onRestoreUIClicked()
 		for (int i = 0; i<numHists2D; i++)
 		{
 			Histogram2DWindow* histogram2D = new Histogram2DWindow(ui.mdiArea1);
-			setupPlotWindow(histogram2D, false);
 			stream >> *histogram2D;
+			setupPlotWindow(histogram2D, histogram2D->tabIndex, false);
 			histogram2D->onNewCalibration(histogram2D->chPrimary, calibrationValues[histogram2D->chPrimary]);
 			histograms2D.push_back(histogram2D);
 
@@ -630,8 +670,8 @@ void QtDAQ::onRestoreUIClicked()
 		for (int i = 0; i<numFoMs; i++)
 		{
 			FoMWindow* fomPlot = new FoMWindow(ui.mdiArea1);
-			setupPlotWindow(fomPlot, false);
 			stream >> *fomPlot;
+			setupPlotWindow(fomPlot, fomPlot->tabIndex, false);
 			fomPlot->onNewCalibration(fomPlot->chPrimary, calibrationValues[fomPlot->chPrimary]);
 			fomPlots.push_back(fomPlot);
 
@@ -645,8 +685,8 @@ void QtDAQ::onRestoreUIClicked()
 		for (int i = 0; i<numSignalPlots; i++)
 		{
 			SignalPlotWindow* signalPlot = new SignalPlotWindow(ui.mdiArea1);
-			setupPlotWindow(signalPlot, false);
 			stream >> *signalPlot;
+			setupPlotWindow(signalPlot, signalPlot->tabIndex, false);
 			signalPlots.push_back(signalPlot);
 
 			connect(signalPlot, SIGNAL(plotClosed()), this, SLOT(onSignalPlotClosed()));
@@ -654,10 +694,16 @@ void QtDAQ::onRestoreUIClicked()
 		file.close();
 
 		//disable multiple restores
-		ui.actionRestore_UI->setEnabled(false);
+		ui.actionRestoreUI->setEnabled(false);
+
+		//workaround for resize bug
+		showNormal();
+		this->showMaximized();
+		showNormal();
+		this->showMaximized();
+
 	}
 }
-
 void QtDAQ::onPauseReadingToggled(bool checked)
 {
 	if (vxReaderThread)
@@ -751,6 +797,7 @@ void QtDAQ::setupPlotWindow(PlotWindow* plotWindow, int page, bool appendConditi
 		return;
 	
 	mdiAreas[page]->addSubWindow(plotWindow);
+	plotWindow->tabIndex = page;
 	plotWindow->setCutVectors(&cuts, &polygonalCuts, appendConditions);
 	connect(this, SIGNAL(cutAdded(LinearCut&, bool)), plotWindow, SLOT(onLinearCutAdded(LinearCut&, bool)));
 	connect(this, SIGNAL(polygonalCutAdded(PolygonalCut&, bool)), plotWindow, SLOT(onPolygonalCutAdded(PolygonalCut&, bool)));
@@ -764,7 +811,7 @@ void QtDAQ::setupPlotWindow(PlotWindow* plotWindow, int page, bool appendConditi
 void QtDAQ::onAddHistogramClicked()
 {
 	HistogramWindow* histogram = new HistogramWindow();
-	setupPlotWindow(histogram);
+	setupPlotWindow(histogram, -1);
 	//set to ch0 by default
 	histogram->onNewCalibration(0, calibrationValues[0]);
 
@@ -1064,7 +1111,10 @@ void QtDAQ::moveCurrentWindowToPage(int page)
 	QWidget* windowWidget = currentSubWindow->widget();
 	if (!windowWidget)
 		return;
-
+	PlotWindow* plotWindow = dynamic_cast<PlotWindow*>(windowWidget);
+	if (!plotWindow)
+		return;
+	plotWindow->tabIndex = page;
 	mdiAreas[activeTabIndex]->removeSubWindow(currentSubWindow);
 	QMdiSubWindow* newSubWindow = mdiAreas[page]->addSubWindow(windowWidget);
 	windowWidget->setParent(newSubWindow);

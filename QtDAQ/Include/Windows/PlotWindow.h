@@ -32,9 +32,7 @@ public slots:
 	void onActiveCutsClicked();
 	void onSaveImageClicked();
 	void onRenameClicked();
-
 	
-
 	void closeEvent(QCloseEvent* event);
 	
 	virtual void onAddLinearCutAddClicked(){}
@@ -51,14 +49,15 @@ protected:
 	bool isInActiveRegion(EventStatistics* stats);
 	void updateSettings();
 public:
-	int chPrimary;
+	int chPrimary = 0;
+	int tabIndex = 0;
 	QVector<Condition>conditions;
 	QVector<Condition>polygonalConditions;
 	
 protected:
 	Ui::DialogActiveCuts uiDialogActiveCuts;	
-	QVector<LinearCut>*cuts;
-	QVector<PolygonalCut>*polygonalCuts;
+	QVector<LinearCut>*cuts=nullptr;
+	QVector<PolygonalCut>*polygonalCuts=nullptr;
 	//conditions (for each cut):
 	//1: include region; -1: exclude region; 0: ignore cut
 	
@@ -66,7 +65,7 @@ protected:
 	QwtPlot* plot;
 	QSettings settings;
 	QString name;
-	int numEvents;
+	int numEvents=0;
 	friend QDataStream &operator<<(QDataStream &out, const PlotWindow &obj);
 	friend QDataStream &operator>>(QDataStream &in, PlotWindow &obj);
 };

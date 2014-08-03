@@ -5,11 +5,7 @@ PlotWindow::PlotWindow(QWidget* parent, int s_chPrimary):QMainWindow(parent),
 {
 	refreshTimer = new QTimer(this);
     connect(refreshTimer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
-	refreshTimer->start(1000);
-	numEvents=0;
-	cuts=NULL;
-	polygonalCuts=NULL;
-
+	refreshTimer->start(1000);	
 }
 
 void PlotWindow::setCutVectors(QVector<LinearCut>*s_cuts,QVector<PolygonalCut>*s_polygonalCuts, bool updateConditions)
@@ -204,6 +200,9 @@ QDataStream &operator<<(QDataStream &out, const PlotWindow &obj)
 	out<<UI_SAVE_VERSION;
 	out<<obj.chPrimary<<obj.conditions<<obj.polygonalConditions;
 	out<<obj.name;
+	//Newly introducted in UI Version 0x03: Begin
+	out << obj.tabIndex;
+	//Newly introducted in UI Version 0x03: End
 	QByteArray geometry=obj.parentWidget()->saveGeometry();
 	out<<geometry;
 	return out;	
@@ -216,6 +215,8 @@ QDataStream &operator>>(QDataStream &in, PlotWindow &obj)
 	in>>obj.chPrimary>>obj.conditions>>obj.polygonalConditions;
 	if (uiSaveVersion>=0x02)
 		in>>obj.name;
+	if (uiSaveVersion >= 0x03)
+		in >> obj.tabIndex;	
 	QByteArray geometry;
 	in>>geometry;
 	obj.parentWidget()->restoreGeometry(geometry);
