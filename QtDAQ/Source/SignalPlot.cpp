@@ -121,22 +121,12 @@ SignalPlot::SignalPlot(QWidget *parent):
     cDeltaSignal->attach(this);
 	cDeltaSignal->setVisible(false);
 
-	tempT=NULL;
-	tempV=NULL;
-	tempDV=NULL;
-	vAverage=NULL;
-	vShifted=NULL;
-	numAveragedEvents=0;
-	displayAverage=false;
-	numSamples=0;
-
 	// panning with the left mouse button
     (void )new QwtPlotPanner( canvas() );
 
     // zoom in/out with the wheel
     QwtPlotMagnifier *magnifier = new QwtPlotMagnifier( canvas() );
     magnifier->setMouseButton( Qt::NoButton );
-
 }
 
 void SignalPlot::clearAverages()

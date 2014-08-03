@@ -55,9 +55,6 @@ HistogramPlot::HistogramPlot(QWidget *parent):
 	histogram->attach(this);
 	histogram->setStyle(QwtPlotHistogram::Outline);
 
-
-
-
 	fittedCurve=new QwtPlotCurve("Fitted Function");
 	fittedCurve->attach(this);
 	fittedCurve->setVisible(false);

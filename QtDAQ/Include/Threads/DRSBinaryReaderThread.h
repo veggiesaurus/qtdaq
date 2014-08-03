@@ -42,22 +42,22 @@ private:
 private:
 	int eventIndex;
 	EventRawData rawData[NUM_BUFFERED_EVENTS];
-	int eventSize;
+	int eventSize=0;
 	char* buffer;
 	float* tempValArray;
 	float* tempFilteredValArray;
 	bool channelEnabled[NUM_DIGITIZER_CHANNELS];
     QVector<EventStatistics*>* processedEvents;
-	FILE* inputFile;
+	FILE* inputFile=nullptr;
 	bool compressedInput;
 	int numEventsInFile;
 	int numEventsRead;
 	EventTimestamp firstEventTimestamp;
-	QTimer* updateTimer;
-	bool sampleNextEvent;
+	QTimer* updateTimer=nullptr;
+	bool sampleNextEvent=true;
 	AnalysisConfig* analysisConfig;
 	//temperature sensing
-	float currentTemp;
+	float currentTemp=-1;
 
 };
 

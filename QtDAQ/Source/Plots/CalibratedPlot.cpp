@@ -25,7 +25,6 @@ CalibratedPlot::CalibratedPlot(QWidget *parent):
 	grid->setPen(QPen(Qt::gray, 0, Qt::DotLine));
     grid->attach(this);
 	setCanvasBackground(QBrush(Qt::white));
-	energyCalibration.calibrated=false;
 }
 
 void CalibratedPlot::setCalibrationValues(EnergyCalibration s_energyCalibration)

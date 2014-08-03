@@ -3,14 +3,6 @@
 DRSAcquisitionThread::DRSAcquisitionThread(QObject *parent)
 	: QThread(parent)
 {
-	updateTimer=NULL;
-	drs=NULL;
-	board=NULL;
-	config=NULL;
-	acquiring=false;
-	sampleNextEvent=true;
-	currentTemp=-1;
-	numEvents=0;
 	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
 	tempValArray=new float[NUM_DIGITIZER_SAMPLES];
 	tempFilteredValArray=new float[NUM_DIGITIZER_SAMPLES];

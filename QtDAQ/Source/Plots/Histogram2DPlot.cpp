@@ -39,7 +39,6 @@ RasterData::RasterData(QVector<double> &values, int numColumns, double xMin, dou
 Histogram2DPlot::Histogram2DPlot(QWidget *parent):
 	CalibratedPlot( parent )
 {
-	logScaleEnabled=false;    
     setAxisTitle(xBottom, "Long Gate Integral" );
     setAxisScale(xBottom, 0.0, 2000.0);
 

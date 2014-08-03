@@ -24,17 +24,17 @@ public:
 	void clearAverages();
 public:
 	//temp arrays for storing the signal;
-	double* tempT, *tempV, *tempDV;
+	double* tempT=nullptr, *tempV=nullptr, *tempDV=nullptr;
 	//averaging and shifting
-	int numAveragedEvents;
-	double* vAverage;
-	double* vShifted;
-	double initBaseline;
-	int initOffset;
+	int numAveragedEvents=0;
+	double* vAverage=nullptr;
+	double* vShifted=nullptr;
+	double initBaseline=0;
+	int initOffset=0;
 
 	double sampleTime;
-	int numSamples;
-	bool displayAverage;
+	int numSamples=0;
+	bool displayAverage=false;
 
 private:
 	QwtPlotMarker *baseline;

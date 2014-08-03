@@ -37,17 +37,17 @@ private:
 	float* tempValArray;
 	float* tempFilteredValArray;
 	bool channelEnabled[NUM_DIGITIZER_CHANNELS];
-    QVector<EventStatistics*>* processedEvents;
-	QTimer* updateTimer;
-	bool sampleNextEvent;
-	bool acquiring;
-	DRS* drs;
-	DRSBoard* board;
-	AcquisitionConfig* config;
-	AnalysisConfig* analysisConfig;
-	int numEvents;
+	QVector<EventStatistics*>* processedEvents;
+	QTimer* updateTimer = nullptr;
+	bool sampleNextEvent = true;
+	bool acquiring=false;
+	DRS* drs=nullptr;
+	DRSBoard* board=nullptr;
+	AcquisitionConfig* config=nullptr;
+	AnalysisConfig* analysisConfig=nullptr;
+	int numEvents=0;
 	EventTimestamp firstEventTimestamp;
 	//temperature monitoring
-	float currentTemp;
+	float currentTemp=-1;
 };
 

@@ -60,5 +60,5 @@ private:
 	QwtPickerPolygonMachine* pickerPolygonMachine;
 	QwtPickerClickPointMachine* pickerPointMachine;
 	QwtPlotShapeItem* selectedPolygon;
-	bool logScaleEnabled;
+	bool logScaleEnabled = false;
 };

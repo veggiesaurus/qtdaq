@@ -3,11 +3,6 @@
 DRSBinaryReaderThread::DRSBinaryReaderThread(QObject *parent)
 	: QThread(parent)
 {
-	inputFile=NULL;
-	eventSize=0;
-	updateTimer=NULL;
-	currentTemp=-1;
-	sampleNextEvent=true;
 	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
 	
 	//tempValArray=new float[NUM_DIGITIZER_SAMPLES];
