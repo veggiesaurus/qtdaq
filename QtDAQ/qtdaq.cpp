@@ -717,7 +717,10 @@ void QtDAQ::onCascadeClicked()
 
 void QtDAQ::onTileClicked()
 {
-	ui.mdiArea1->tileSubWindows();
+	int page = ui.tabWidget->currentIndex();
+	if (page < 0 || page >= NUM_UI_PAGES)
+		return;
+	mdiAreas[page]->tileSubWindows();
 	showNormal();
 	showMaximized();
 }

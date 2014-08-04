@@ -16,7 +16,7 @@ using namespace v8;
 		Local<Object> self = info.Holder(); \
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0)); \
 		void* ptr = wrap->Value(); \
-		double value = static_cast<##className*>(ptr)->##varName; \
+		double value = static_cast<className*>(ptr)->varName; \
 		info.GetReturnValue().Set(value); \
 	  } \
 	  void set_##className##varName (Local<String>property,Local<Value> value, const PropertyCallbackInfo<void> &info) \
@@ -24,7 +24,7 @@ using namespace v8;
 		Local<Object> self = info.Holder(); \
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0)); \
 		void* ptr = wrap->Value(); \
-		static_cast<##className*>(ptr)->##varName = (float) value->NumberValue(); \
+		static_cast<className*>(ptr)->varName = (float) value->NumberValue(); \
 	}
 
 #define GET_SET_DEFINITION_INT(className, varName) \
@@ -33,7 +33,7 @@ using namespace v8;
 		Local<Object> self = info.Holder(); \
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0)); \
 		void* ptr = wrap->Value(); \
-		double value = static_cast<##className*>(ptr)->##varName; \
+		double value = static_cast<className*>(ptr)->varName; \
 		info.GetReturnValue().Set(value); \
 	  } \
 	  void set_##className##varName (Local<String>property,Local<Value> value, const PropertyCallbackInfo<void> &info) \
@@ -41,11 +41,11 @@ using namespace v8;
 		Local<Object> self = info.Holder(); \
 		Local<External> wrap = Local<External>::Cast(self->GetInternalField(0)); \
 		void* ptr = wrap->Value(); \
-		static_cast<##className*>(ptr)->##varName = (float) value->Int32Value(); \
+		static_cast<className*>(ptr)->varName = (float) value->Int32Value(); \
 	}
 
 #define SET_TEMPLATE_ACCESSOR(templateVar, className, varName) \
-	(##templateVar)->SetAccessor(String::NewFromUtf8(isolate, #varName), get_##className##varName, set_##className##varName);
+	(templateVar)->SetAccessor(String::NewFromUtf8(isolate, #varName), get_##className##varName, set_##className##varName);
 
 
 GET_SET_DECLARATION(SampleStatistics, timeOfFlight);
