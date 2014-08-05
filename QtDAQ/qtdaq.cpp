@@ -96,7 +96,7 @@ QtDAQ::~QtDAQ()
 	//SAFE_DELETE(board);
 	SAFE_DELETE(drs);
 	delete config;
-}
+} 
 
 void QtDAQ::onUiUpdateTimerTimeout()
 {
