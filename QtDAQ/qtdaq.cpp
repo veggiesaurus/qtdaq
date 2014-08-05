@@ -76,10 +76,25 @@ QtDAQ::QtDAQ(QWidget *parent)
 	uiUpdateTimer = new QTimer();
 	uiUpdateTimer->setInterval(1000);	
 	connect(uiUpdateTimer, &QTimer::timeout, this, &QtDAQ::onUiUpdateTimerTimeout);
+
+	autoTrigTimer = new QTimer();
+	autoTrigTimer->setInterval(10);
+	connect(autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);
+	autoTrigTimer->start();
 }
 
 QtDAQ::~QtDAQ()
 {
+	if (drsAcquisitionThread)
+	{
+		drsAcquisitionThread->stopAcquisition();
+		drsAcquisitionThread->exit();
+		drsAcquisitionThread->wait(100);
+		SAFE_DELETE(drsAcquisitionThread);
+	}
+
+	//SAFE_DELETE(board);
+	SAFE_DELETE(drs);
 	delete config;
 }
 
@@ -345,6 +360,8 @@ void QtDAQ::onStartClicked()
 	drsAcquisitionThread->start(QThread::HighPriority);
 	ui.actionStop->setEnabled(true);
 	ui.actionReset->setEnabled(true);
+	ui.actionStart->setEnabled(false);
+	ui.actionSoftTrigger->setEnabled(true);
 }
 
 
@@ -355,6 +372,7 @@ void QtDAQ::onStopClicked()
 	ui.actionStart->setEnabled(true);
 	ui.actionStop->setEnabled(false);
 	ui.actionReset->setEnabled(false);
+	ui.actionSoftTrigger->setEnabled(false);
 }
 
 void QtDAQ::onResetClicked()
@@ -365,6 +383,11 @@ void QtDAQ::onResetClicked()
 	numEventsProcessed = 0;
 }
 
+void QtDAQ::onSoftTriggerClicked()
+{	
+	if (drs || board)
+		board->SoftTrigger();
+}
 void QtDAQ::onEditConfigClicked()
 {
 	ConfigDialog* dialog = new ConfigDialog(config);

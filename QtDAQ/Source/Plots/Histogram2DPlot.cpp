@@ -122,7 +122,7 @@ void Histogram2DPlot::displayCutPolygon(bool display)
 void Histogram2DPlot::setRasterData(QVector<double> &values, int numColumns, double xMin, double xMax, double yMin, double yMax, double zMin, double zMax)
 {
 		
-    d_spectrogram->setData(new RasterData(values, numColumns, xMin, xMax, yMin, yMax, max(zMin, 1.0), max(zMax, 1.0)));	
+    d_spectrogram->setData(new RasterData(values, numColumns, xMin, xMax, yMin, yMax, fmax(zMin, 1.0), fmax(zMax, 1.0)));	
 	setAxisScale(xBottom, xMin, xMax);
     setAxisScale(yLeft, yMin, yMax);
 	const QwtInterval zInterval = d_spectrogram->data()->interval( Qt::ZAxis );

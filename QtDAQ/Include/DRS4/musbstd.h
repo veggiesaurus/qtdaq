@@ -24,7 +24,7 @@ typedef struct {
 } MUSB_INTERFACE;
 
 #elif defined(_MSC_VER)
-
+#define NOMINMAX
 #include <windows.h>
 
 typedef struct {

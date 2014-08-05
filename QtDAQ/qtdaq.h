@@ -88,6 +88,7 @@ public:
 	void onStartClicked();
 	void onStopClicked();
 	void onResetClicked();
+	void onSoftTriggerClicked();
 	void onSerialInterfaceClicked();
 	//config slots
 	void onEditConfigClicked();
@@ -190,6 +191,8 @@ private:
 	bool finishedReading;
 	float prevAcquisitionTime;
 	QTimer* uiUpdateTimer;
+
+	QTimer* autoTrigTimer;
 	QTime* acquisitionTime;
 	DRS* drs = nullptr;
 	DRSBoard* board = nullptr;

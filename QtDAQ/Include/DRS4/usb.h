@@ -4,6 +4,7 @@
 #define __USB_H__
 
 #include <stdlib.h>
+#define NOMINMAX
 #include <windows.h>
 
 /*

@@ -112,7 +112,7 @@ void ConfigDialog::setUIFromConfig(AcquisitionConfig* s_config)
 	//global digitizer settings 
 	//////////////////////////////	
 	ui.comboBoxCorrectionLevel->setCurrentIndex(s_config->correctionLevel);
-	ui.spinBoxVoltageOffset->setValue(min(500, max(-500, s_config->voltageOffset)));
+	ui.spinBoxVoltageOffset->setValue(std::min(500, std::max(-500, (int)s_config->voltageOffset)));
 
 	//samples per event, set to 1024
 	switch (s_config->samplesPerEvent)
@@ -134,8 +134,8 @@ void ConfigDialog::setUIFromConfig(AcquisitionConfig* s_config)
 	ui.comboBoxExternalTrigger->setCurrentIndex(s_config->externalTriggeringEnabled);
 	ui.comboBoxSelfTriggering->setCurrentIndex(s_config->selfTriggeringEnabled);
 	ui.comboBoxTriggerEdge->setCurrentIndex(s_config->triggerPolarityIsNegative);
-	ui.spinBoxTriggerDelay->setValue(min(100, max(0, s_config->postTriggerDelay)));
-	ui.spinBoxTriggerThreshold->setValue(min(500, max(-500, s_config->triggerThreshold)));
+	ui.spinBoxTriggerDelay->setValue(std::min(100, std::max(0, (int)s_config->postTriggerDelay)));
+	ui.spinBoxTriggerThreshold->setValue(std::min(500, std::max(-500, (int)s_config->triggerThreshold)));
 	ui.comboBoxTriggerEdge->setCurrentIndex(s_config->triggerPolarityIsNegative);
 #pragma endregion
 
@@ -189,8 +189,8 @@ void ConfigDialog::updateConfig()
 	//sample rate
 	int sampleRate=ui.comboBoxSampleRate->currentText().toInt();
 	//range is between 698MS and 5.12GS
-	sampleRate=min(sampleRate, 5120);
-	sampleRate=max(sampleRate, 698);
+	sampleRate=std::min(sampleRate, 5120);
+	sampleRate=std::max(sampleRate, 698);
 	config->sampleRateMSPS=sampleRate;
 
 #pragma endregion

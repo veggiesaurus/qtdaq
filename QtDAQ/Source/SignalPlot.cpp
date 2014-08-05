@@ -211,8 +211,8 @@ void SignalPlot::setData(float* t, float* V, float* DV, int s_numSamples, float 
 		{
 			vAverage[i]=(vAverage[i]*numAveragedEvents)+vShifted[i];
 			vAverage[i]/=numAveragedEvents+1;
-			vAverage[i]=max(0.0, vAverage[i]);
-			vAverage[i]=min(1024.0, vAverage[i]);
+			vAverage[i]=fmax(0.0, vAverage[i]);
+			vAverage[i]=fmin(1024.0, vAverage[i]);
 		}
 		numAveragedEvents++;
 	}
@@ -258,7 +258,10 @@ void SignalPlot::setDisplayAverage(bool s_displayAverage)
 
 void SignalPlot::shiftSample(float* V, int numSamples, int shift)
 {	
-	for (int i=max(-shift, 0);i<min(numSamples, numSamples+shift)-1;i++) 
+	//if there's a bad shift, don't shift at all
+	if (std::abs(shift)> numSamples)
+		shift=0;
+	for (int i=std::max(-shift, 0);i<std::min(numSamples, numSamples+shift)-1;i++) 
 		vShifted[i]=V[i+shift];
 
 	//padding
