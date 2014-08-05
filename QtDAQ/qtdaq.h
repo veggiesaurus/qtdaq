@@ -4,6 +4,7 @@
 #include <QMdiSubWindow>
 #include <QShortcut>
 #include <QFileDialog>
+#include <QDir>
 #include <QVector>
 #include <QString>
 #include <QTime>

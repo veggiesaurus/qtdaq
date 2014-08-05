@@ -188,15 +188,19 @@ void QtDAQ::onNewEventSample(EventSampleData* sample)
 void QtDAQ::onReadDRSFileClicked()
 {
 	QFileDialog fileDialog(this, "Set raw data input file", "", "Uncompressed data (*.dat);;Compressed data (*.dtz);;All files (*.*)");
-	fileDialog.restoreState(settings.value("mainWindow/loadRawState").toByteArray());
-	fileDialog.selectFile(settings.value("mainWindow/rawDataDirectory").toString());
+	fileDialog.restoreState(settings.value("mainWindow/loadRawStateDRS").toByteArray());
+	QString prevFile = settings.value("mainWindow/prevDRSRawDataFile").toString();
+	QString prevFileDir = settings.value("mainWindow/prevDRSRawDataDir").toString();
+	fileDialog.setDirectory(prevFileDir);
+	fileDialog.selectFile(prevFile);
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
 	if (fileDialog.exec())
 	{
 		QString newRawFilename = fileDialog.selectedFiles().first();
-		settings.setValue("mainWindow/loadRawState", fileDialog.saveState());
-		QDir currentDir;
-		settings.setValue("mainWindow/rawDataDirectory", currentDir.absoluteFilePath(newRawFilename));
+		settings.setValue("mainWindow/loadRawStateDRS", fileDialog.saveState());
+		QFileInfo fileInfo(newRawFilename);	
+		settings.setValue("mainWindow/prevDRSRawDataDir", fileInfo.dir().absolutePath());
+		settings.setValue("mainWindow/prevDRSRawDataFile", fileInfo.fileName());
 
 		rawFilename = newRawFilename;
 		clearAllPlots();
@@ -216,15 +220,20 @@ void QtDAQ::onReadDRSFileClicked()
 void QtDAQ::onReadVxFileClicked()
 {
 	QFileDialog fileDialog(this, "Set raw data input file", "", "Compressed data (*.dtz);;All files (*.*)");
-	fileDialog.restoreState(settings.value("mainWindow/loadRawState").toByteArray());
-	fileDialog.selectFile(settings.value("mainWindow/rawDataDirectory").toString());
+	fileDialog.restoreState(settings.value("mainWindow/loadRawStateVx").toByteArray());
+	QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
+	QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
+	fileDialog.setDirectory(prevFileDir);
+	fileDialog.selectFile(prevFile);
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
 	if (fileDialog.exec())
 	{
 		QString newRawFilename = fileDialog.selectedFiles().first();
-		settings.setValue("mainWindow/loadRawState", fileDialog.saveState());
-		QDir currentDir;
-		settings.setValue("mainWindow/rawDataDirectory", currentDir.absoluteFilePath(newRawFilename));
+		settings.setValue("mainWindow/loadRawStateVx", fileDialog.saveState());
+		QFileInfo fileInfo(newRawFilename);
+		settings.setValue("mainWindow/prevVxRawDataDir", fileInfo.dir().absolutePath());
+		settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
+
 		rawFilename = newRawFilename;
 		clearAllPlots();
 
@@ -285,6 +294,9 @@ void QtDAQ::onReplayCurrentFileClicked()
 		ui.actionPauseFileReading->setChecked(false);
 		if (dataMode == DRS_MODE)
 		{
+			drsReaderThread->stopReading();
+			drsReaderThread->wait(100);
+			drsReaderThread->exit();
 			drsReaderThread->disconnect();
 			delete drsReaderThread;
 
@@ -481,16 +493,29 @@ void QtDAQ::onSaveUIClicked()
 	//open a file for output	
 	QFileDialog fileDialog(this, "Set output file", "", "UI config (*.uic);;All files (*.*)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-	fileDialog.restoreState(settings.value("mainWindow/saveUIState").toByteArray());
+	fileDialog.restoreState(settings.value("ui/saveUIState").toByteArray());
 	fileDialog.setFileMode(QFileDialog::AnyFile);
 	if (!rawFilename.isEmpty())
 	{
-		fileDialog.selectFile(rawFilename + ".uic");
+		QFileInfo fileInfo(rawFilename);
+		fileDialog.setDirectory(fileInfo.dir());
+		fileDialog.selectFile(fileInfo.fileName() + ".uic");
+	}
+	else
+	{
+		QString prevFile = settings.value("ui/prevUIFile").toString();
+		QString prevFileDir = settings.value("ui/prevUIDir").toString();
+		fileDialog.setDirectory(prevFileDir);
+		fileDialog.selectFile(prevFile);
 	}
 	if (fileDialog.exec())
 	{
-		settings.setValue("mainWindow/saveUIState", fileDialog.saveState());
+		settings.setValue("ui/saveUIState", fileDialog.saveState());
 		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("ui/prevUIDir", fileInfo.dir().absolutePath());
+		settings.setValue("ui/prevUIFile", fileInfo.fileName());
+
 		QFile file(fileName);
 		if (!file.open(QIODevice::WriteOnly))
 			return;
@@ -553,21 +578,34 @@ void QtDAQ::onRestoreUIClicked()
 
 
 void QtDAQ::restoreUI(bool legacy)
-{
+{ 
 	//open a file for config input
 	QFileDialog fileDialog(this, "Set input file", "", "UI config (*.uic);;All files (*.*)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-	fileDialog.restoreState(settings.value("mainWindow/saveUIState").toByteArray());
+	fileDialog.restoreState(settings.value("ui/saveUIState").toByteArray());
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
 	if (!rawFilename.isEmpty())
-	{
-		fileDialog.selectFile(rawFilename + ".uic");
+	{ 
+		QFileInfo fileInfo(rawFilename);
+		fileDialog.setDirectory(fileInfo.dir().absolutePath());
+		fileDialog.selectFile(fileInfo.fileName() + ".uic");
 	}
+	else 
+	{
+		QString prevFile = settings.value("ui/prevUIFile").toString();
+		QString prevFileDir = settings.value("ui/prevUIDir").toString();
+		fileDialog.setDirectory(prevFileDir);
+		fileDialog.selectFile(prevFile);
+	}
+
 	if (fileDialog.exec())
 	{
 		qDebug("Test");
-		settings.setValue("mainWindow/saveUIState", fileDialog.saveState());
+		settings.setValue("ui/saveUIState", fileDialog.saveState());
 		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("ui/prevUIDir", fileInfo.dir().absolutePath());
+		settings.setValue("ui/prevUIFile", fileInfo.fileName());
 		QFile file(fileName);
 		if (!file.open(QIODevice::ReadOnly))
 		{

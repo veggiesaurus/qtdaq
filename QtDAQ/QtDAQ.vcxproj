@@ -40,6 +40,7 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(QWT_ROOT)\include;$(ProjectDir)\include;$(ProjectDir)\include\DRS4;$(ProjectDir)\include\vector;$(ProjectDir)\include\Dialogs;$(ProjectDir)\include\Plots;$(ProjectDir)\include\Threads;$(ProjectDir)\include\Windows;$(ProjectDir)\include\curvefit;C:\v8\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(QWT_ROOT)\lib;C:\v8\build\Release;$(ProjectDir)/Lib;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -62,6 +63,8 @@
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;Qt5SerialPortd.lib;qwtd.lib;v8.lib;zlib-1.2.7-win32d.lib;winmm.lib;Qt5Qmld.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
