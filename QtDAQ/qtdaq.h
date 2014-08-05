@@ -11,6 +11,7 @@
 #include <QtSerialPort\QSerialPort>
 #include <QtSerialPort\QSerialPortInfo>
 #include <QInputDialog>
+#include <QJSEngine>
 
 #include "ui_qtdaq.h"
 #include "ui_dialogConfig.h"

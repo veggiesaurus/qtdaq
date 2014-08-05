@@ -285,6 +285,15 @@ void QtDAQ::onReplayCurrentFileClicked()
 		ui.actionPauseFileReading->setChecked(false);
 		if (dataMode == DRS_MODE)
 		{
+			drsReaderThread->disconnect();
+			delete drsReaderThread;
+
+			drsReaderThread = new DRSBinaryReaderThread(this);
+			connect(drsReaderThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
+			connect(drsReaderThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
+			connect(drsReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
+
+
 			drsReaderThread->initDRSBinaryReaderThread(rawFilename, compressedOutput, analysisConfig);
 			drsReaderThread->start();
 		}

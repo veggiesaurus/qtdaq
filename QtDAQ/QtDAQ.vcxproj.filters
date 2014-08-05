@@ -490,15 +490,15 @@
     <CustomBuild Include="QtDAQ.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="Include\DRS4Acquisition.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\ProcessRoutines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\AnalysisConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\DRS4Acquisition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\globals.h">
