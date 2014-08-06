@@ -3,16 +3,16 @@
 #include <QDialog>
 #include <QCheckBox>
 #include <QMessageBox>
-#include "ui_dialogConfig.h"
+#include "ui_dialogAcquisitionConfig.h"
 #include "AcquisitionConfig.h"
 #include "DRS4/DRS.h"
 #include "globals.h"
 
-class ConfigDialog : public QDialog
+class AcquisitionConfigDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	ConfigDialog (AcquisitionConfig* s_config, QWidget * parent = 0, Qt::WindowFlags f = 0 );
+	AcquisitionConfigDialog(AcquisitionConfig* s_config, QWidget * parent = 0, Qt::WindowFlags f = 0);
 	void updateConfig();
 	void setDRS(DRS* s_drs);
 private:
@@ -20,7 +20,7 @@ private:
 	void updateUI();
 	
 public:
-	Ui::DialogConfig ui;	
+	Ui::DialogAcquisitionConfig ui;
 public slots:
 	//channels
 	void onChannelCheckBoxChanged();

@@ -1,8 +1,8 @@
-#include "Dialogs/ConfigDialog.h"
+#include "Dialogs/AcquisitionConfigDialog.h"
 
 
 
-ConfigDialog::ConfigDialog (AcquisitionConfig* s_config, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
+AcquisitionConfigDialog::AcquisitionConfigDialog(AcquisitionConfig* s_config, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	ui.setupUi(this);	
 	config=s_config;
@@ -37,7 +37,7 @@ ConfigDialog::ConfigDialog (AcquisitionConfig* s_config, QWidget * parent, Qt::W
 
 }
 
-void ConfigDialog::setDRS(DRS* s_drs)
+void AcquisitionConfigDialog::setDRS(DRS* s_drs)
 {
 	drs=s_drs;
 	char strError[255];
@@ -105,7 +105,7 @@ void ConfigDialog::setDRS(DRS* s_drs)
 /////////////////////////////////////////////////
 // initialises the UI based on a config object
 /////////////////////////////////////////////////
-void ConfigDialog::setUIFromConfig(AcquisitionConfig* s_config)
+void AcquisitionConfigDialog::setUIFromConfig(AcquisitionConfig* s_config)
 {
 #pragma region global (global digitizer settings)
 	//////////////////////////////
@@ -155,7 +155,7 @@ void ConfigDialog::setUIFromConfig(AcquisitionConfig* s_config)
 
 }
 
-void ConfigDialog::updateUI()
+void AcquisitionConfigDialog::updateUI()
 {		
 	//update channels
 	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
@@ -168,7 +168,7 @@ void ConfigDialog::updateUI()
 /////////////////////////////////////////////////
 // updates the config based on UI
 /////////////////////////////////////////////////
-void ConfigDialog::updateConfig()
+void AcquisitionConfigDialog::updateConfig()
 {
 #pragma region global (global digitizer settings)
 	//////////////////////////////
@@ -220,27 +220,27 @@ void ConfigDialog::updateConfig()
 
 #pragma region slots (slots for ui interactions)
 
-void ConfigDialog::onChannelCheckBoxChanged()
+void AcquisitionConfigDialog::onChannelCheckBoxChanged()
 {		
 	updateUI();
 }
 
-void ConfigDialog::onChannelTriggerCheckBoxChanged()
+void AcquisitionConfigDialog::onChannelTriggerCheckBoxChanged()
 {
 	updateUI();
 }
 
-void ConfigDialog::onComboBoxSelfTriggeringChanged()
+void AcquisitionConfigDialog::onComboBoxSelfTriggeringChanged()
 {
 	updateUI();
 }
 
-void ConfigDialog::onVoltageOffsetChanged()
+void AcquisitionConfigDialog::onVoltageOffsetChanged()
 {
 	updateUI();
 }
 
-void ConfigDialog::onTriggerThresholdChanged()
+void AcquisitionConfigDialog::onTriggerThresholdChanged()
 {
 	updateUI();
 }

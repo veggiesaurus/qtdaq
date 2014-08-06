@@ -122,9 +122,6 @@
     <ClCompile Include="Source\Dialogs\CalibrationDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Dialogs\ConfigDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Dialogs\LinearCutDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -290,12 +287,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_CalibrationDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ConfigDialog.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ConfigDialog.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_LinearCutDialog.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -353,6 +344,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_QtDAQ.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\AcquisitionConfigDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtdaq.qrc">
@@ -365,9 +365,6 @@
       <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Include\Dialogs\CalibrationDialog.h">
-      <Filter>Header Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Include\Dialogs\ConfigDialog.h">
       <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Include\Dialogs\PolygonalCutEditDialog.h">
@@ -422,9 +419,6 @@
       <Filter>Form Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Forms\Dialogs\dialogCalibration.ui">
-      <Filter>Form Files\Dialogs</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Forms\Dialogs\dialogConfig.ui">
       <Filter>Form Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Forms\Dialogs\dialogHistogram2DConfig.ui">
@@ -492,6 +486,12 @@
     </CustomBuild>
     <CustomBuild Include="Include\DRS4Acquisition.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogAcquisitionConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\AcquisitionConfigDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -591,9 +591,6 @@
     <ClInclude Include="GeneratedFiles\ui_dialogCalibration.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_dialogConfig.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_dialogHistogram2DConfig.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -644,6 +641,9 @@
     </ClInclude>
     <ClInclude Include="Include\Plots\SortedPairPlot.h">
       <Filter>Header Files\Plots</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogAcquisitionConfig.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -78,9 +78,9 @@ QtDAQ::QtDAQ(QWidget *parent)
 	connect(uiUpdateTimer, &QTimer::timeout, this, &QtDAQ::onUiUpdateTimerTimeout);
 
 	autoTrigTimer = new QTimer();
-	autoTrigTimer->setInterval(10);
-	connect(autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);
-	autoTrigTimer->start();
+	//auto trigger: 16ms : ~ 60 Hz
+	autoTrigTimer->setInterval(16);
+	connect(autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);	
 }
 
 QtDAQ::~QtDAQ()
@@ -362,6 +362,7 @@ void QtDAQ::onStartClicked()
 	ui.actionReset->setEnabled(true);
 	ui.actionStart->setEnabled(false);
 	ui.actionSoftTrigger->setEnabled(true);
+	ui.actionAutoTrigger->setEnabled(true);
 }
 
 
@@ -373,6 +374,7 @@ void QtDAQ::onStopClicked()
 	ui.actionStop->setEnabled(false);
 	ui.actionReset->setEnabled(false);
 	ui.actionSoftTrigger->setEnabled(false);
+	ui.actionAutoTrigger->setEnabled(false);
 }
 
 void QtDAQ::onResetClicked()
@@ -388,9 +390,19 @@ void QtDAQ::onSoftTriggerClicked()
 	if (drs || board)
 		board->SoftTrigger();
 }
-void QtDAQ::onEditConfigClicked()
+
+void QtDAQ::onAutoTriggerToggled(bool triggerOn)
 {
-	ConfigDialog* dialog = new ConfigDialog(config);
+	if (triggerOn)
+		autoTrigTimer->start();
+	else
+		autoTrigTimer->stop();
+}
+
+
+void QtDAQ::onEditAcquisitionConfigClicked()
+{
+	AcquisitionConfigDialog* dialog = new AcquisitionConfigDialog(config);
 	connect(dialog, SIGNAL(drsObjectChanged(DRS*, DRSBoard*)), this, SLOT(onDRSObjectChanged(DRS*, DRSBoard*)));
 	dialog->setDRS(drs);
 	int retDialog = dialog->exec();
@@ -413,21 +425,27 @@ void QtDAQ::onEditAnalysisConfigClicked()
 	settings.setValue("analysis/previousSettings", qVariantFromValue(*analysisConfig));
 }
 
-void QtDAQ::onLoadConfigClicked()
+void QtDAQ::onLoadAcquisitionConfigClicked()
 {
 	//open a file for output
 	QFileDialog fileDialog(this, "Set config file", "", "Binary config (*.bcfg);;All files (*.*)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-	fileDialog.restoreState(settings.value("mainWindow/saveConfigState").toByteArray());
+	fileDialog.restoreState(settings.value("acquisition/saveConfigState").toByteArray());
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
-	if (!rawFilename.isEmpty())
-	{
-		fileDialog.selectFile(rawFilename + ".bcfg");
-	}
+
+	QString prevFileDir = settings.value("acquisition/prevDRSAcqDir").toString();
+	QString prevFile = settings.value("acquisition/prevDRSAcqFile").toString();
+	fileDialog.setDirectory(prevFileDir);
+	fileDialog.selectFile(prevFile);
+
 	if (fileDialog.exec())
 	{
-		settings.setValue("mainWindow/saveConfigState", fileDialog.saveState());
-		QString fileName = fileDialog.selectedFiles().first();	QFile file(fileName);
+		settings.setValue("acquisition/saveConfigState", fileDialog.saveState());
+		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("acquisition/prevDRSAcqDir", fileInfo.dir().absolutePath());
+		settings.setValue("acquisition/prevDRSAcqFile", fileInfo.fileName());
+		QFile file(fileName);
 		if (!file.open(QIODevice::ReadOnly))
 			return;
 		file.read((char*)config, sizeof(AcquisitionConfig));
@@ -440,16 +458,29 @@ void QtDAQ::onLoadAnalysisConfigClicked()
 	//open a file for output
 	QFileDialog fileDialog(this, "Set config file", "", "Analysis config (*.acfg);;All files (*.*)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-	fileDialog.restoreState(settings.value("mainWindow/saveAnalysisConfigState").toByteArray());
+	fileDialog.restoreState(settings.value("analysis/saveAnalysisConfigState").toByteArray());
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
 	if (!rawFilename.isEmpty())
 	{
-		fileDialog.selectFile(rawFilename + ".acfg");
+		QFileInfo fileInfo(rawFilename);
+		fileDialog.setDirectory(fileInfo.dir().absolutePath());
+		fileDialog.selectFile(fileInfo.fileName() + ".acfg");
+	}
+	else
+	{
+		QString prevFileDir = settings.value("analysis/prevAnalysisDir").toString();
+		QString prevFile = settings.value("analysis/prevAnalysisFile").toString();
+		fileDialog.setDirectory(prevFileDir);
+		fileDialog.selectFile(prevFile);
 	}
 	if (fileDialog.exec())
 	{
-		settings.setValue("mainWindow/saveAnalysisConfigState", fileDialog.saveState());
+		settings.setValue("analysis/saveAnalysisConfigState", fileDialog.saveState());
 		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("analysis/prevAnalysisDir", fileInfo.dir().absolutePath());
+		settings.setValue("analysis/prevAnalysisFile", fileInfo.fileName());
+
 		QFile file(fileName);
 
 		if (!file.open(QIODevice::ReadOnly))
@@ -463,21 +494,27 @@ void QtDAQ::onLoadAnalysisConfigClicked()
 	}
 }
 
-void QtDAQ::onSaveConfigClicked()
+void QtDAQ::onSaveAcquisitionConfigClicked()
 {
 	//open a file for output
 	QFileDialog fileDialog(this, "Set output file", "", "Binary config (*.bcfg);;All files (*.*)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-	fileDialog.restoreState(settings.value("mainWindow/saveConfigState").toByteArray());
+	fileDialog.restoreState(settings.value("acquisition/saveConfigState").toByteArray());
 	fileDialog.setFileMode(QFileDialog::AnyFile);
-	if (!rawFilename.isEmpty())
-	{
-		fileDialog.selectFile(rawFilename + ".bcfg");
-	}
+
+	QString prevFileDir = settings.value("acquisition/prevDRSAcqDir").toString();
+	QString prevFile = settings.value("acquisition/prevDRSAcqFile").toString();
+	fileDialog.setDirectory(prevFileDir);
+	fileDialog.selectFile(prevFile);
+
 	if (fileDialog.exec())
 	{
-		settings.setValue("mainWindow/saveConfigState", fileDialog.saveState());
+		settings.setValue("acquisition/saveConfigState", fileDialog.saveState());
 		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("acquisition/prevDRSAcqDir", fileInfo.dir().absolutePath());
+		settings.setValue("acquisition/prevDRSAcqFile", fileInfo.fileName());
+
 		QFile file(fileName);
 		if (!file.open(QIODevice::WriteOnly))
 			return;
@@ -491,16 +528,29 @@ void QtDAQ::onSaveAnalysisConfigClicked()
 	//open a file for output
 	QFileDialog fileDialog(this, "Set output file", "", "Analysis config (*.acfg);;All files (*.*)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-	fileDialog.restoreState(settings.value("mainWindow/saveAnalysisConfigState").toByteArray());
+	fileDialog.restoreState(settings.value("analysis/saveAnalysisConfigState").toByteArray());
 	fileDialog.setFileMode(QFileDialog::AnyFile);
 	if (!rawFilename.isEmpty())
 	{
-		fileDialog.selectFile(rawFilename + ".acfg");
+		QFileInfo fileInfo(rawFilename);
+		fileDialog.setDirectory(fileInfo.dir());
+		fileDialog.selectFile(fileInfo.fileName() + ".acfg");
+	}
+	else
+	{
+		QString prevFileDir = settings.value("analysis/prevAnalysisDir").toString();
+		QString prevFile = settings.value("analysis/prevAnalysisFile").toString();
+		fileDialog.setDirectory(prevFileDir);
+		fileDialog.selectFile(prevFile);
 	}
 	if (fileDialog.exec())
 	{
-		settings.setValue("mainWindow/saveAnalysisConfigState", fileDialog.saveState());
+		settings.setValue("analysis/saveAnalysisConfigState", fileDialog.saveState());
 		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("analysis/prevAnalysisDir", fileInfo.dir().absolutePath());
+		settings.setValue("analysis/prevAnalysisFile", fileInfo.fileName());
+
 		QFile file(fileName);
 
 		if (!file.open(QIODevice::WriteOnly))
@@ -526,8 +576,8 @@ void QtDAQ::onSaveUIClicked()
 	}
 	else
 	{
-		QString prevFile = settings.value("ui/prevUIFile").toString();
 		QString prevFileDir = settings.value("ui/prevUIDir").toString();
+		QString prevFile = settings.value("ui/prevUIFile").toString();
 		fileDialog.setDirectory(prevFileDir);
 		fileDialog.selectFile(prevFile);
 	}
@@ -615,8 +665,8 @@ void QtDAQ::restoreUI(bool legacy)
 	}
 	else 
 	{
-		QString prevFile = settings.value("ui/prevUIFile").toString();
 		QString prevFileDir = settings.value("ui/prevUIDir").toString();
+		QString prevFile = settings.value("ui/prevUIFile").toString();
 		fileDialog.setDirectory(prevFileDir);
 		fileDialog.selectFile(prevFile);
 	}

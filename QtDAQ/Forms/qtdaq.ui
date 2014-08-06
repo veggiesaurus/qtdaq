@@ -100,9 +100,9 @@
     <property name="title">
      <string>Acquisition</string>
     </property>
-    <addaction name="actionLoadConfig"/>
-    <addaction name="actionSaveConfig"/>
-    <addaction name="actionEditConfig"/>
+    <addaction name="actionEditAcquisitionConfig"/>
+    <addaction name="actionSaveAcquisitionConfig"/>
+    <addaction name="actionLoadAcquisitionConfig"/>
     <addaction name="separator"/>
     <addaction name="actionSerialInterface"/>
     <addaction name="separator"/>
@@ -110,7 +110,9 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionReset"/>
+    <addaction name="separator"/>
     <addaction name="actionSoftTrigger"/>
+    <addaction name="actionAutoTrigger"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -152,7 +154,7 @@
     <addaction name="menuMoveWindow"/>
     <addaction name="actionRenamePage"/>
    </widget>
-   <widget class="QMenu" name="menuOptions">
+   <widget class="QMenu" name="menuAnalysis">
     <property name="title">
      <string>Analysis</string>
     </property>
@@ -165,8 +167,8 @@
      <addaction name="actionLinearCutRemove"/>
     </widget>
     <addaction name="actionAnalysisConfig"/>
-    <addaction name="actionLoadAnalysisConfig"/>
     <addaction name="actionSaveAnalysisConfig"/>
+    <addaction name="actionLoadAnalysisConfig"/>
     <addaction name="separator"/>
     <addaction name="actionEnergyCallibration"/>
     <addaction name="menuLinearCuts"/>
@@ -175,32 +177,41 @@
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAcquisition"/>
-   <addaction name="menuOptions"/>
+   <addaction name="menuAnalysis"/>
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionLoadConfig">
+  <action name="actionLoadAcquisitionConfig">
    <property name="text">
     <string>Load Acquisition Config</string>
    </property>
    <property name="shortcut">
     <string>Q, L</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
-  <action name="actionSaveConfig">
+  <action name="actionSaveAcquisitionConfig">
    <property name="text">
     <string>Save Acquisition Config</string>
    </property>
    <property name="shortcut">
     <string>Q, S</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
-  <action name="actionEditConfig">
+  <action name="actionEditAcquisitionConfig">
    <property name="text">
     <string>Edit Acquisition Config</string>
    </property>
    <property name="shortcut">
     <string>Q, E</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionStart">
@@ -213,6 +224,9 @@
    <property name="shortcut">
     <string>Q, S</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionStop">
    <property name="enabled">
@@ -222,7 +236,10 @@
     <string>Stop</string>
    </property>
    <property name="shortcut">
-    <string>Q, Shift+S</string>
+    <string>Q, X</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionReset">
@@ -234,6 +251,9 @@
    </property>
    <property name="shortcut">
     <string>Q, R</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetOutputFile">
@@ -293,6 +313,9 @@
    </property>
    <property name="shortcut">
     <string>Q, I</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSaveUI">
@@ -522,6 +545,23 @@
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
+  <action name="actionAutoTrigger">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Auto Trigger</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Space</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
@@ -529,10 +569,10 @@
  </resources>
  <connections>
   <connection>
-   <sender>actionEditConfig</sender>
+   <sender>actionEditAcquisitionConfig</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onEditConfigClicked()</slot>
+   <slot>onEditAcquisitionConfigClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -545,10 +585,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionLoadConfig</sender>
+   <sender>actionLoadAcquisitionConfig</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onLoadConfigClicked()</slot>
+   <slot>onLoadAcquisitionConfigClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -561,10 +601,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionSaveConfig</sender>
+   <sender>actionSaveAcquisitionConfig</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onSaveConfigClicked()</slot>
+   <slot>onSaveAcquisitionConfigClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1120,11 +1160,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAutoTrigger</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onAutoTriggerToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>onEditConfigClicked()</slot>
-  <slot>onSaveConfigClicked()</slot>
-  <slot>onLoadConfigClicked()</slot>
+  <slot>onEditAcquisitionConfigClicked()</slot>
+  <slot>onSaveAcquisitionConfigClicked()</slot>
+  <slot>onLoadAcquisitionConfigClicked()</slot>
   <slot>onCalibrateClicked()</slot>
   <slot>onAddSignalPlotClicked()</slot>
   <slot>onAddHistogramClicked()</slot>
@@ -1159,5 +1215,6 @@
   <slot>onMoveToPage4Clicked()</slot>
   <slot>onRestoreUILegacyClicked()</slot>
   <slot>onSoftTriggerClicked()</slot>
+  <slot>onAutoTriggerToggled(bool)</slot>
  </slots>
 </ui>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <author>Angus C</author>
- <class>DialogConfig</class>
- <widget class="QDialog" name="DialogConfig">
+ <class>DialogAcquisitionConfig</class>
+ <widget class="QDialog" name="DialogAcquisitionConfig">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -546,7 +546,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>DialogConfig</receiver>
+   <receiver>DialogAcquisitionConfig</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -562,7 +562,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DialogConfig</receiver>
+   <receiver>DialogAcquisitionConfig</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

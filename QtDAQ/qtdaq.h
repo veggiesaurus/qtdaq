@@ -15,7 +15,7 @@
 #include <QJSEngine>
 
 #include "ui_qtdaq.h"
-#include "ui_dialogConfig.h"
+#include "ui_dialogAcquisitionConfig.h"
 #include "ui_windowHistogramPlot.h"
 #include "ui_window2DHistogramPlot.h"
 #include "ui_windowSignalPlot.h"
@@ -30,7 +30,7 @@
 #include "Dialogs/LinearCutEditDialog.h"
 #include "Dialogs/CalibrationDialog.h"
 #include "Dialogs/AnalysisConfigDialog.h"
-#include "Dialogs/ConfigDialog.h"
+#include "Dialogs/AcquisitionConfigDialog.h"
 
 #include "Windows/SignalPlotWindow.h"
 #include "Windows/HistogramWindow.h"
@@ -71,8 +71,6 @@ public:
 	QtDAQ(QWidget *parent = 0);
 	~QtDAQ();
 	public slots:
-	//config slots
-	void onDRSObjectChanged(DRS* s_drs, DRSBoard* s_board);
 	//thread slots
 	void onNewProcessedEvents(QVector<EventStatistics*>* stats);
 	void onNewEventSample(EventSampleData* sample);
@@ -89,11 +87,13 @@ public:
 	void onStopClicked();
 	void onResetClicked();
 	void onSoftTriggerClicked();
+	void onAutoTriggerToggled(bool);
 	void onSerialInterfaceClicked();
-	//config slots
-	void onEditConfigClicked();
-	void onLoadConfigClicked();
-	void onSaveConfigClicked();
+	//acquisition config slots
+	void onEditAcquisitionConfigClicked();
+	void onLoadAcquisitionConfigClicked();
+	void onSaveAcquisitionConfigClicked();
+	void onDRSObjectChanged(DRS* s_drs, DRSBoard* s_board);
 	//options
 	void onCalibrateClicked();
 	void onEditAnalysisConfigClicked();
@@ -170,7 +170,7 @@ private:
 private:
 	Ui::QtDAQClass ui;
 	QMdiArea* mdiAreas[4];
-	Ui::DialogConfig uiDialogConfig;
+	Ui::DialogAcquisitionConfig uiDialogAcquisitionConfig;
 	Ui::DialogAnalysisConfig uiDialogAnalysisConfig;
 	AcquisitionConfig* config;
 	AnalysisConfig* analysisConfig;
