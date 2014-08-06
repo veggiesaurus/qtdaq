@@ -4,7 +4,7 @@ AcquisitionConfig::AcquisitionConfig()
 {
 	/* Default settings */
 	samplesPerEvent = (1024);
-	sampleRateMSPS=1000;
+	sampleRateMSPS=1024;
 	postTriggerDelay = 0;
 	externalTriggeringEnabled = false;
 	triggerPolarityIsNegative = false;
@@ -31,7 +31,7 @@ AcquisitionConfig* AcquisitionConfig::DefaultConfig()
 	defConfig->channelEnabled[1]=true;
 	defConfig->channelSelfTriggerEnabled[0]=true;
 	defConfig->channelSelfTriggerEnabled[1]=true;
-	defConfig->sampleRateMSPS=1000;
+	defConfig->sampleRateMSPS=1024;
 	defConfig->triggerThreshold=-60;
 	defConfig->triggerPolarityIsNegative=true;
 	defConfig->voltageOffset=0;
@@ -40,7 +40,7 @@ AcquisitionConfig* AcquisitionConfig::DefaultConfig()
 }
 
 //send config to the board
-bool AcquisitionConfig::SetDRS4Config(DRSBoard* board)
+bool AcquisitionConfig::apply(DRSBoard* board)
 {
 	board->SetFrequency(sampleRateMSPS/1000.0, true);
 	//board->SetTranspMode(1);
@@ -58,4 +58,43 @@ bool AcquisitionConfig::SetDRS4Config(DRSBoard* board)
 
 	return true;
 	//todo: corrections
+}
+
+QDataStream &operator<<(QDataStream &out, const AcquisitionConfig &obj)
+{
+	out << ACQUISITION_SAVE_VERSION;
+	out << obj.correctionLevel << obj.samplesPerEvent << obj.sampleRateMSPS << obj.voltageOffset;
+	out << obj.externalTriggeringEnabled << obj.selfTriggeringEnabled << obj.triggerPolarityIsNegative << obj.postTriggerDelay << obj.triggerThreshold;
+	out << (quint32)NUM_DIGITIZER_CHANNELS;
+	for (auto i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
+	{
+		out << obj.channelEnabled[i] << obj.channelSelfTriggerEnabled[i];
+	}
+
+	return out;
+}
+
+QDataStream &operator>>(QDataStream &in, AcquisitionConfig &obj)
+{
+	//read file version
+	quint32 acqFileVersion;
+	in >> acqFileVersion;
+
+	in >> obj.correctionLevel >> obj.samplesPerEvent >> obj.sampleRateMSPS >> obj.voltageOffset;
+	in >> obj.externalTriggeringEnabled >> obj.selfTriggeringEnabled >> obj.triggerPolarityIsNegative >> obj.postTriggerDelay >> obj.triggerThreshold;
+
+	//careful reading just in case NUM_DIGITIZER CHANNELS is different from numChannels
+	quint32 numChannels;
+	in >> numChannels;
+	for (auto i = 0; i < numChannels; i++)
+	{
+		bool chEnabled, chTriggerEnabled;
+		in >> chEnabled >> chTriggerEnabled;
+		if (i < NUM_DIGITIZER_CHANNELS)
+		{
+			obj.channelEnabled[i] = chEnabled;
+			obj.channelSelfTriggerEnabled[i] = chEnabled;
+		}
+	}	
+	return in;
 }

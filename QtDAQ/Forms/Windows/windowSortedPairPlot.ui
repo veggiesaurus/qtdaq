@@ -57,8 +57,6 @@
     </property>
     <addaction name="actionSaveImage"/>
     <addaction name="actionSaveData"/>
-    <addaction name="separator"/>
-    <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -236,7 +234,6 @@
   </connection>
  </connections>
  <slots>
-  <slot>onCloseClicked()</slot>
   <slot>onSaveDataClicked()</slot>
   <slot>onSaveImageClicked()</slot>
   <slot>onRefreshClicked()</slot>

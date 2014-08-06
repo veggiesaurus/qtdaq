@@ -1,8 +1,11 @@
 #pragma once
 
-#include "qstring.h"
+#include <QDataStream>
+#include <QVector>
 #include "DRS4/DRS.h"
 #include "DRS4Acquisition.h"
+#include "globals.h"
+
 
 class AcquisitionConfig
 {
@@ -10,8 +13,9 @@ public:
 	AcquisitionConfig();
 	static AcquisitionConfig* DefaultConfig();
 	~AcquisitionConfig();
-	bool loadFromFile(QString filename);
-	bool writeToFile(QString filename);
+
+	//File Settings
+	
 
 	//Global Digitizer Settings
 	int correctionLevel;
@@ -31,6 +35,9 @@ public:
 	bool channelSelfTriggerEnabled[NUM_DIGITIZER_CHANNELS];
 
 	//send config to the board
-	bool SetDRS4Config(DRSBoard* board);
+	bool apply(DRSBoard* board);
 };
+Q_DECLARE_METATYPE(AcquisitionConfig)
 
+QDataStream &operator<<(QDataStream &out, const AcquisitionConfig &obj);
+QDataStream &operator>>(QDataStream &in, AcquisitionConfig &obj);

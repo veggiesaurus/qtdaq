@@ -148,20 +148,20 @@ void SignalPlot::setGates(int start, int shortGateEnd, int longGateEnd, int tofS
 	if (displayAverage && numAveragedEvents >1)
 		return;
 	startPosition->setXValue(start*sampleTime);
-	startPosition->setVisible(true);
+	startPosition->setVisible(ciGatesVisible);
 	shortGateEndPosition->setXValue(shortGateEnd*sampleTime);
-	shortGateEndPosition->setVisible(true);
+	shortGateEndPosition->setVisible(ciGatesVisible);
 	longGateEndPosition->setXValue(longGateEnd*sampleTime);
-	longGateEndPosition->setVisible(true);
+	longGateEndPosition->setVisible(ciGatesVisible);
 	if (tofStartPulse>=0)
 	{
 		tofStartPosition->setXValue(tofStartPulse*sampleTime);
-		tofStartPosition->setVisible(true);
+		tofStartPosition->setVisible(tofGatesVisible);
 	}
 	if (tofEndPulse>=0)
 	{
 		tofEndPosition->setXValue(tofEndPulse*sampleTime);
-		tofEndPosition->setVisible(true);
+		tofEndPosition->setVisible(tofGatesVisible);
 	}
 }
 
@@ -223,7 +223,7 @@ void SignalPlot::setData(float* t, float* V, float* DV, int s_numSamples, float 
 	if (displayAverage)
 		setAxisScale(xBottom, 0.0+initOffset, numSamples*sampleTime+initOffset, (numSamples*sampleTime<400)?20.0:100.0);
 	else
-		setAxisScale(xBottom, -200.0+s_offsetTime, numSamples*sampleTime+s_offsetTime+100, (numSamples*sampleTime<400)?20.0:100.0);
+		setAxisScale(xBottom, -200.0 + (alignSigs ? s_offsetTime : 0), numSamples*sampleTime + (alignSigs ? s_offsetTime : 0) + 100, (numSamples*sampleTime<400) ? 20.0 : 100.0);
 
 
 	if (V)
@@ -261,15 +261,23 @@ void SignalPlot::setDisplayAverage(bool s_displayAverage)
 void SignalPlot::shiftSample(float* V, int numSamples, int shift)
 {	
 	//if there's a bad shift, don't shift at all
-	if (std::abs(shift)> numSamples)
-		shift=0;
-	for (int i=std::max(-shift, 0);i<std::min(numSamples, numSamples+shift)-1;i++) 
-		vShifted[i]=V[i+shift];
-
+	if (std::abs(shift) >= numSamples)
+	{
+		memcpy(vShifted, V, sizeof(float)*numSamples);
+		return;
+	}
+	int startPoint = std::max(-shift, 0);
+	int endPoint = std::min(numSamples, numSamples - shift);
+	for (int i = startPoint; i < endPoint; i++)
+		vShifted[i] = V[i + shift];
 	//padding
-	for (int i=0;i<-shift;i++)
-		vShifted[i]=V[0];
+	for (int i = 0; i<startPoint; i++)
+		vShifted[i] = V[0];
 
-	for (int i=numSamples+shift-1;i<numSamples-1;i++)
-		vShifted[i]=V[numSamples-1];
+	for (int i = endPoint; i<numSamples; i++)
+		vShifted[i] = V[numSamples - 1];
 }
+
+void SignalPlot::showCIGates(bool val) { ciGatesVisible = val; }
+void SignalPlot::showToFGates(bool val) { tofGatesVisible = val; }
+void SignalPlot::setAlignSignals(bool val) { alignSigs = val; }

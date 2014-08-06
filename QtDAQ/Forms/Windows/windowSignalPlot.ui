@@ -48,7 +48,7 @@
     </property>
     <addaction name="actionOptions"/>
     <addaction name="actionRefresh"/>
-    <addaction name="actionDisplay_average_waveform"/>
+    <addaction name="actionDisplayAverageWaveform"/>
     <addaction name="separator"/>
     <addaction name="actionActiveCuts"/>
    </widget>
@@ -58,14 +58,22 @@
     </property>
     <addaction name="actionSaveImage"/>
     <addaction name="actionSaveData"/>
-    <addaction name="separator"/>
-    <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionRename_window"/>
+    <widget class="QMenu" name="menuShow">
+     <property name="title">
+      <string>Show</string>
+     </property>
+     <addaction name="actionToFGates"/>
+     <addaction name="actionChargeIntegralGates"/>
+    </widget>
+    <addaction name="actionRenameWindow"/>
+    <addaction name="actionAutoscale"/>
+    <addaction name="actionAlignSignals"/>
+    <addaction name="menuShow"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuConfigure"/>
@@ -108,7 +116,7 @@
     <string>C, R</string>
    </property>
   </action>
-  <action name="actionDisplay_average_waveform">
+  <action name="actionDisplayAverageWaveform">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -127,12 +135,44 @@
     <string>C, A</string>
    </property>
   </action>
-  <action name="actionRename_window">
+  <action name="actionRenameWindow">
    <property name="text">
     <string>Rename window</string>
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionAutoscale">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Autoscale (Vertical)</string>
+   </property>
+  </action>
+  <action name="actionToFGates">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ToF Gates</string>
+   </property>
+  </action>
+  <action name="actionChargeIntegralGates">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Charge Integral Gates</string>
+   </property>
+  </action>
+  <action name="actionAlignSignals">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Align signals by CFD</string>
    </property>
   </action>
  </widget>
@@ -233,7 +273,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionDisplay_average_waveform</sender>
+   <sender>actionDisplayAverageWaveform</sender>
    <signal>toggled(bool)</signal>
    <receiver>WindowSignalPlot</receiver>
    <slot>onDisplayAverageClicked(bool)</slot>
@@ -265,7 +305,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionRename_window</sender>
+   <sender>actionRenameWindow</sender>
    <signal>triggered()</signal>
    <receiver>WindowSignalPlot</receiver>
    <slot>onRenameClicked()</slot>
@@ -280,9 +320,72 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAutoscale</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onAutoscaleToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAlignSignals</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onAlignSignalsToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionToFGates</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onShowToFToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionChargeIntegralGates</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onShowCIToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>onCloseClicked()</slot>
   <slot>onSaveDataClicked()</slot>
   <slot>onSaveImageClicked()</slot>
   <slot>onRefreshClicked()</slot>
@@ -290,5 +393,9 @@
   <slot>onDisplayAverageClicked(bool)</slot>
   <slot>onActiveCutsClicked()</slot>
   <slot>onRenameClicked()</slot>
+  <slot>onAutoscaleToggled(bool)</slot>
+  <slot>onAlignSignalsToggled(bool)</slot>
+  <slot>onShowToFToggled(bool)</slot>
+  <slot>onShowCIToggled(bool)</slot>
  </slots>
 </ui>

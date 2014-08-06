@@ -12,15 +12,25 @@ QtDAQ::QtDAQ(QWidget *parent)
 	mdiAreas[3] = ui.mdiArea4;
 
 	showMaximized();
-	config = AcquisitionConfig::DefaultConfig();
+	acquisitionConfig = new AcquisitionConfig();
+	qRegisterMetaType<AcquisitionConfig>("AcquisitionConfig");
+	qRegisterMetaTypeStreamOperators<AcquisitionConfig>("AcquisitionConfig");
+
+	//restore previous settings
+	QVariant varAcquisition = settings.value("acquisition/previousSettings");
+	if (varAcquisition.isValid())
+		*acquisitionConfig = varAcquisition.value<AcquisitionConfig>();
+	else
+		acquisitionConfig = AcquisitionConfig::DefaultConfig();
+
 	analysisConfig = new AnalysisConfig();
 	qRegisterMetaType<AnalysisConfig>("AnalysisConfig");
 	qRegisterMetaTypeStreamOperators<AnalysisConfig>("AnalysisConfig");
 
 	//restore previous settings
-	QVariant var = settings.value("analysis/previousSettings");
-	if (var.isValid())
-		*analysisConfig = var.value<AnalysisConfig>();
+	QVariant varAnalysis = settings.value("analysis/previousSettings");
+	if (varAnalysis.isValid())
+		*analysisConfig = varAnalysis.value<AnalysisConfig>();
 
 
 	//buffers and mutexes
@@ -86,16 +96,17 @@ QtDAQ::QtDAQ(QWidget *parent)
 QtDAQ::~QtDAQ()
 {
 	if (drsAcquisitionThread)
-	{
+	{		
 		drsAcquisitionThread->stopAcquisition();
 		drsAcquisitionThread->exit();
 		drsAcquisitionThread->wait(100);
+		drsAcquisitionThread->terminate();
 		SAFE_DELETE(drsAcquisitionThread);
 	}
 
 	//SAFE_DELETE(board);
 	SAFE_DELETE(drs);
-	delete config;
+	delete acquisitionConfig;
 } 
 
 void QtDAQ::onUiUpdateTimerTimeout()
@@ -346,7 +357,7 @@ void QtDAQ::onReadStatisticsFileClicked()
 
 void QtDAQ::onInitClicked()
 {
-	drsAcquisitionThread->initDRSAcquisitionThread(drs, board, config, analysisConfig);
+	drsAcquisitionThread->initDRSAcquisitionThread(drs, board, acquisitionConfig, analysisConfig);
 	ui.actionStart->setEnabled(true);
 }
 
@@ -357,6 +368,7 @@ void QtDAQ::onStartClicked()
 	uiUpdateTimer->start();
 	acquisitionTime->start();
 	numEventsProcessed = 0;
+	drsAcquisitionThread->initDRSAcquisitionThread(drs, board, acquisitionConfig, analysisConfig);
 	drsAcquisitionThread->start(QThread::HighPriority);
 	ui.actionStop->setEnabled(true);
 	ui.actionReset->setEnabled(true);
@@ -387,7 +399,7 @@ void QtDAQ::onResetClicked()
 
 void QtDAQ::onSoftTriggerClicked()
 {	
-	if (drs || board)
+	if (drs && board)
 		board->SoftTrigger();
 }
 
@@ -402,7 +414,7 @@ void QtDAQ::onAutoTriggerToggled(bool triggerOn)
 
 void QtDAQ::onEditAcquisitionConfigClicked()
 {
-	AcquisitionConfigDialog* dialog = new AcquisitionConfigDialog(config);
+	AcquisitionConfigDialog* dialog = new AcquisitionConfigDialog(acquisitionConfig);
 	connect(dialog, SIGNAL(drsObjectChanged(DRS*, DRSBoard*)), this, SLOT(onDRSObjectChanged(DRS*, DRSBoard*)));
 	dialog->setDRS(drs);
 	int retDialog = dialog->exec();
@@ -410,6 +422,7 @@ void QtDAQ::onEditAcquisitionConfigClicked()
 	if (retDialog == QDialog::Rejected)
 		return;
 	dialog->updateConfig();
+	settings.setValue("acquisition/previousSettings", QVariant::fromValue(*acquisitionConfig));
 }
 
 void QtDAQ::onEditAnalysisConfigClicked()
@@ -422,7 +435,7 @@ void QtDAQ::onEditAnalysisConfigClicked()
 	dialog->updateConfig();
 	if (vxProcessThread)
 		vxProcessThread->onAnalysisConfigChanged();
-	settings.setValue("analysis/previousSettings", qVariantFromValue(*analysisConfig));
+	settings.setValue("analysis/previousSettings", QVariant::fromValue(*analysisConfig));
 }
 
 void QtDAQ::onLoadAcquisitionConfigClicked()
@@ -448,7 +461,12 @@ void QtDAQ::onLoadAcquisitionConfigClicked()
 		QFile file(fileName);
 		if (!file.open(QIODevice::ReadOnly))
 			return;
-		file.read((char*)config, sizeof(AcquisitionConfig));
+		QDataStream stream(&file);
+		stream >> (*acquisitionConfig);
+		file.close();
+		
+		settings.setValue("acquisition/previousSettings", QVariant::fromValue(*acquisitionConfig));
+
 		file.close();
 	}
 }
@@ -490,7 +508,7 @@ void QtDAQ::onLoadAnalysisConfigClicked()
 		file.close();
 		if (vxProcessThread)
 			vxProcessThread->onAnalysisConfigChanged();
-		settings.setValue("analysis/previousSettings", qVariantFromValue(*analysisConfig));
+		settings.setValue("analysis/previousSettings", QVariant::fromValue(*analysisConfig));
 	}
 }
 
@@ -518,7 +536,8 @@ void QtDAQ::onSaveAcquisitionConfigClicked()
 		QFile file(fileName);
 		if (!file.open(QIODevice::WriteOnly))
 			return;
-		file.write((const char*)config, sizeof(AcquisitionConfig));
+		QDataStream stream(&file);
+		stream << (*acquisitionConfig);
 		file.close();
 	}
 }

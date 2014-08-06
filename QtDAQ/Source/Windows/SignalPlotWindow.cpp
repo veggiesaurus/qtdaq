@@ -13,7 +13,7 @@ SignalPlotWindow::SignalPlotWindow(QWidget * parent, int s_chPrimary, int s_chSe
 	ui.qwtPlotSignal->setAxisScale(QwtPlot::xBottom, 0, 1000, 200);
 	ui.qwtPlotSignal->setAxisTitle(QwtPlot::xBottom, "t (nS)");
 	ui.qwtPlotSignal->setAxisTitle(QwtPlot::yLeft, "ADC Count");
-	updateTitle();	
+	updateSettings();	
 }
 
 void SignalPlotWindow::onNewEventSample(EventSampleData* sample)
@@ -21,7 +21,7 @@ void SignalPlotWindow::onNewEventSample(EventSampleData* sample)
 	int channelNum=sample->stats.channelStatistics[chPrimary].channelNumber;
 	if (channelNum!=chPrimary || !isInActiveRegion(&sample->stats))
 		return;
-	
+
 	if ((chPrimary>=0 && sample->fValues[chPrimary]) ||(chSecondary>=0 && sample->fValues[chSecondary]))
 	{
 		float sampleTime=1000.0/sample->MSPS;
@@ -44,8 +44,6 @@ void SignalPlotWindow::onOptionsClicked()
     uiDialogSignalConfig.setupUi(dialog);
 	uiDialogSignalConfig.comboBoxChannel->setCurrentIndex(chPrimary);
 	uiDialogSignalConfig.comboBoxChannelSecondary->setCurrentIndex(chSecondary+1);
-	uiDialogSignalConfig.spinBoxDelay->setValue(refreshDelay);
-	uiDialogSignalConfig.checkBoxAutoscale->setChecked(autoscale);
     int retDialog=dialog->exec();
     if (retDialog==QDialog::Rejected)
         return;
@@ -53,9 +51,8 @@ void SignalPlotWindow::onOptionsClicked()
 	chPrimary=uiDialogSignalConfig.comboBoxChannel->currentIndex();
 	//the -1 is needed because the first entry in the secondary box is N/A
 	chSecondary=uiDialogSignalConfig.comboBoxChannelSecondary->currentIndex()-1;
-	refreshDelay=uiDialogSignalConfig.spinBoxDelay->value();
-	autoscale=uiDialogSignalConfig.checkBoxAutoscale->isChecked();	
-	updateTitle();
+	updateSettings();
+	ui.qwtPlotSignal->replot();
 }
 
 void SignalPlotWindow::onDisplayAverageClicked(bool checked)
@@ -84,6 +81,31 @@ void SignalPlotWindow::clearValues()
 void SignalPlotWindow::timerUpdate()
 {
 
+}
+
+void SignalPlotWindow::onAutoscaleToggled(bool checked)
+{
+	ui.qwtPlotSignal->setAxisAutoScale(QwtPlot::yLeft, checked);
+	if (!checked)
+		ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1200, 200);
+	autoscale = checked;
+}
+void SignalPlotWindow::onAlignSignalsToggled(bool checked)
+{
+	ui.qwtPlotSignal->setAlignSignals(checked);
+	alignSigs = checked;
+}
+
+void SignalPlotWindow::onShowCIToggled(bool checked)
+{
+	ui.qwtPlotSignal->showCIGates(checked);
+	showCIGates = checked;
+}
+
+void SignalPlotWindow::onShowToFToggled(bool checked)
+{
+	ui.qwtPlotSignal->showToFGates(checked);
+	showToFGates = checked;
 }
 
 void SignalPlotWindow::onSaveDataClicked()
@@ -124,15 +146,28 @@ void SignalPlotWindow::onSaveDataClicked()
 void SignalPlotWindow::updateSettings()
 {	
 	updateTitle();
-	ui.actionDisplay_average_waveform->setChecked(averageWaveform);
+	ui.actionDisplayAverageWaveform->setChecked(averageWaveform);
 	ui.qwtPlotSignal->setDisplayAverage(averageWaveform);
+
+	ui.actionAutoscale->setChecked(autoscale);
+	ui.actionAlignSignals->setChecked(alignSigs);
+	ui.actionChargeIntegralGates->setChecked(showCIGates);
+	ui.actionToFGates->setChecked(showToFGates);
+
+	//manually update plot settings
+	ui.qwtPlotSignal->setAxisAutoScale(QwtPlot::yLeft, autoscale);
+	ui.qwtPlotSignal->setAlignSignals(alignSigs);
+	ui.qwtPlotSignal->showCIGates(showCIGates);
+	ui.qwtPlotSignal->showToFGates(showToFGates);
+
+
 }
 
 QDataStream &operator<<(QDataStream &out, const SignalPlotWindow &obj)
 {
 	out<<static_cast<const PlotWindow&>(obj);
-	out<<UI_SAVE_VERSION;	
-	out<<obj.chSecondary<<obj.refreshDelay<<obj.averageWaveform<<obj.autoscale;
+	out<<UI_SAVE_VERSION_SIGPLOT;	
+	out << obj.chSecondary << obj.refreshDelay << obj.averageWaveform << obj.autoscale << obj.alignSigs << obj.showCIGates << obj.showToFGates;
 	return out;	
 }
 
@@ -142,6 +177,8 @@ QDataStream &operator>>(QDataStream &in, SignalPlotWindow &obj)
 	quint32 uiSaveVersion;
 	in>>uiSaveVersion;
 	in>>obj.chSecondary>>obj.refreshDelay>>obj.averageWaveform>>obj.autoscale;
+	if (uiSaveVersion >= 0x04)
+		in >> obj.alignSigs >> obj.showCIGates >> obj.showToFGates;
 	obj.updateSettings();
 	return in;
 }

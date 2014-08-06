@@ -51,6 +51,7 @@ void AcquisitionConfigDialog::setDRS(DRS* s_drs)
 	int numBoards=drs->GetNumberOfBoards();
 	while (!numBoards)
 	{
+		SAFE_DELETE(drs);
 		int retryResponse=QMessageBox::warning(this, "DRS Board Error", "No DRS board was found. Press retry to try again, or cancel to ignore.",
                                 QMessageBox::Retry | QMessageBox::Cancel,
                                QMessageBox::Retry);
@@ -58,6 +59,12 @@ void AcquisitionConfigDialog::setDRS(DRS* s_drs)
 		{
 			drs=new DRS();
 			numBoards=drs->GetNumberOfBoards();
+			if (drs && numBoards)
+			{
+				auto boardType = drs->GetBoard(0)->GetBoardType();
+				if (!boardType)
+					numBoards = 0;
+			}
 		}
 		else
 		{

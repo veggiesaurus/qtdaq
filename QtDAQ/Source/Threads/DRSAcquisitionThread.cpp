@@ -22,7 +22,7 @@ bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_boar
 	drs=s_drs;
 	board=s_board;
 	board->Init();
-	config->SetDRS4Config(board);
+	config->apply(board);
 	numEvents=0;
 	
 

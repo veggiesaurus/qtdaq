@@ -6,6 +6,8 @@
 #include "Windows/PlotWindow.h"
 #include "Plots/SignalPlot.h"
 
+#define UI_SAVE_VERSION_SIGPLOT ((quint32)(0x04))
+
 class SignalPlotWindow : public PlotWindow
 {
 	Q_OBJECT
@@ -20,8 +22,11 @@ public slots:
 	void clearValues();
 	void onSaveDataClicked();
 	void timerUpdate();
-signals:
-	void plotClosed();
+	void onShowToFToggled(bool);
+	void onShowCIToggled(bool);
+	void onAutoscaleToggled(bool);
+	void onAlignSignalsToggled(bool);
+
 private:
 	void updateTitle();	
 	//called after serialization
@@ -34,8 +39,11 @@ private:
 
 	int chSecondary;
 	int refreshDelay;
-	bool averageWaveform;
-	bool autoscale;
+	bool averageWaveform = false;
+	bool autoscale = false; 
+	bool alignSigs = true;
+	bool showToFGates = false;
+	bool showCIGates = true;
 
 private:
 	friend QDataStream &operator<<(QDataStream &out, const SignalPlotWindow &obj);

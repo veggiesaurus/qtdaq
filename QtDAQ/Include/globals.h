@@ -26,6 +26,7 @@ if (ptr != NULL)            \
 
 #define UI_SAVE_VERSION ((quint32)(0x03))
 #define ANALYSIS_SAVE_VERSION ((quint32)(0x01))
+#define ACQUISITION_SAVE_VERSION ((quint32)(0x01))
 
 enum HistogramParameter
 {

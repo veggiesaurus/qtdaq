@@ -22,6 +22,9 @@ public:
 	void setGates(int start, int shortGateEnd, int longGateEnd, int tofStartPulse, int tofEndPulse);
 	void setData(float* t, float* V, float* DV, int s_numSamples, float s_sampleTime, float s_offsetTime);
 	void clearAverages();
+	void setAlignSignals(bool);
+	void showToFGates(bool);
+	void showCIGates(bool);
 public:
 	//temp arrays for storing the signal;
 	double* tempT=nullptr, *tempV=nullptr, *tempDV=nullptr;
@@ -51,6 +54,10 @@ private:
     
 	QwtPlotCurve *cSignal;
 	QwtPlotCurve *cDeltaSignal;
+
+	bool alignSigs = false;
+	bool tofGatesVisible = false;
+	bool ciGatesVisible = true;
 
 private:
 	void shiftSample(float* sample, int numSamples, int shift);

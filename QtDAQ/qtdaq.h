@@ -172,7 +172,7 @@ private:
 	QMdiArea* mdiAreas[4];
 	Ui::DialogAcquisitionConfig uiDialogAcquisitionConfig;
 	Ui::DialogAnalysisConfig uiDialogAnalysisConfig;
-	AcquisitionConfig* config;
+	AcquisitionConfig* acquisitionConfig;
 	AnalysisConfig* analysisConfig;
 	EnergyCalibration calibrationValues[NUM_DIGITIZER_CHANNELS];
 	QVector<SignalPlotWindow*> signalPlots;
