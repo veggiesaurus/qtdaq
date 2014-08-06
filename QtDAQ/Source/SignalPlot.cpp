@@ -11,7 +11,9 @@ SignalPlot::SignalPlot(QWidget *parent):
 
     setAxisTitle(yLeft, "ADC Count");
 	//TODO: this is for deltas
-    setAxisScale(yLeft, 0, 1024);
+	setAxisScale(yLeft, 0, 1200);
+
+	//setAxisScaleDiv(yLeft, QwtScaleDiv()
 	setCanvasBackground(Qt::white);
 	//canvas()->setLineWidth( 1 );
     //canvas()->setFrameStyle( QFrame::Box | QFrame::Plain );

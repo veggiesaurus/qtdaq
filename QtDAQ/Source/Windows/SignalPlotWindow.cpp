@@ -9,8 +9,8 @@ SignalPlotWindow::SignalPlotWindow(QWidget * parent, int s_chPrimary, int s_chSe
 	ui.qwtPlotSignal->setMinimumHeight(200);
 	ui.qwtPlotSignal->setMinimumWidth(400);
 	ui.qwtPlotSignal->setCanvasBackground(QBrush(Qt::white));
-	ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1024, 1000);
-	ui.qwtPlotSignal->setAxisScale(QwtPlot::xBottom, 0, 520, 100);
+	ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1200, 200);
+	ui.qwtPlotSignal->setAxisScale(QwtPlot::xBottom, 0, 1000, 200);
 	ui.qwtPlotSignal->setAxisTitle(QwtPlot::xBottom, "t (nS)");
 	ui.qwtPlotSignal->setAxisTitle(QwtPlot::yLeft, "ADC Count");
 	updateTitle();	
