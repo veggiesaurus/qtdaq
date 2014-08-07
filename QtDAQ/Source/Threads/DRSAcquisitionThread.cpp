@@ -15,6 +15,7 @@ DRSAcquisitionThread::DRSAcquisitionThread(QObject *parent)
 
 bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime)
 {
+	drsObjectMutex.lock();
 	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
 	memset(&rawData, 0, sizeof(EventRawData));
 	config=s_config;
@@ -36,8 +37,17 @@ bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_boar
 	updateTimer->setInterval(updateTime);
 	connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdateTimerTimeout()));
 	updateTimer->start();
-    
+	drsObjectMutex.unlock();
 	return true;
+}
+
+void DRSAcquisitionThread::reInit(AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig)
+{
+	configMutex.lock();
+	config = s_config;
+	analysisConfig = s_analysisConfig;
+	requiresReconfig = true;
+	configMutex.unlock();
 }
 
 void DRSAcquisitionThread::run()
@@ -48,6 +58,7 @@ void DRSAcquisitionThread::run()
 	int firstChannel=8, lastChannel=0;
 	//find which is the first channel to read out, and which is the last
 	//(only read out channels that are required, to improve throughput)
+	configMutex.lock();
 	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
 	{
 		if (config->channelEnabled[i])
@@ -59,7 +70,7 @@ void DRSAcquisitionThread::run()
 		else
 			rawData.fValues[i]=NULL;
 	}
-
+	configMutex.unlock();
 
 	float* tmpSamples=new float[NUM_DIGITIZER_SAMPLES];
 	//todo: error handling if no channels selected
@@ -72,13 +83,39 @@ void DRSAcquisitionThread::run()
 	EventTimestamp timeStamp;
 	while(acquiring)
 	{
+		drsObjectMutex.lock();
+
+		configMutex.lock();
+		if (config->requiresReconfig)
+		{
+			config->apply(board);
+
+			//re-init channel storage
+			/*
+			for (int i = 0; i<NUM_DIGITIZER_CHANNELS; i++)
+			{
+				SAFE_DELETE_ARRAY(rawData.fValues[i]);
+				if (config->channelEnabled[i])
+				{
+					firstChannel = std::min(firstChannel, i);
+					lastChannel = std::max(lastChannel, i);
+					rawData.fValues[i] = new unsigned short[NUM_DIGITIZER_SAMPLES];
+				}
+				else
+					rawData.fValues[i] = NULL;
+			}*/
+
+			config->requiresReconfig = false;
+			requiresReconfig = false;
+		}
+		configMutex.unlock();
+
 		if (!processedEvents)
 		{
 			processedEvents=new QVector<EventStatistics*>;
 			processedEvents->setSharable(true);
 
-		}
-
+		}		
 		/* start board (activate domino wave) */
 		board->StartDomino();
 
@@ -97,20 +134,27 @@ void DRSAcquisitionThread::run()
 			firstEventTimestamp=timeStamp;
 		rawData.timestamp=&timeStamp;
 		/* decode waveform (Y) array first channel in mV */
+		configMutex.lock();
 		for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
 		{
 			if (config->channelEnabled[i])
 			{
+				if (!rawData.fValues[i])
+					rawData.fValues[i] = new unsigned short[NUM_DIGITIZER_SAMPLES];
 				//DRS4 offset (ch1 is in index 0, ch2 is in index 2, etc)
-				//board->GetRawWave(0, i*2, rawData.fValues[i]);
 				board->GetWave(0, i*2,tmpSamples);
 				for (int j=0;j<NUM_DIGITIZER_SAMPLES;j++)
 					rawData.fValues[i][j]=(unsigned short)((tmpSamples[j]+512)*65536/1024.0);
 			}
+			else if (rawData.fValues[i])
+				SAFE_DELETE_ARRAY(rawData.fValues[i])
+
 		}
 		numEvents++;
 		processEvent(rawData, sampleNextEvent);
 		sampleNextEvent=false;
+		configMutex.unlock();
+		drsObjectMutex.unlock();
 	}
 
 }

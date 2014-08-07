@@ -199,7 +199,7 @@ void AcquisitionConfigDialog::updateConfig()
 	sampleRate=std::min(sampleRate, 5120);
 	sampleRate=std::max(sampleRate, 698);
 	config->sampleRateMSPS=sampleRate;
-
+	config->requiresReconfig = true;
 #pragma endregion
 
 #pragma region trigger (global trigger settings)

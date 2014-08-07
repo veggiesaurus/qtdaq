@@ -88,8 +88,8 @@ QtDAQ::QtDAQ(QWidget *parent)
 	connect(uiUpdateTimer, &QTimer::timeout, this, &QtDAQ::onUiUpdateTimerTimeout);
 
 	autoTrigTimer = new QTimer();
-	//auto trigger: 16ms : ~ 60 Hz
-	autoTrigTimer->setInterval(16);
+	//auto trigger: 17ms: ~ 60 Hz
+	autoTrigTimer->setInterval(17);
 	connect(autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);	
 }
 
@@ -357,8 +357,13 @@ void QtDAQ::onReadStatisticsFileClicked()
 
 void QtDAQ::onInitClicked()
 {
-	drsAcquisitionThread->initDRSAcquisitionThread(drs, board, acquisitionConfig, analysisConfig);
-	ui.actionStart->setEnabled(true);
+	if (drsAcquisitionThread->isRunning())
+		drsAcquisitionThread->reInit(acquisitionConfig, analysisConfig);
+	else
+	{
+		drsAcquisitionThread->initDRSAcquisitionThread(drs, board, acquisitionConfig, analysisConfig);
+		ui.actionStart->setEnabled(true);
+	}
 }
 
 
@@ -421,7 +426,11 @@ void QtDAQ::onEditAcquisitionConfigClicked()
 
 	if (retDialog == QDialog::Rejected)
 		return;
+	if (drsAcquisitionThread)
+		drsAcquisitionThread->configMutex.lock();
 	dialog->updateConfig();
+	if (drsAcquisitionThread)
+		drsAcquisitionThread->configMutex.unlock();
 	settings.setValue("acquisition/previousSettings", QVariant::fromValue(*acquisitionConfig));
 }
 

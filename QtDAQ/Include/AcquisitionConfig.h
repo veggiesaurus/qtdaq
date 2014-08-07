@@ -14,8 +14,8 @@ public:
 	static AcquisitionConfig* DefaultConfig();
 	~AcquisitionConfig();
 
-	//File Settings
-	
+	//Synchronisation settings
+	bool requiresReconfig = false;
 
 	//Global Digitizer Settings
 	int correctionLevel;
