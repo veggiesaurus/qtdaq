@@ -233,7 +233,7 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 	bool processSuccess=true;
 
 	//1.0ns per sample (assuming 1 GSPS), TODO: read from board or data
-	int sampleRateMSPS=698;
+	int sampleRateMSPS=1000;
 
 	EventSampleData* sample;
 	if (outputSample)

@@ -15,6 +15,7 @@ VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2
 	numSamples=1024;
 	tempValArray=new float[numSamples];
 	tempFilteredValArray=new float[numSamples];
+	tempMedianArray = new float[numSamples];
 	memset(tempValArray, 0, sizeof(float)*numSamples);
 	memset(tempFilteredValArray, 0, sizeof(float)*numSamples);
 	processedEvents=new QVector<EventStatistics*>;
@@ -393,10 +394,13 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 				numSamples=chSize/analysisConfig->samplingReductionFactor;
 				SAFE_DELETE_ARRAY(tempValArray);
 				SAFE_DELETE_ARRAY(tempFilteredValArray);
+				SAFE_DELETE_ARRAY(tempMedianArray);
 				tempValArray=new float[numSamples];
-				tempFilteredValArray=new float[numSamples];
+				tempFilteredValArray = new float[numSamples];
+				tempMedianArray = new float[numSamples];
 				memset(tempValArray, 0, sizeof(float)*numSamples);
 				memset(tempFilteredValArray, 0, sizeof(float)*numSamples);
+				memset(tempMedianArray, 0, sizeof(float)*numSamples);
 			}
 			stats->channelStatistics[ch].channelNumber=ch;
 			if (analysisConfig->bitsDropped)
@@ -438,9 +442,12 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 						tempValArray[i]=((float)rawEvent->data.DataChannel[ch][index]);
 					}
 				}
-			}			
-			processSuccess&=findBaseline(tempValArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
-			
+			}
+
+			//medianfilter(tempValArray, tempMedianArray, numSamples);
+			//processSuccess &= findBaseline(tempMedianArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
+			processSuccess &= findBaseline(tempValArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
+
 			if (analysisConfig->preCFDFilter)
 				processSuccess&=lowPassFilter(tempValArray, numSamples,analysisConfig->preCFDFactor);
 			//if the digital gain is not unity

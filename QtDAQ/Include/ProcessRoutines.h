@@ -76,3 +76,5 @@ bool linearFit(float* inputData, int inputNumSamples, int startIndex, int endInd
 bool findIntersection(float* inputData, int inputNumSamples, int inputSearchStart, int inputSearchEnd, int inputCrossingMinLength, float inputThreshold, bool inputNegative, int& outputCrossingPosition);
 
 bool linearFilter(float* inputData, int inputNumSamples, float inputBaseline, float inputStart, float* inputFilter, int inputFilterLength, float& outputSum);
+
+void medianfilter(const float* signal, float* result, int N);

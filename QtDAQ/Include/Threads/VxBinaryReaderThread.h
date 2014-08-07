@@ -12,7 +12,7 @@
 #include "zlib/zlib.h"
 
 #define MAX_UINT16_CHANNEL_SIZE				64
-#define EVENT_BUFFER_SIZE	1024
+#define EVENT_BUFFER_SIZE	8192
 
 #define MAX_X742_CHANNEL_SIZE				9
 #define MAX_X742_GROUP_SIZE					4

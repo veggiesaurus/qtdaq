@@ -91,11 +91,47 @@ bool cfdSampleOptimized(float* inputData, float inputBaseline, int inputNumSampl
         outputData[k]+=(F*(inputData[k-i])-(inputData[k-i-D])+baselineFix)*inputScale;
 	}		
 	
+	float* i_n = &(inputData[L + D]);
+	float* i_nl = &(inputData[D]);
+	float* i_nd = &(inputData[L]);
+	float* i_nld = inputData;
+	float* o_n = &(outputData[L + D]);
 	for (int n=L+D;n<inputNumSamples-1;n++)
 	{	
 		outputData[n+1]=outputData[n]+(F*(inputData[n]-inputData[n-L])-inputData[n-D]+inputData[n-L-D])*inputScale;
 	}	
 	return true;
+}
+
+//   1D MEDIAN FILTER implementation
+//     signal - input signal
+//     result - output signal
+//     N      - length of the signal
+void medianfilter(const float* signal, float* result, int N)
+{
+	//   Move window through all elements of the signal
+	for (int i = 2; i < N - 2; ++i)
+	{
+		//   Pick up window elements
+		float window[5];
+		for (int j = 0; j < 5; ++j)
+			window[j] = signal[i - 2 + j];
+		//   Order elements (only half of them)
+		for (int j = 0; j < 3; ++j)
+		{
+			//   Find position of minimum element
+			int min = j;
+			for (int k = j + 1; k < 5; ++k)
+				if (window[k] < window[min])
+					min = k;
+			//   Put found minimum element in its place
+			const float temp = window[j];
+			window[j] = window[min];
+			window[min] = temp;
+		}
+		//   Get result - the middle element
+		result[i - 2] = window[2];
+	}
 }
 
 
