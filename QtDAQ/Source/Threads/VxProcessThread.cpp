@@ -94,7 +94,6 @@ void VxProcessThread::onResumeProcessing()
 		for (int i=0;i<EVENT_BUFFER_SIZE;i++)
 		{			
 			processEvent(&(rawBuffers[currentBufferIndex][i]), sampleNextEvent);
-			sampleNextEvent=false;
 		}
 		rawMutexes[currentBufferIndex]->unlock();
 		currentBufferIndex=1-currentBufferIndex;
@@ -184,7 +183,6 @@ void VxProcessThread::run()
 			if (ev.processed)
 				return;			
 			processEvent(&ev, sampleNextEvent);
-			sampleNextEvent=false;
 			ev.processed=true;
 			eventCounter++;
 		}
@@ -310,7 +308,6 @@ void VxProcessThread::onNewRawEvents(QVector<EventVx*>* events)
 	{
 		processEvent((*events)[i], sampleNextEvent);
 		freeEvent((*events)[i]);
-		sampleNextEvent=false;
 	}
 	events->clear();
 	SAFE_DELETE(events);
@@ -696,6 +693,7 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	{
 		sample->stats=*stats;
 		emit newEventSample(sample);
+		sampleNextEvent = false;
 	}	
 	processedEvents->push_back(stats);
 	//delete stats;
