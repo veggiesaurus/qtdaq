@@ -12,7 +12,7 @@
 #include "zlib/zlib.h"
 
 #define MAX_UINT16_CHANNEL_SIZE				64
-#define EVENT_BUFFER_SIZE	8192
+#define EVENT_BUFFER_SIZE	1024
 
 #define MAX_X742_CHANNEL_SIZE				9
 #define MAX_X742_GROUP_SIZE					4
@@ -154,7 +154,7 @@ class VxBinaryReaderThread : public QThread
 	 Q_OBJECT
 public:
 	 VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
-	 bool initVxBinaryReaderThread(QString filename, bool isCompressedInput, AnalysisConfig* s_analysisConfig, int updateTime=100);
+	 bool initVxBinaryReaderThread(QString filename, bool isCompressedInput, int updateTime=100);
 	bool isReading();
  signals:
 	 void newRawEvents(QVector<EventVx*>*);

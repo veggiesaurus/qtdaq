@@ -1,6 +1,6 @@
 #include "Threads/VxProcessThread.h"
 
-VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QMutex* s_procBuffer1Mutex, QMutex* s_procBuffer2Mutex, EventStatistics* s_procBuffer1, EventStatistics* s_procBuffer2, QObject *parent)
+VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent)
 	: QThread(parent)
 {
 	eventSize=0;
@@ -30,13 +30,27 @@ VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2
 	rawMutexes[0]=s_rawBuffer1Mutex;
 	rawMutexes[1]=s_rawBuffer2Mutex;
 
-	procBuffers[0]=s_procBuffer1;
-	procBuffers[1]=s_procBuffer2;
-	procMutexes[0]=s_procBuffer1Mutex;
-	procMutexes[1]=s_procBuffer2Mutex;	
 }
 
-
+VxProcessThread::~VxProcessThread()
+{
+	if (file)
+	{
+		file->close();
+		SAFE_DELETE(file);
+	}
+	processedEventsMutex.lock();
+	if (processedEvents)
+	{		
+		for (auto it = processedEvents->begin(); it != processedEvents->end(); it++)
+		{
+			auto statEvent = *it;
+			SAFE_DELETE(statEvent);
+		}
+		processedEvents->clear();
+	}
+	processedEventsMutex.unlock();
+}
 
 bool VxProcessThread::initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime)
 {		
@@ -258,6 +272,11 @@ void VxProcessThread::openFileStream(const FunctionCallbackInfo<Value>& args)
          if( fileName.length() ) 
          {
 			 VxProcessThread* thread=reinterpret_cast<VxProcessThread*>(v8::External::Cast(*args.Data())->Value());
+			 if (thread->file)
+			 {
+				 thread->file->close();
+				 SAFE_DELETE(thread->file);
+			 }
 			 thread->file=new QFile(*fileName);
 			 if (!thread->file->open(QIODevice::WriteOnly))
 				return;
@@ -318,12 +337,14 @@ void VxProcessThread::onNewRawEvents(QVector<EventVx*>* events)
 void VxProcessThread::onUpdateTimerTimeout()
 {	
 	sampleNextEvent=true;
+	processedEventsMutex.lock();
 	if (processedEvents && processedEvents->size()>0)
 	{        
 		emit newProcessedEvents(processedEvents);
 		processedEvents=new QVector<EventStatistics*>();
 		processedEvents->setSharable(true);	
 	}
+	processedEventsMutex.unlock();
 }
 
 void VxProcessThread::onAnalysisConfigChanged()

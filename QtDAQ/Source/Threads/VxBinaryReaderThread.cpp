@@ -44,6 +44,8 @@ void freeEvent(EventVx* &ev)
 	{
 		if (ev->data.ChSize[i])
 			SAFE_DELETE_ARRAY(ev->data.DataChannel[i]);
+		if (ev->fData.ChSize[i])
+			SAFE_DELETE_ARRAY(ev->fData.DataChannel[i]);
 	}
 	SAFE_DELETE(ev);
 }
@@ -54,6 +56,8 @@ void freeEvent(EventVx &ev)
 	{
 		if (ev.data.ChSize[i])
 			SAFE_DELETE_ARRAY(ev.data.DataChannel[i]);
+		if (ev.fData.ChSize[i])
+			SAFE_DELETE_ARRAY(ev.fData.DataChannel[i]);
 	}
 }
 
@@ -90,7 +94,7 @@ VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_
 
 
 
-bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedInput, AnalysisConfig* s_analysisConfig, int updateTime)
+bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedInput, int updateTime)
 {	
 	filename=s_filename;
 	if (isReadingFile)
@@ -101,7 +105,6 @@ bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isC
 		doExitReadLoop=true;
 	}
 
-	analysisConfig=s_analysisConfig;
 	if (inputFileCompressed)
 		gzclose(inputFileCompressed);
 	inputFileCompressed=gzopen(filename.toStdString().data(), "rb");
@@ -155,7 +158,7 @@ void VxBinaryReaderThread::rewindFile()
 		if (inputFileCompressed)
 			gzclose(inputFileCompressed);
 		numEventsRead=0;
-		initVxBinaryReaderThread(filename, true, analysisConfig, updateTimer->interval());
+		initVxBinaryReaderThread(filename, true, updateTimer->interval());
 		start();
 	}
 	else

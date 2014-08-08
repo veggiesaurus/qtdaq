@@ -24,7 +24,8 @@ class VxProcessThread : public QThread
 {
 	 Q_OBJECT
 public:
-	VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QMutex* s_procBuffer1Mutex, QMutex* s_procBuffer2Mutex, EventStatistics* s_procBuffer1, EventStatistics* s_procBuffer2, QObject *parent = 0);
+	VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
+	~VxProcessThread();
 	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=33);
 	void restartProcessThread();
 	void processEvent(EventVx* rawEvent, bool outputSample);	
@@ -95,8 +96,9 @@ private:
 	QMutex* rawMutexes[2];
 	EventVx* rawBuffers[2];	
 	//processed
-	QMutex* procMutexes[2];
-	EventStatistics* procBuffers[2];
 	int currentBufferIndex;
 	int currentBufferPosition;
+
+	QMutex processedEventsMutex;
+
 };

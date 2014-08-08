@@ -160,6 +160,7 @@ signals:
 	void temperatureUpdated(float);
 	void resumeProcessing();
 private:
+	void readVxFile(QString filename, bool compressedInput);
 	void addSortedPairPlotFromSave(int chPrimary, int chSecondary, HistogramParameter parameter, QVector<Condition> conditions, QByteArray geometry);
 	void restoreUI(bool legacy = false);
 	bool initSerial(QString portName);

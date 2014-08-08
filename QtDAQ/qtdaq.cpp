@@ -261,50 +261,88 @@ void QtDAQ::onReadVxFileClicked()
 		settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
 
 		rawFilename = newRawFilename;
-		clearAllPlots();
-
 		bool compressedOutput = rawFilename.endsWith("dtz");
-
-		SAFE_DELETE(rawBuffer1Mutex);
-		SAFE_DELETE(rawBuffer2Mutex);
-		rawBuffer1Mutex = new QMutex();
-		rawBuffer2Mutex = new QMutex();
-
-		if (vxProcessThread)
-		{
-			vxProcessThread->disconnect();
-			delete vxProcessThread;
-		}
-		vxProcessThread = new VxProcessThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, procBuffer1Mutex, procBuffer2Mutex, procBuffer1, procBuffer2, this);
-		connect(this, SIGNAL(resumeProcessing()), vxProcessThread, SLOT(onResumeProcessing()), Qt::QueuedConnection);
-		connect(vxProcessThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
-		connect(vxProcessThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
-		vxProcessThread->initVxProcessThread(analysisConfig);
-
-
-		if (vxReaderThread)
-		{
-			vxReaderThread->stopReading(true);
-			//vxReaderThread->exit();
-			vxReaderThread->disconnect();
-			delete vxReaderThread;
-		}
-		vxReaderThread = new VxBinaryReaderThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
-		connect(vxReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
-
-		vxReaderThread->initVxBinaryReaderThread(rawFilename, compressedOutput, analysisConfig);
-		vxReaderThread->start();
+		clearAllPlots();
 		uiUpdateTimer->stop();
 		numUITimerTimeouts = 0;
 		numEventsProcessed = 0;
 		prevNumEventsProcessed = 0;
+
+		readVxFile(rawFilename, compressedOutput);
+				
 		finishedReading = false;
 		uiUpdateTimer->start();
 		acquisitionTime->start();
-		vxProcessThread->start();
 		dataMode = Vx_MODE;
 		ui.actionPauseFileReading->setChecked(false);
 	}
+
+}
+
+void QtDAQ::readVxFile(QString filename, bool compressedInput)
+{
+	if (rawBuffer1Mutex && !finishedReading)
+	{
+		rawBuffer1Mutex->lock();
+		rawBuffer2Mutex->lock();
+	}
+
+	if (vxReaderThread)
+	{
+		vxReaderThread->stopReading(true);
+		vxReaderThread->disconnect();
+		vxReaderThread->exit();
+		vxReaderThread->wait(100);
+		vxReaderThread->terminate();
+		SAFE_DELETE(vxReaderThread);
+	}
+
+	if (vxProcessThread)
+	{
+		vxProcessThread->disconnect();
+		vxProcessThread->exit();
+		vxProcessThread->wait(100);
+		vxProcessThread->terminate();
+		SAFE_DELETE(vxProcessThread);
+	}
+
+	SAFE_DELETE(rawBuffer1Mutex);
+	SAFE_DELETE(rawBuffer2Mutex);
+	rawBuffer1Mutex = new QMutex();
+	rawBuffer2Mutex = new QMutex();
+	if (rawBuffer1)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeEvent(rawBuffer1[i]);
+	}
+	if (rawBuffer2)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeEvent(rawBuffer2[i]);
+	}
+
+	SAFE_DELETE_ARRAY(rawBuffer1);
+	SAFE_DELETE_ARRAY(rawBuffer2);
+	rawBuffer1 = new EventVx[EVENT_BUFFER_SIZE];
+	rawBuffer2 = new EventVx[EVENT_BUFFER_SIZE];
+	memset(rawBuffer1, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
+	memset(rawBuffer2, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
+	//TODO: clean buffers if needed
+
+	vxProcessThread = new VxProcessThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+	connect(this, SIGNAL(resumeProcessing()), vxProcessThread, SLOT(onResumeProcessing()), Qt::QueuedConnection);
+	connect(vxProcessThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
+	connect(vxProcessThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
+	vxProcessThread->initVxProcessThread(analysisConfig);
+
+
+
+	vxReaderThread = new VxBinaryReaderThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+	connect(vxReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
+
+	vxReaderThread->initVxBinaryReaderThread(rawFilename, compressedInput);
+	vxReaderThread->start();
+	vxProcessThread->start();
 
 }
 
@@ -314,9 +352,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 	if (!rawFilename.isEmpty())
 	{
 		bool compressedOutput = rawFilename.endsWith("dtz");
-		numEventsProcessed = 0;
-		prevNumEventsProcessed = 0;
-		finishedReading = false;
+		
 		ui.actionPauseFileReading->setChecked(false);
 		if (dataMode == DRS_MODE)
 		{
@@ -337,11 +373,20 @@ void QtDAQ::onReplayCurrentFileClicked()
 		}
 		else if (dataMode == Vx_MODE)
 		{
-			vxProcessThread->resetTriggerTimerAdjustments();
-			vxReaderThread->rewindFile();
-			vxReaderThread->setPaused(false);
+			if (!finishedReading)
+			{
+				vxProcessThread->resetTriggerTimerAdjustments();
+				vxReaderThread->rewindFile();
+				vxReaderThread->setPaused(false);
+			}
+			else
+			{
+				readVxFile(rawFilename, compressedOutput);
+			}
 		}
-
+		numEventsProcessed = 0;
+		prevNumEventsProcessed = 0;
+		finishedReading = false;
 		uiUpdateTimer->stop();
 		numUITimerTimeouts = 0;
 		uiUpdateTimer->start();
