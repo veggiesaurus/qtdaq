@@ -16,10 +16,13 @@ class DRSAcquisitionThread : public QThread
 {
 	 Q_OBJECT
 public:
-	 DRSAcquisitionThread(QObject *parent = 0);	 
-	 bool initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime=100);
-	 void reInit(AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig);
+	DRSAcquisitionThread(QObject *parent = 0);	 
+	bool initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime=100);
+	void reInit(AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig);
 	void processEvent(EventRawData rawEvent, bool outputSample);
+	void lockConfig();
+	void unlockConfig();
+	void setPaused(bool);
  signals:
 	 void newProcessedEvents(QVector<EventStatistics*>*);
 	 void newEventSample(EventSampleData*);
@@ -34,7 +37,6 @@ public slots:
 	void onUpdateTimerTimeout();
 	void onTemperatureUpdated(float temp);
 public:
-	QMutex configMutex;
 
 private:
 	EventRawData rawData;
@@ -55,6 +57,8 @@ private:
 	float currentTemp=-1;
 
 	QMutex drsObjectMutex;
-	bool requiresReconfig = false;
+	QMutex configMutex;
+	QMutex pauseMutex;
+	bool requiresPause = false;
 };
 

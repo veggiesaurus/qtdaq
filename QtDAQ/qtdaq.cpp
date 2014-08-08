@@ -362,6 +362,9 @@ void QtDAQ::onInitClicked()
 	else
 	{
 		drsAcquisitionThread->initDRSAcquisitionThread(drs, board, acquisitionConfig, analysisConfig);
+		//start paused
+		drsAcquisitionThread->setPaused(true);
+		drsAcquisitionThread->start();
 		ui.actionStart->setEnabled(true);
 	}
 }
@@ -373,8 +376,7 @@ void QtDAQ::onStartClicked()
 	uiUpdateTimer->start();
 	acquisitionTime->start();
 	numEventsProcessed = 0;
-	drsAcquisitionThread->initDRSAcquisitionThread(drs, board, acquisitionConfig, analysisConfig);
-	drsAcquisitionThread->start(QThread::HighPriority);
+	drsAcquisitionThread->setPaused(false);
 	ui.actionStop->setEnabled(true);
 	ui.actionReset->setEnabled(true);
 	ui.actionStart->setEnabled(false);
@@ -385,8 +387,7 @@ void QtDAQ::onStartClicked()
 
 void QtDAQ::onStopClicked()
 {
-	drsAcquisitionThread->stopAcquisition();
-	drsAcquisitionThread->terminate();
+	drsAcquisitionThread->setPaused(true);
 	ui.actionStart->setEnabled(true);
 	ui.actionStop->setEnabled(false);
 	ui.actionReset->setEnabled(false);
@@ -427,10 +428,10 @@ void QtDAQ::onEditAcquisitionConfigClicked()
 	if (retDialog == QDialog::Rejected)
 		return;
 	if (drsAcquisitionThread)
-		drsAcquisitionThread->configMutex.lock();
+		drsAcquisitionThread->lockConfig();
 	dialog->updateConfig();
 	if (drsAcquisitionThread)
-		drsAcquisitionThread->configMutex.unlock();
+		drsAcquisitionThread->unlockConfig();
 	settings.setValue("acquisition/previousSettings", QVariant::fromValue(*acquisitionConfig));
 }
 

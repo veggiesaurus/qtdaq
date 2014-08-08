@@ -25,9 +25,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		Qt5Version = 5.3_msvc2013_opengl
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
+		Qt5Version = msvc2013_opengl
 	EndGlobalSection
 EndGlobal

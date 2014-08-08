@@ -4,10 +4,13 @@
 #include <QString>
 #include <QDateTime>
 
+
+
 #ifdef _MSC_VER
 #define NOMINMAX
 #include "windows.h"
 #endif
+
 
 #define SAFE_DELETE( ptr ) \
 if (ptr != NULL)      \

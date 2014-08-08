@@ -179,7 +179,8 @@ void VxBinaryReaderThread::run()
 			continue;
 		}
 		else
-			pauseMutex.unlock();
+			pauseMutex.unlock();		
+
 		
 		if (doRewindFile)
 		{

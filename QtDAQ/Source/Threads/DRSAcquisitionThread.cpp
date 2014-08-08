@@ -46,7 +46,6 @@ void DRSAcquisitionThread::reInit(AcquisitionConfig* s_config, AnalysisConfig* s
 	configMutex.lock();
 	config = s_config;
 	analysisConfig = s_analysisConfig;
-	requiresReconfig = true;
 	configMutex.unlock();
 }
 
@@ -83,30 +82,23 @@ void DRSAcquisitionThread::run()
 	EventTimestamp timeStamp;
 	while(acquiring)
 	{
-		drsObjectMutex.lock();
+		//pausing
+		pauseMutex.lock();
+		if (requiresPause)
+		{
+			pauseMutex.unlock();
+			msleep(100);
+			continue;
+		}
+		else
+			pauseMutex.unlock();
 
+		drsObjectMutex.lock();
 		configMutex.lock();
 		if (config->requiresReconfig)
 		{
-			config->apply(board);
-
-			//re-init channel storage
-			/*
-			for (int i = 0; i<NUM_DIGITIZER_CHANNELS; i++)
-			{
-				SAFE_DELETE_ARRAY(rawData.fValues[i]);
-				if (config->channelEnabled[i])
-				{
-					firstChannel = std::min(firstChannel, i);
-					lastChannel = std::max(lastChannel, i);
-					rawData.fValues[i] = new unsigned short[NUM_DIGITIZER_SAMPLES];
-				}
-				else
-					rawData.fValues[i] = NULL;
-			}*/
-
-			config->requiresReconfig = false;
-			requiresReconfig = false;
+			config->apply(board);			
+			config->requiresReconfig = false;		
 		}
 		configMutex.unlock();
 
@@ -390,6 +382,17 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 	if (processedEvents)
 		processedEvents->push_back(stats);
 }
+
+void DRSAcquisitionThread::lockConfig(){ configMutex.lock(); }
+void DRSAcquisitionThread::unlockConfig(){ configMutex.unlock(); }
+
+void DRSAcquisitionThread::setPaused(bool paused)
+{
+	pauseMutex.lock();
+	requiresPause = paused;
+	pauseMutex.unlock();
+}
+
 
 void DRSAcquisitionThread::stopAcquisition()
 {
