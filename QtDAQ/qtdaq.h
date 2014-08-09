@@ -148,6 +148,8 @@ public:
 	void onExitClicked();
 	//temperature sensor
 	void serialReadData();
+protected:
+	void closeEvent(QCloseEvent *event);
 
 signals:
 	void newEvents(QVector<EventStatistics*>* stats);

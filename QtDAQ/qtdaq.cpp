@@ -95,18 +95,7 @@ QtDAQ::QtDAQ(QWidget *parent)
 
 QtDAQ::~QtDAQ()
 {
-	if (drsAcquisitionThread)
-	{		
-		drsAcquisitionThread->stopAcquisition();
-		drsAcquisitionThread->exit();
-		drsAcquisitionThread->wait(100);
-		drsAcquisitionThread->terminate();
-		SAFE_DELETE(drsAcquisitionThread);
-	}
-
-	//SAFE_DELETE(board);
-	SAFE_DELETE(drs);
-	delete acquisitionConfig;
+	
 } 
 
 void QtDAQ::onUiUpdateTimerTimeout()
@@ -1338,4 +1327,47 @@ void QtDAQ::onRenamePageClicked()
 		ui.tabWidget->tabText(activeTabIndex), &ok);
 	if (ok && !text.isEmpty())
 		ui.tabWidget->setTabText(activeTabIndex, text);
+}
+
+void QtDAQ::closeEvent(QCloseEvent*)
+{
+	if (rawBuffer1Mutex && !finishedReading)
+	{
+		rawBuffer1Mutex->lock();
+		rawBuffer2Mutex->lock();
+	}
+
+	if (drsAcquisitionThread)
+	{
+		drsAcquisitionThread->stopAcquisition();
+		drsAcquisitionThread->exit();
+		drsAcquisitionThread->wait(100);
+		drsAcquisitionThread->terminate();
+		SAFE_DELETE(drsAcquisitionThread);
+	}
+
+
+
+	if (vxReaderThread)
+	{
+		vxReaderThread->stopReading(true);
+		vxReaderThread->disconnect();
+		vxReaderThread->exit();
+		vxReaderThread->wait(100);
+		vxReaderThread->terminate();
+		SAFE_DELETE(vxReaderThread);
+	}
+
+	if (vxProcessThread)
+	{
+		vxProcessThread->disconnect();
+		vxProcessThread->exit();
+		vxProcessThread->wait(100);
+		vxProcessThread->terminate();
+		SAFE_DELETE(vxProcessThread);
+	}
+
+	//SAFE_DELETE(board);
+	SAFE_DELETE(drs);
+	delete acquisitionConfig;
 }
