@@ -26,7 +26,7 @@ class VxProcessThread : public QThread
 public:
 	VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
 	~VxProcessThread();
-	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=33);
+	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=125);
 	void restartProcessThread();
 	void processEvent(EventVx* rawEvent, bool outputSample);	
 	void resetTriggerTimerAdjustments();
@@ -69,7 +69,7 @@ private:
 	float* tempFilteredValArray;
 	float* tempMedianArray;
     QVector<EventStatistics*>* processedEvents;
-	QTimer* updateTimer;
+	QTimer updateTimer;
 	bool sampleNextEvent;
 	AnalysisConfig* analysisConfig;
 	bool outputCurrentChannel;

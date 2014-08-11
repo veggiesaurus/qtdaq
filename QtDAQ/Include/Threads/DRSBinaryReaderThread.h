@@ -23,8 +23,9 @@ class DRSBinaryReaderThread : public QThread
 {
 	 Q_OBJECT
 public:
-	 DRSBinaryReaderThread(QObject *parent = 0);	 
-	 bool initDRSBinaryReaderThread(QString filename, bool isCompressedInput, AnalysisConfig* s_analysisConfig, int updateTime=50);
+	 DRSBinaryReaderThread(QObject *parent = 0);
+	 ~DRSBinaryReaderThread();
+	 bool initDRSBinaryReaderThread(QString filename, bool isCompressedInput, int s_runIndex, AnalysisConfig* s_analysisConfig, int updateTime=125);
 	void processEvent(EventRawData rawEvent, bool outputSample);
  signals:
 	 void newProcessedEvents(QVector<EventStatistics*>*);
@@ -32,10 +33,11 @@ public:
 	 void eventReadingFinished();
 
 public slots:
-	void stopReading();
+	void stopReading(bool forceExit);
 	void rewindFile();
 	void onUpdateTimerTimeout();
 	void onTemperatureUpdated(float temp);
+	void setPaused(bool paused);
 private:
     void run();
 
@@ -43,7 +45,7 @@ private:
 	int eventIndex;
 	EventRawData rawData[NUM_BUFFERED_EVENTS];
 	int eventSize=0;
-	char* buffer;
+	char* buffer=nullptr;
 	float* tempValArray;
 	float* tempFilteredValArray;
 	bool channelEnabled[NUM_DIGITIZER_CHANNELS];
@@ -53,11 +55,20 @@ private:
 	int numEventsInFile;
 	int numEventsRead;
 	EventTimestamp firstEventTimestamp;
-	QTimer* updateTimer=nullptr;
+	QTimer updateTimer;
 	bool sampleNextEvent=true;
 	AnalysisConfig* analysisConfig;
 	//temperature sensing
 	float currentTemp=-1;
+	bool requiresPause;
+	bool ungracefulReadExit = false;
+
+	//Mutexes
+	QMutex processedEventsMutex;
+	QMutex fileMutex;
+	QMutex pauseMutex;
+	//doesn't need to be atomic in this case, because replaying is done by destroying and re-creating threads
+	int runIndex;
 
 };
 

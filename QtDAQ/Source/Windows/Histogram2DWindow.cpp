@@ -47,8 +47,11 @@ void Histogram2DWindow::onOptionsClicked()
 	uiDialogHistogramConfig.spinBoxChannelsX->setValue(numBinsX);
 	uiDialogHistogramConfig.spinBoxChannelsY->setValue(numBinsY);
     int retDialog=dialog->exec();
-    if (retDialog==QDialog::Rejected)
-        return;
+	if (retDialog == QDialog::Rejected)
+	{
+		SAFE_DELETE(dialog);
+		return;
+	}
 
 	bool needsClear=false;
 	int newChPrimary=uiDialogHistogramConfig.comboBoxChannel->currentIndex();
@@ -89,6 +92,7 @@ void Histogram2DWindow::onOptionsClicked()
 		updateTitleAndAxis();
 		recreateHistogram();
 	}
+	SAFE_DELETE(dialog);
 }
 
 void Histogram2DWindow::updateTitleAndAxis()

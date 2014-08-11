@@ -8,10 +8,32 @@ DRSAcquisitionThread::DRSAcquisitionThread(QObject *parent)
 	tempFilteredValArray=new float[NUM_DIGITIZER_SAMPLES];
 	memset(tempValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES);
 	memset(tempFilteredValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES);
+	processedEventsMutex.lock();
 	processedEvents=new QVector<EventStatistics*>;
 	processedEvents->setSharable(true);
-
+	processedEventsMutex.unlock();
 }
+
+DRSAcquisitionThread::~DRSAcquisitionThread()
+{
+
+	processedEventsMutex.lock();
+	if (processedEvents)
+	{
+		for (auto& i : *processedEvents)
+		{
+			SAFE_DELETE(i);
+		}
+		processedEvents->clear();
+	}
+	SAFE_DELETE(processedEvents);
+	processedEventsMutex.unlock();
+
+	SAFE_DELETE_ARRAY(tempValArray);
+	SAFE_DELETE_ARRAY(tempFilteredValArray);
+	SAFE_DELETE(updateTimer);
+}
+
 
 bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime)
 {
@@ -190,12 +212,14 @@ void DRSAcquisitionThread::GetTimeStamp(EventTimestamp &ts)
 void DRSAcquisitionThread::onUpdateTimerTimeout()
 {
 	sampleNextEvent=true;
+	processedEventsMutex.lock();
 	if (processedEvents && processedEvents->size()>0)
 	{        
 		emit newProcessedEvents(processedEvents);
 		processedEvents=new QVector<EventStatistics*>();
 		processedEvents->setSharable(true);
 	}
+	processedEventsMutex.unlock();
 }
 
 void DRSAcquisitionThread::onTemperatureUpdated(float temp)
@@ -379,8 +403,10 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 		sample->stats=*stats;
 		emit newEventSample(sample);
 	}
+	processedEventsMutex.lock();
 	if (processedEvents)
 		processedEvents->push_back(stats);
+	processedEventsMutex.unlock();
 }
 
 void DRSAcquisitionThread::lockConfig(){ configMutex.lock(); }
@@ -397,9 +423,10 @@ void DRSAcquisitionThread::setPaused(bool paused)
 void DRSAcquisitionThread::stopAcquisition()
 {
 	acquiring=false;
+	processedEventsMutex.lock();
 	if (processedEvents && processedEvents->size()>0)
 		emit newProcessedEvents(processedEvents);
-	
+	processedEventsMutex.unlock();
 	emit eventAcquisitionFinished();
 	
 }

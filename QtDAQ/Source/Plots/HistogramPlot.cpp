@@ -6,10 +6,7 @@ Histogram::Histogram(const QString &title, const QColor &symbolColor):
     QwtPlotHistogram(title)
 {
     setStyle(QwtPlotHistogram::Columns);
-
-    setColor(symbolColor);
-
-	
+    setColor(symbolColor);	
 }
 
 void Histogram::setColor(const QColor &symbolColor)
@@ -58,6 +55,14 @@ HistogramPlot::HistogramPlot(QWidget *parent):
 	fittedCurve=new QwtPlotCurve("Fitted Function");
 	fittedCurve->attach(this);
 	fittedCurve->setVisible(false);
+}
+
+HistogramPlot::~HistogramPlot()
+{
+	SAFE_DELETE(logScaleEngine);
+	SAFE_DELETE(linearScaleEngine);
+	SAFE_DELETE(histogram);
+	SAFE_DELETE(fittedCurve);
 }
 
 void HistogramPlot::setLogScale(bool log)

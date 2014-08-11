@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QFile>
 #include <QMutex>
+#include <atomic>
 #include "DRS4Acquisition.h"
 #include "AnalysisConfig.h"
 #include "zlib/zlib.h"
@@ -116,10 +117,11 @@ struct EventVx
 {
 	CAEN_DGTZ_EventInfo_t info;
 	bool processed;
+	int runIndex;
 	CAEN_DGTZ_UINT16_EVENT_t data;
 	CAEN_DGTZ_FLOAT_EVENT_t fData;
 	static EventVx* eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data);
-	static EventVx* eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_FLOAT_EVENT_t* fData);
+	static EventVx* eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_FLOAT_EVENT_t* fData);	
 };
 
 void freeEvent(EventVx* &ev);
@@ -154,7 +156,8 @@ class VxBinaryReaderThread : public QThread
 	 Q_OBJECT
 public:
 	 VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
-	 bool initVxBinaryReaderThread(QString filename, bool isCompressedInput, int updateTime=100);
+	 ~VxBinaryReaderThread();
+	 bool initVxBinaryReaderThread(QString filename, bool isCompressedInput, int s_runIndex, int updateTime = 125);
 	bool isReading();
  signals:
 	 void newRawEvents(QVector<EventVx*>*);
@@ -165,7 +168,7 @@ private:
  
 public slots:
 	void stopReading(bool forceExit);
-	void rewindFile();
+	void rewindFile(int s_runIndex);
 	void onUpdateTimerTimeout();
 	void setPaused(bool paused);
 	
@@ -177,7 +180,7 @@ private:
 	QString filename;
 	int numEventsInFile;
 	int numEventsRead;
-	QTimer* updateTimer;
+	QTimer updateTimer;
 	bool doRewindFile;
 	bool doExitReadLoop;
 	bool isReadingFile;
@@ -192,5 +195,9 @@ private:
 	int currentBufferPosition;
 
 	//vx1742 switches
-	bool vx1742Mode;	
+	bool vx1742Mode;
+
+	//run tracking
+	QMutex runIndexMutex;
+	std::atomic<int> runIndex;
 };

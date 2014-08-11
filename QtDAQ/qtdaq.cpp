@@ -41,14 +41,6 @@ QtDAQ::QtDAQ(QWidget *parent)
 	rawBuffer2 = new EventVx[EVENT_BUFFER_SIZE];
 	memset(rawBuffer1, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
 	memset(rawBuffer2, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
-	//processed
-	//raw
-	procBuffer1Mutex = new QMutex();
-	procBuffer2Mutex = new QMutex();
-	procBuffer1 = new EventStatistics[EVENT_BUFFER_SIZE];
-	procBuffer2 = new EventStatistics[EVENT_BUFFER_SIZE];
-	memset(procBuffer1, 0, sizeof(EventStatistics)*EVENT_BUFFER_SIZE);
-	memset(procBuffer2, 0, sizeof(EventStatistics)*EVENT_BUFFER_SIZE);
 
 
 	drsReaderThread = new DRSBinaryReaderThread(this);
@@ -81,16 +73,13 @@ QtDAQ::QtDAQ(QWidget *parent)
 	new QShortcut(Qt::Key_3, this, SLOT(onSwitchPage3()));
 	new QShortcut(Qt::Key_4, this, SLOT(onSwitchPage4()));
 
-	acquisitionTime = new QTime();
 	//update timer for ui
-	uiUpdateTimer = new QTimer();
-	uiUpdateTimer->setInterval(1000);	
-	connect(uiUpdateTimer, &QTimer::timeout, this, &QtDAQ::onUiUpdateTimerTimeout);
+	uiUpdateTimer.setInterval(1000);	
+	connect(&uiUpdateTimer, &QTimer::timeout, this, &QtDAQ::onUiUpdateTimerTimeout);
 
-	autoTrigTimer = new QTimer();
 	//auto trigger: 17ms: ~ 60 Hz
-	autoTrigTimer->setInterval(17);
-	connect(autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);	
+	autoTrigTimer.setInterval(17);
+	connect(&autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);	
 }
 
 QtDAQ::~QtDAQ()
@@ -113,11 +102,11 @@ void QtDAQ::onUiUpdateTimerTimeout()
 		}
 		else
 		{
-			int timeMillis = uiUpdateTimer->interval();
+			int timeMillis = uiUpdateTimer.interval();
 			double rate = ((double)max(0, numEventsProcessed - prevNumEventsProcessed)) / timeMillis*1000.0;
 			prevNumEventsProcessed = numEventsProcessed;
 			numUITimerTimeouts++;
-			statusBar()->showMessage("Processing data: " + QString::number(numEventsProcessed) + " events processed @ " + QString::number(rate) + " events/s", uiUpdateTimer->interval());
+			statusBar()->showMessage("Processing data: " + QString::number(numEventsProcessed) + " events processed @ " + QString::number(rate) + " events/s", uiUpdateTimer.interval());
 		}
 	}
 
@@ -125,7 +114,7 @@ void QtDAQ::onUiUpdateTimerTimeout()
 
 void QtDAQ::onEventReadingFinished()
 {
-	prevAcquisitionTime = acquisitionTime->elapsed();
+	prevAcquisitionTime = acquisitionTime.elapsed();
 
 	finishedReading = true;
 
@@ -152,37 +141,39 @@ void QtDAQ::onDRSObjectChanged(DRS* s_drs, DRSBoard* s_board)
 
 void QtDAQ::onNewProcessedEvents(QVector<EventStatistics*>* stats)
 {
-	//return;
 	if (!stats)
 		return;
-	numEventsProcessed += stats->size();
 
-	for (QVector<HistogramWindow*>::iterator it = histograms.begin(); it != histograms.end(); it++)
+	//select only valid events
+	QVector<EventStatistics*>* statsValid = new QVector<EventStatistics*>();
+	//statsValid->reserve(stats->size());
+	for (auto& i : *stats)
 	{
-		(*it)->onNewEventStatistics(stats);
+		if (i->runIndex == runIndex)
+			statsValid->push_back(i);			
 	}
 
-	for (QVector<Histogram2DWindow*>::iterator it = histograms2D.begin(); it != histograms2D.end(); it++)
-	{
-		(*it)->onNewEventStatistics(stats);
-	}
+	numEventsProcessed += statsValid->size();
 
-	for (QVector<FoMWindow*>::iterator it = fomPlots.begin(); it != fomPlots.end(); it++)
-	{
-		(*it)->onNewEventStatistics(stats);
-	}
+	for (auto& i : histograms)
+		i->onNewEventStatistics(statsValid);
 
-	for (QVector<SortedPairPlotWindow*>::iterator it = sortedPairPlots.begin(); it != sortedPairPlots.end(); it++)
-	{
-		(*it)->onNewEventStatistics(stats);
-	}
+	for (auto& i : histograms2D)
+		i->onNewEventStatistics(statsValid);
 
-	for (QVector<EventStatistics*>::iterator it = stats->begin(); it != stats->end(); it++)
-	{
-		EventStatistics* statEvent = *it;
-		SAFE_DELETE(statEvent);
-	}
+	for (auto& i : fomPlots)
+		i->onNewEventStatistics(statsValid);
+
+	for (auto& i : sortedPairPlots)
+		i->onNewEventStatistics(statsValid);
+
+	for (auto& i : *stats)
+		SAFE_DELETE(i);
+
 	stats->clear();
+	statsValid->clear();
+	SAFE_DELETE(stats);
+	SAFE_DELETE(statsValid);
 }
 
 void QtDAQ::onNewEventSample(EventSampleData* sample)
@@ -198,6 +189,7 @@ void QtDAQ::onNewEventSample(EventSampleData* sample)
 	{
 		SAFE_DELETE_ARRAY(sample->fValues[ch]);
 	}
+	SAFE_DELETE(sample);
 }
 
 void QtDAQ::onReadDRSFileClicked()
@@ -221,13 +213,32 @@ void QtDAQ::onReadDRSFileClicked()
 		clearAllPlots();
 		bool compressedOutput = rawFilename.endsWith("dtz");
 
-		drsReaderThread->initDRSBinaryReaderThread(rawFilename, compressedOutput, analysisConfig);
-		drsReaderThread->start();
-		uiUpdateTimer->stop();
+		uiUpdateTimer.stop();
 		numUITimerTimeouts = 0;
-		uiUpdateTimer->start();
-		acquisitionTime->start();
+		numEventsProcessed = 0;
+		prevNumEventsProcessed = 0;
+
+		if (drsReaderThread)
+		{
+			drsReaderThread->stopReading(true);
+			drsReaderThread->wait(100);
+			drsReaderThread->exit();
+			drsReaderThread->disconnect();
+			delete drsReaderThread;
+		}
+		drsReaderThread = new DRSBinaryReaderThread(this);
+		connect(drsReaderThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
+		connect(drsReaderThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
+		connect(drsReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
+
+		runIndex++;
+		drsReaderThread->initDRSBinaryReaderThread(rawFilename, compressedOutput, runIndex, analysisConfig);
+		drsReaderThread->start();
+		finishedReading = false;
+		uiUpdateTimer.start();
+		acquisitionTime.start();
 		dataMode = DRS_MODE;
+		ui.actionPauseFileReading->setChecked(false);
 	}
 
 }
@@ -252,7 +263,7 @@ void QtDAQ::onReadVxFileClicked()
 		rawFilename = newRawFilename;
 		bool compressedOutput = rawFilename.endsWith("dtz");
 		clearAllPlots();
-		uiUpdateTimer->stop();
+		uiUpdateTimer.stop();
 		numUITimerTimeouts = 0;
 		numEventsProcessed = 0;
 		prevNumEventsProcessed = 0;
@@ -260,8 +271,8 @@ void QtDAQ::onReadVxFileClicked()
 		readVxFile(rawFilename, compressedOutput);
 				
 		finishedReading = false;
-		uiUpdateTimer->start();
-		acquisitionTime->start();
+		uiUpdateTimer.start();
+		acquisitionTime.start();
 		dataMode = Vx_MODE;
 		ui.actionPauseFileReading->setChecked(false);
 	}
@@ -329,7 +340,8 @@ void QtDAQ::readVxFile(QString filename, bool compressedInput)
 	vxReaderThread = new VxBinaryReaderThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
 	connect(vxReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
 
-	vxReaderThread->initVxBinaryReaderThread(rawFilename, compressedInput);
+	runIndex++;
+	vxReaderThread->initVxBinaryReaderThread(rawFilename, compressedInput, runIndex);
 	vxReaderThread->start();
 	vxProcessThread->start();
 
@@ -345,19 +357,18 @@ void QtDAQ::onReplayCurrentFileClicked()
 		ui.actionPauseFileReading->setChecked(false);
 		if (dataMode == DRS_MODE)
 		{
-			drsReaderThread->stopReading();
+			drsReaderThread->stopReading(true);
 			drsReaderThread->wait(100);
 			drsReaderThread->exit();
 			drsReaderThread->disconnect();
 			delete drsReaderThread;
-
 			drsReaderThread = new DRSBinaryReaderThread(this);
 			connect(drsReaderThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
 			connect(drsReaderThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
 			connect(drsReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
 
-
-			drsReaderThread->initDRSBinaryReaderThread(rawFilename, compressedOutput, analysisConfig);
+			runIndex++;
+			drsReaderThread->initDRSBinaryReaderThread(rawFilename, compressedOutput, runIndex, analysisConfig);
 			drsReaderThread->start();
 		}
 		else if (dataMode == Vx_MODE)
@@ -365,7 +376,8 @@ void QtDAQ::onReplayCurrentFileClicked()
 			if (!finishedReading)
 			{
 				vxProcessThread->resetTriggerTimerAdjustments();
-				vxReaderThread->rewindFile();
+				runIndex++;
+				vxReaderThread->rewindFile(runIndex);
 				vxReaderThread->setPaused(false);
 			}
 			else
@@ -373,13 +385,14 @@ void QtDAQ::onReplayCurrentFileClicked()
 				readVxFile(rawFilename, compressedOutput);
 			}
 		}
+		ui.actionPauseFileReading->setChecked(false);
+		uiUpdateTimer.stop();
+		numUITimerTimeouts = 0;
 		numEventsProcessed = 0;
 		prevNumEventsProcessed = 0;
 		finishedReading = false;
-		uiUpdateTimer->stop();
-		numUITimerTimeouts = 0;
-		uiUpdateTimer->start();
-		acquisitionTime->start();
+		uiUpdateTimer.start();
+		acquisitionTime.start();
 	}
 }
 
@@ -407,8 +420,8 @@ void QtDAQ::onInitClicked()
 
 void QtDAQ::onStartClicked()
 {
-	uiUpdateTimer->start();
-	acquisitionTime->start();
+	uiUpdateTimer.start();
+	acquisitionTime.start();
 	numEventsProcessed = 0;
 	drsAcquisitionThread->setPaused(false);
 	ui.actionStop->setEnabled(true);
@@ -432,8 +445,8 @@ void QtDAQ::onStopClicked()
 void QtDAQ::onResetClicked()
 {
 	clearAllPlots();
-	uiUpdateTimer->start();
-	acquisitionTime->start();
+	uiUpdateTimer.start();
+	acquisitionTime.start();
 	numEventsProcessed = 0;
 }
 
@@ -446,9 +459,9 @@ void QtDAQ::onSoftTriggerClicked()
 void QtDAQ::onAutoTriggerToggled(bool triggerOn)
 {
 	if (triggerOn)
-		autoTrigTimer->start();
+		autoTrigTimer.start();
 	else
-		autoTrigTimer->stop();
+		autoTrigTimer.stop();
 }
 
 
@@ -891,6 +904,8 @@ void QtDAQ::onPauseReadingToggled(bool checked)
 {
 	if (vxReaderThread)
 		vxReaderThread->setPaused(checked);
+	if (drsReaderThread)
+		drsReaderThread->setPaused(checked);
 }
 
 void QtDAQ::onCascadeClicked()
@@ -1337,6 +1352,29 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		rawBuffer2Mutex->lock();
 	}
 
+	if (rawBuffer1)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeEvent(rawBuffer1[i]);
+		
+	}
+	if (rawBuffer2)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeEvent(rawBuffer2[i]);
+		
+	}
+
+	if (drsReaderThread)
+	{
+		if (!finishedReading)
+			drsReaderThread->stopReading(true);
+		drsReaderThread->exit();
+		drsReaderThread->wait(100);
+		drsReaderThread->terminate();
+		SAFE_DELETE(drsReaderThread);
+	}
+
 	if (drsAcquisitionThread)
 	{
 		drsAcquisitionThread->stopAcquisition();
@@ -1345,8 +1383,6 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		drsAcquisitionThread->terminate();
 		SAFE_DELETE(drsAcquisitionThread);
 	}
-
-
 
 	if (vxReaderThread)
 	{
@@ -1367,7 +1403,12 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		SAFE_DELETE(vxProcessThread);
 	}
 
+	SAFE_DELETE_ARRAY(rawBuffer1)
+	SAFE_DELETE(rawBuffer1Mutex);
+	SAFE_DELETE_ARRAY(rawBuffer2)
+	SAFE_DELETE(rawBuffer2Mutex);
 	//SAFE_DELETE(board);
 	SAFE_DELETE(drs);
-	delete acquisitionConfig;
+	SAFE_DELETE(acquisitionConfig);
+	SAFE_DELETE(analysisConfig);
 }

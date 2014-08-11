@@ -1,3 +1,8 @@
+#define VALGRIND
+
+#ifdef VALGRIND
+#include <vld.h> 
+#endif
 #include "qtdaq.h"
 #include <QtWidgets/QApplication>
 

@@ -80,7 +80,6 @@ VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_
 	: QThread(parent)
 {
 	inputFileCompressed=NULL;
-	updateTimer=NULL;
 	doRewindFile=false;
 	doExitReadLoop=false;
 	isReadingFile=false;
@@ -92,11 +91,14 @@ VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_
 	rawMutexes[1]=s_rawBuffer2Mutex;
 }
 
+VxBinaryReaderThread::~VxBinaryReaderThread()
+{
+}
 
-
-bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedInput, int updateTime)
+bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedInput, int s_runIndex, int updateTime)
 {	
 	filename=s_filename;
+	runIndex = s_runIndex;
 	if (isReadingFile)
 	{
 		gzclose(inputFileCompressed);
@@ -123,12 +125,8 @@ bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isC
 	}
 	
 	numEventsRead=0;
-	if (updateTimer)
-	{
-		updateTimer->stop();
-		updateTimer->disconnect();
-		SAFE_DELETE(updateTimer);
-	}
+	updateTimer.stop();
+	updateTimer.disconnect();
 
 	//start reading into buffer0, but need to lock and unlock buffer1 as well to make sure it's free
 	rawMutexes[0]->lock();
@@ -142,15 +140,14 @@ bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isC
 	currentBufferIndex=0;
 	currentBufferPosition=0;
 
-	updateTimer=new QTimer();
-	updateTimer->setInterval(updateTime);
-	connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdateTimerTimeout()));
-    updateTimer->start();
+	updateTimer.setInterval(updateTime);
+	connect(&updateTimer, SIGNAL(timeout()), this, SLOT(onUpdateTimerTimeout()));
+    updateTimer.start();
 	doExitReadLoop=false;
 	return true;
 }
 
-void VxBinaryReaderThread::rewindFile()
+void VxBinaryReaderThread::rewindFile(int s_runIndex)
 {
 	//if eof has been reached
 	if (gzeof(inputFileCompressed) || !inputFileCompressed)
@@ -158,11 +155,15 @@ void VxBinaryReaderThread::rewindFile()
 		if (inputFileCompressed)
 			gzclose(inputFileCompressed);
 		numEventsRead=0;
-		initVxBinaryReaderThread(filename, true, updateTimer->interval());
+		initVxBinaryReaderThread(filename, true, s_runIndex, updateTimer.interval());
 		start();
 	}
 	else
-		doRewindFile=true;
+	{
+		runIndex = s_runIndex;
+		doRewindFile = true;
+
+	}
 }
 
 void VxBinaryReaderThread::run()
@@ -225,6 +226,7 @@ void VxBinaryReaderThread::run()
 			break;
 		}
 		
+		ev.runIndex = runIndex.load();
 		//vx1742: BoardId of 2
 		if (ev.info.BoardId==2)
 		{

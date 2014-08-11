@@ -11,24 +11,45 @@ DRSBinaryReaderThread::DRSBinaryReaderThread(QObject *parent)
 	//tempFilteredValArray=new float[NUM_DIGITIZER_SAMPLES];
 	memset(tempValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES);
 	memset(tempFilteredValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES);
-	processedEvents=new QVector<EventStatistics*>;
-	processedEvents->setSharable(true);			
+	processedEventsMutex.lock();
+	processedEvents=new QVector<EventStatistics*>();
+	processedEventsMutex.unlock();
 }
 
-bool DRSBinaryReaderThread::initDRSBinaryReaderThread(QString filename, bool isCompressedInput, AnalysisConfig* s_analysisConfig, int updateTime)
+DRSBinaryReaderThread::~DRSBinaryReaderThread()
+{		
+	processedEventsMutex.lock();
+	if (processedEvents && ungracefulReadExit)
+	{
+		for (auto& i : *processedEvents)
+		{
+			SAFE_DELETE(i);
+		}
+		processedEvents->clear();
+		SAFE_DELETE(processedEvents);
+	}
+	processedEventsMutex.unlock();
+	
+	SAFE_DELETE_ARRAY(buffer);
+
+	qFreeAligned(tempFilteredValArray);
+	qFreeAligned(tempValArray);
+}
+bool DRSBinaryReaderThread::initDRSBinaryReaderThread(QString filename, bool isCompressedInput, int s_runIndex, AnalysisConfig* s_analysisConfig, int updateTime)
 {
+	runIndex = s_runIndex;
 	eventSize=0;
 	analysisConfig=s_analysisConfig;
 	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
 	memset(rawData, 0, sizeof(EventRawData)*NUM_BUFFERED_EVENTS);
 
 	compressedInput=isCompressedInput;
+	fileMutex.lock();
 	if (inputFile)
 		fclose(inputFile);
 	inputFile=fopen(filename.toStdString().data(), "rb");
 	if (!inputFile)
 			return false;
-
 	fseek(inputFile, 0, SEEK_END);
 	long fileSize=ftell(inputFile);
 	fseek(inputFile, 0, SEEK_SET);
@@ -83,6 +104,7 @@ bool DRSBinaryReaderThread::initDRSBinaryReaderThread(QString filename, bool isC
 	//calculate size of each event (in bytes):
 	//EHDR(4)+serial(4)+timeStamp(20)+tVals(4*N)+numChannels*(CHDR(4)+fVals(4*N))
 	eventSize= 4 + 20 + 4*NUM_DIGITIZER_SAMPLES + numChannels*(4 + 2*NUM_DIGITIZER_SAMPLES);
+	SAFE_DELETE_ARRAY(buffer);
 	buffer=new char[eventSize*NUM_BUFFERED_EVENTS];
 	numEventsInFile=fileSize/eventSize;
 
@@ -123,83 +145,117 @@ bool DRSBinaryReaderThread::initDRSBinaryReaderThread(QString filename, bool isC
 
 	//go back to begining of file, ready for reading
 	rewind(inputFile);
+	fileMutex.unlock();
+
 	numEventsRead=0;
-	if (updateTimer)
-	{
-		updateTimer->stop();
-		updateTimer->disconnect();
-		SAFE_DELETE(updateTimer);
-	}
-	updateTimer=new QTimer();
-	updateTimer->setInterval(updateTime);
-	connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdateTimerTimeout()));
-    updateTimer->start();
+	updateTimer.stop();
+	updateTimer.disconnect();
+	updateTimer.setInterval(updateTime);
+	connect(&updateTimer, SIGNAL(timeout()), this, SLOT(onUpdateTimerTimeout()));
+    updateTimer.start();
 	return true;
 }
 
 void DRSBinaryReaderThread::rewindFile()
 {
+	fileMutex.lock();
 	rewind(inputFile);
+	fileMutex.unlock();
+	setPaused(false);
+}
+
+void DRSBinaryReaderThread::setPaused(bool paused)
+{
+	pauseMutex.lock();
+	requiresPause = paused;
+	pauseMutex.unlock();
 }
 
 void DRSBinaryReaderThread::run()
 {	
+	ungracefulReadExit = false;
+	setPaused(false);
+	
+	while (inputFile && !feof(inputFile))
 	{
-		while (inputFile && !feof(inputFile))
+
+		pauseMutex.lock();
+		if (requiresPause)
 		{
-			if (!processedEvents)
-			{
-				processedEvents=new QVector<EventStatistics*>;
-				//processedEvents->reserve(1000);
-				processedEvents->setSharable(true);
-
-			}
-
-			int nextReadSize=NUM_BUFFERED_EVENTS;
-			if ((numEventsInFile-numEventsRead)<NUM_BUFFERED_EVENTS)
-			{
-				nextReadSize=(numEventsInFile-numEventsRead);
-				if (nextReadSize==0)
-					break;
-			}
-			if (fread(buffer, sizeof(char), eventSize*nextReadSize, inputFile)!=eventSize*nextReadSize)
-			{
-				break;
-			}			
-			//process event, output each event
-			else
-			{
-				for (int i=0;i<nextReadSize;i++)
-				{
-					//sanity checks:
-					if (rawData[i].timestamp->year>2010 && rawData[i].timestamp->year<2020)
-					{
-						//reset first event timestamp
-						if (!numEventsRead)
-							firstEventTimestamp=*rawData[i].timestamp;
-
-						processEvent(rawData[i], sampleNextEvent);
-						numEventsRead++;
-						sampleNextEvent=false;
-					}
-				}
-			}			
+			pauseMutex.unlock();
+			msleep(100);
+			continue;
 		}
+		else
+			pauseMutex.unlock();
+
+		processedEventsMutex.lock();
+		if (!processedEvents)
+		{
+			processedEvents=new QVector<EventStatistics*>;
+			//processedEvents->reserve(1000);
+			processedEvents->setSharable(true);
+
+		}
+		processedEventsMutex.unlock();
+
+		int nextReadSize=NUM_BUFFERED_EVENTS;
+		if ((numEventsInFile-numEventsRead)<NUM_BUFFERED_EVENTS)
+		{
+			nextReadSize=(numEventsInFile-numEventsRead);
+			if (nextReadSize == 0)
+				break;
+		}
+		fileMutex.lock();
+		if (!inputFile  || fread(buffer, sizeof(char), eventSize*nextReadSize, inputFile) != eventSize*nextReadSize)
+		{
+			fileMutex.unlock();
+			ungracefulReadExit = true;
+			break;
+		}
+		//process event, output each event
+		else
+		{
+			fileMutex.unlock();
+			for (int i = 0; i<nextReadSize; i++)
+			{
+				//sanity checks:
+				if (rawData[i].timestamp->year>2010 && rawData[i].timestamp->year<2020)
+				{
+					//reset first event timestamp
+					if (!numEventsRead)
+						firstEventTimestamp=*rawData[i].timestamp;
+
+					processEvent(rawData[i], sampleNextEvent);
+					numEventsRead++;
+					sampleNextEvent=false;
+				}
+			}
+		}			
 	}
-	stopReading();	
+	
+	processedEventsMutex.lock();
+	if (!ungracefulReadExit)
+	{
+		if (processedEvents && processedEvents->size() > 0)
+			emit newProcessedEvents(processedEvents);
+	}
+	processedEventsMutex.unlock();
+	stopReading(ungracefulReadExit);	
 }
 
 
 void DRSBinaryReaderThread::onUpdateTimerTimeout()
 {
 	sampleNextEvent=true;
+	processedEventsMutex.lock();
 	if (processedEvents && processedEvents->size()>0)
 	{        
 		emit newProcessedEvents(processedEvents);
 		processedEvents=new QVector<EventStatistics*>();
 		//processedEvents->reserve(1000);
-		processedEvents->setSharable(true);	
 	}
+	processedEventsMutex.unlock();
 }
 
 void DRSBinaryReaderThread::onTemperatureUpdated(float temp)
@@ -208,21 +264,20 @@ void DRSBinaryReaderThread::onTemperatureUpdated(float temp)
 	currentTemp=temp;
 }
 
-void DRSBinaryReaderThread::stopReading()
-{
-	if (processedEvents->size()>0)
-	{        
-		emit newProcessedEvents(processedEvents);
-	}
-
+void DRSBinaryReaderThread::stopReading(bool forceExit)
+{	
+	updateTimer.stop();
+	ungracefulReadExit = forceExit;
+	fileMutex.lock();
 	if (inputFile)
 	{
 		fclose(inputFile);
-		inputFile=NULL;
+		inputFile = NULL;
 	}
-	
-	emit eventReadingFinished();
-	//this->exit();
+	fileMutex.unlock();
+	//only emit if we're finished reading without manual exit
+	if (!forceExit)
+		emit eventReadingFinished();
 }
 
 void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSample)
@@ -230,8 +285,8 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 	EventStatistics* stats=new EventStatistics();
 	stats->timestamp=*rawEvent.timestamp;
 	stats->serial=*rawEvent.serial;
-	bool processSuccess=true;
-
+	stats->runIndex = runIndex;
+	bool processSuccess = true;
 	//1.0ns per sample (assuming 1 GSPS), TODO: read from board or data
 	int sampleRateMSPS=1000;
 
@@ -406,5 +461,7 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 		emit newEventSample(sample);
 
 	}
+	processedEventsMutex.lock();
 	processedEvents->push_back(stats);
+	processedEventsMutex.unlock();
 }

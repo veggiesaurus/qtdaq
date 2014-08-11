@@ -18,7 +18,6 @@ class Histogram: public QwtPlotHistogram
 {
 public:
     Histogram(const QString &, const QColor &);
-
     void setColor(const QColor &);
     void setValues(uint numValues, const double *, double minValue, double maxValue);
 	
@@ -30,6 +29,7 @@ class HistogramPlot: public CalibratedPlot
 	Q_OBJECT
 public:
     HistogramPlot(QWidget * = NULL);
+	~HistogramPlot();
 	void setLogScale(bool log);
 	void setValues(uint numValues, const double* values, double minValue, double maxValue){histogram->setValues(numValues, values, minValue, maxValue);}
 	void setFittedValues(uint numValues, const double* xVals, const double* yVals);

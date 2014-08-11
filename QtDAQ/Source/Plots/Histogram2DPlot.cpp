@@ -83,6 +83,15 @@ Histogram2DPlot::Histogram2DPlot(QWidget *parent):
 	canvas()->installEventFilter(this);
 }
 
+Histogram2DPlot::~Histogram2DPlot()
+{
+	SAFE_DELETE(d_spectrogram);
+	SAFE_DELETE(plotPicker);
+	SAFE_DELETE(selectedPolygon);
+	SAFE_DELETE(pickerPointMachine);
+}
+
+
 void Histogram2DPlot::onSelected (const QVector< QPointF > &pa)
 {	
 	if (pa.size()>2)

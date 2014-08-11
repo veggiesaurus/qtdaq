@@ -43,6 +43,7 @@ class Histogram2DPlot: public CalibratedPlot
 	Q_OBJECT
 public:
 	Histogram2DPlot(QWidget * = NULL);
+	~Histogram2DPlot();
 	void setRasterData(QVector<double> &values, int numColumns, double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
 	void setResampleMode(int mode);
 	void setLogScale(bool enabled);

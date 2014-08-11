@@ -27,7 +27,7 @@ HistogramWindow::HistogramWindow (QWidget * parent, HistogramParameter s_paramet
 
 HistogramWindow::~HistogramWindow()
 {
-
+	SAFE_DELETE_ARRAY(binVals);
 }
 
 void HistogramWindow::onOptionsClicked()
@@ -41,8 +41,11 @@ void HistogramWindow::onOptionsClicked()
 	uiDialogHistogramConfig.spinBoxChannels->setValue(numBins);
 
     int retDialog=dialog->exec();
-    if (retDialog==QDialog::Rejected)
-        return;
+	if (retDialog == QDialog::Rejected)
+	{
+		SAFE_DELETE(dialog);
+		return;
+	}
 
 	bool needsClear=false;
 
@@ -77,6 +80,7 @@ void HistogramWindow::onOptionsClicked()
 		updateTitleAndAxis();
 		recreateHistogram();
 	}
+	SAFE_DELETE(dialog);
 }
 
 void HistogramWindow::onLogScaleToggled(bool logScaleEnabled)
@@ -235,8 +239,9 @@ void HistogramWindow::onNewEventStatistics(QVector<EventStatistics*>* events)
 		else
 		{
 			numEvents++;
-		}
+		}		
 	}
+	timerUpdate();
 }
 
 void HistogramWindow::onSaveDataClicked()

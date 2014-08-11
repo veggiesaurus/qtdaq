@@ -16,7 +16,8 @@ class DRSAcquisitionThread : public QThread
 {
 	 Q_OBJECT
 public:
-	DRSAcquisitionThread(QObject *parent = 0);	 
+	DRSAcquisitionThread(QObject *parent = 0);
+	~DRSAcquisitionThread();
 	bool initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime=100);
 	void reInit(AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig);
 	void processEvent(EventRawData rawEvent, bool outputSample);
@@ -59,6 +60,8 @@ private:
 	QMutex drsObjectMutex;
 	QMutex configMutex;
 	QMutex pauseMutex;
+
+	QMutex processedEventsMutex;
 	bool requiresPause = false;
 };
 

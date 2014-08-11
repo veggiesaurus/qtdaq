@@ -1,5 +1,4 @@
 #pragma once
-
 #include <QtWidgets/QMainWindow>
 #include <QMdiSubWindow>
 #include <QShortcut>
@@ -193,10 +192,10 @@ private:
 	int numUITimerTimeouts = 0;
 	bool finishedReading;
 	float prevAcquisitionTime;
-	QTimer* uiUpdateTimer;
+	QTimer uiUpdateTimer;
 
-	QTimer* autoTrigTimer;
-	QTime* acquisitionTime;
+	QTimer autoTrigTimer;
+	QTime acquisitionTime;
 	DRS* drs = nullptr;
 	DRSBoard* board = nullptr;
 	QString rawFilename;
@@ -217,8 +216,7 @@ private:
 	QMutex* rawBuffer2Mutex;
 	EventVx* rawBuffer2;
 	//processed events
-	QMutex* procBuffer1Mutex;
-	EventStatistics* procBuffer1;
-	QMutex* procBuffer2Mutex;
-	EventStatistics* procBuffer2;
+
+	//run tracking
+	int runIndex = 0;
 };

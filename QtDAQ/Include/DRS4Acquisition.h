@@ -68,6 +68,8 @@ struct EventStatistics
 	EventTimestamp timestamp;
 	double triggerTimeAdjustedMillis;
 	int serial;
+	int runIndex;
+	bool isValid;
 	float custom1,custom2,custom3,custom4,custom5;
 	SampleStatistics channelStatistics[NUM_DIGITIZER_CHANNELS];
 };
