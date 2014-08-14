@@ -18,7 +18,7 @@ DRSBinaryReaderThread::DRSBinaryReaderThread(QObject *parent)
 
 DRSBinaryReaderThread::~DRSBinaryReaderThread()
 {		
-	processedEventsMutex.lock();
+	/*processedEventsMutex.lock();
 	if (processedEvents && ungracefulReadExit)
 	{
 		for (auto& i : *processedEvents)
@@ -28,7 +28,7 @@ DRSBinaryReaderThread::~DRSBinaryReaderThread()
 		processedEvents->clear();
 		SAFE_DELETE(processedEvents);
 	}
-	processedEventsMutex.unlock();
+	processedEventsMutex.unlock();*/
 	
 	SAFE_DELETE_ARRAY(buffer);
 
@@ -228,7 +228,6 @@ void DRSBinaryReaderThread::run()
 
 					processEvent(rawData[i], sampleNextEvent);
 					numEventsRead++;
-					sampleNextEvent=false;
 				}
 			}
 		}			
@@ -281,14 +280,14 @@ void DRSBinaryReaderThread::stopReading(bool forceExit)
 }
 
 void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSample)
-{
+{	
 	EventStatistics* stats=new EventStatistics();
 	stats->timestamp=*rawEvent.timestamp;
 	stats->serial=*rawEvent.serial;
 	stats->runIndex = runIndex;
 	bool processSuccess = true;
-	//1.0ns per sample (assuming 1 GSPS), TODO: read from board or data
-	int sampleRateMSPS=1000;
+	
+	int sampleRateMSPS = (int)round((NUM_DIGITIZER_SAMPLES - 1)*1000.0f / (rawEvent.tValues[NUM_DIGITIZER_SAMPLES - 1] - rawEvent.tValues[0]));
 
 	EventSampleData* sample;
 	if (outputSample)
@@ -296,10 +295,11 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 		sample=new EventSampleData();
 		//set null pointers for channel initially
 		memset(sample, 0, sizeof(EventSampleData));
-		memset(sample->fValues, 0, NUM_DIGITIZER_CHANNELS*sizeof(float*));
-		sample->tValues=new float[NUM_DIGITIZER_SAMPLES];
-		processSuccess&=clone(rawEvent.tValues, NUM_DIGITIZER_SAMPLES, sample->tValues);
+		memset(sample->fValues, 0, NUM_DIGITIZER_CHANNELS*sizeof(float*));		
 	}
+
+
+	//analysisConfig->displayCFDSignal = true;
 
 	for (int ch=0;ch<NUM_DIGITIZER_CHANNELS;ch++)
 	{		
@@ -354,17 +354,7 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 			if (analysisConfig->postCFDFilter)
 				processSuccess&=lowPassFilter(tempFilteredValArray, NUM_DIGITIZER_SAMPLES,analysisConfig->postCFDFactor);
 
-			if (outputSample)
-			{
-				sample->numSamples=NUM_DIGITIZER_SAMPLES;
-				//TODO: read from board or config
-				sample->MSPS=698.0;
-				sample->fValues[ch]=new float[NUM_DIGITIZER_SAMPLES];
-				processSuccess&=clone(tempValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
-				//processSuccess&=clone(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
-			}
-
-			
+				
 			
             int positionOfThresholdCrossing;
 			int positionOfCFDMin, positionOfCFDMax;
@@ -414,41 +404,53 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 				stats->channelStatistics[ch].timeOfHalfRise=rawEvent.tValues[stats->channelStatistics[ch].indexOfHalfRise];
 
 			
-			int startOffset=(analysisConfig->startGate*sampleRateMSPS)/1000;
-            int shortGateOffset=(analysisConfig->shortGate*sampleRateMSPS)/1000;
-            int longGateOffset=(analysisConfig->longGate*sampleRateMSPS)/1000;
+			int startOffset = (analysisConfig->startGate*sampleRateMSPS) / 1000;
+			int shortGateOffset = (analysisConfig->shortGate*sampleRateMSPS) / 1000;
+			int longGateOffset = (analysisConfig->longGate*sampleRateMSPS) / 1000;
 			int timeOffset;
 			switch (analysisConfig->timeOffset)
 			{
 			case CFD_TIME:
-				timeOffset=(int)cfdIndex;
+				timeOffset = (int)cfdIndex;
 				break;
 			case TIME_HALF_RISE:
-				timeOffset=stats->channelStatistics[ch].indexOfHalfRise;
+				timeOffset = stats->channelStatistics[ch].indexOfHalfRise;
 				break;
 			default:
-				timeOffset=stats->channelStatistics[ch].indexOfMin;
+				timeOffset = stats->channelStatistics[ch].indexOfMin;
 				break;
 			}
+			
+			//processSuccess&=calculateIntegrals(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, timeOffset+startOffset, timeOffset+shortGateOffset, timeOffset+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+			processSuccess &= calculateIntegralsCorrected(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, cfdIndex + startOffset, cfdIndex + shortGateOffset, cfdIndex + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+			processSuccess &= calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
+
+			stats->channelStatistics[ch].secondsFromFirstEvent=getSecondsFromFirstEvent(firstEventTimestamp, *rawEvent.timestamp);
 
 			if (outputSample)
 			{
+				sample->numSamples = NUM_DIGITIZER_SAMPLES;
+				sample->MSPS = sampleRateMSPS;
+				if (!sample->tValues)
+				{
+					sample->tValues = new float[NUM_DIGITIZER_SAMPLES];
+					for (size_t i = 0; i < NUM_DIGITIZER_SAMPLES; i++)
+						sample->tValues[i] = rawEvent.tValues[i] - rawEvent.tValues[0];
+					//processSuccess &= clone(rawEvent.tValues, NUM_DIGITIZER_SAMPLES, sample->tValues);
+				}
+				sample->fValues[ch] = new float[NUM_DIGITIZER_SAMPLES];
+				//processSuccess&=clone(tempFilteredValArray, numSamples, sample->fValues[ch]);
+				if (analysisConfig->displayCFDSignal)
+					processSuccess &= clone(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
+				else
+					processSuccess &= clone(tempValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
 
-				sample->baseline=stats->channelStatistics[ch].baseline;
-				if (timeOffset+startOffset>=0 && timeOffset+startOffset<=NUM_DIGITIZER_SAMPLES)
-				sample->indexStart=timeOffset+startOffset;
-				if (timeOffset+shortGateOffset>=0 && timeOffset+shortGateOffset<=NUM_DIGITIZER_SAMPLES)
-				sample->indexShortEnd=timeOffset+shortGateOffset;
-				if (timeOffset+longGateOffset>=0 && timeOffset+longGateOffset<=NUM_DIGITIZER_SAMPLES)
-				sample->indexLongEnd=timeOffset+longGateOffset;
-				if (timeOffset>=0 && timeOffset<=NUM_DIGITIZER_SAMPLES)
-					sample->cfdTime=timeOffset;
+				sample->baseline = stats->channelStatistics[ch].baseline;
+				sample->indexStart = timeOffset + startOffset;
+				sample->indexShortEnd = timeOffset + shortGateOffset;
+				sample->indexLongEnd = timeOffset + longGateOffset;
+				sample->cfdTime = timeOffset / (sampleRateMSPS/1000.0f);
 			}
-
-			processSuccess&=calculateIntegrals(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, timeOffset+startOffset, timeOffset+shortGateOffset, timeOffset+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-            processSuccess&=calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
-
-			stats->channelStatistics[ch].secondsFromFirstEvent=getSecondsFromFirstEvent(firstEventTimestamp, *rawEvent.timestamp);
 
 		}
 		//write -1 to channel number => no data
@@ -459,7 +461,7 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 	{
 		sample->stats=*stats;
 		emit newEventSample(sample);
-
+		sampleNextEvent = false;
 	}
 	processedEventsMutex.lock();
 	processedEvents->push_back(stats);

@@ -93,6 +93,7 @@ VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_
 
 VxBinaryReaderThread::~VxBinaryReaderThread()
 {
+
 }
 
 bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedInput, int s_runIndex, int updateTime)

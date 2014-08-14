@@ -99,8 +99,7 @@ void HistogramWindow::onDuplicateClicked()
 	HistogramWindow* hist=new HistogramWindow(parentWidget(), parameter, chPrimary, parameterMin, parameterMax, numBins, delta, logScale);
 	hist->updateSettings();
 	hist->conditions=conditions;
-	hist->polygonalConditions=polygonalConditions;
-
+	hist->polygonalConditions=polygonalConditions;	
 	emit duplicate(hist);
 }
 

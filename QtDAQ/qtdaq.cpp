@@ -220,7 +220,7 @@ void QtDAQ::onReadDRSFileClicked()
 
 		if (drsReaderThread)
 		{
-			drsReaderThread->stopReading(true);
+			drsReaderThread->stopReading(!finishedReading);
 			drsReaderThread->wait(100);
 			drsReaderThread->exit();
 			drsReaderThread->disconnect();
@@ -357,7 +357,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 		ui.actionPauseFileReading->setChecked(false);
 		if (dataMode == DRS_MODE)
 		{
-			drsReaderThread->stopReading(true);
+			drsReaderThread->stopReading(!finishedReading);
 			drsReaderThread->wait(100);
 			drsReaderThread->exit();
 			drsReaderThread->disconnect();
@@ -1150,7 +1150,7 @@ void QtDAQ::onCutRemoved(int cutIndex, bool isPolygonal)
 void QtDAQ::onHistogramDuplication(HistogramWindow* histogram)
 {
 	HistogramWindow* sender = (HistogramWindow*)QObject::sender();
-	setupPlotWindow(histogram, false);
+	setupPlotWindow(histogram, -1, false);
 	histogram->onNewCalibration(histogram->chPrimary, calibrationValues[histogram->chPrimary]);
 	histograms.push_back(histogram);
 
@@ -1163,7 +1163,7 @@ void QtDAQ::onHistogramDuplication(HistogramWindow* histogram)
 void QtDAQ::onHistogram2DDuplication(Histogram2DWindow* histogram2D)
 {
 	Histogram2DWindow* sender = (Histogram2DWindow*)QObject::sender();
-	setupPlotWindow(histogram2D, false);
+	setupPlotWindow(histogram2D, -1, false);
 	histogram2D->onNewCalibration(histogram2D->chPrimary, calibrationValues[histogram2D->chPrimary]);
 	histograms2D.push_back(histogram2D);
 	connect(histogram2D, SIGNAL(plotClosed()), this, SLOT(onHistogram2DClosed()));
@@ -1174,11 +1174,13 @@ void QtDAQ::onHistogram2DDuplication(Histogram2DWindow* histogram2D)
 
 void QtDAQ::onFoMPlotDuplication()
 {
+	//TODO
 
 }
 
 void QtDAQ::onSignalPlotDuplication()
 {
+	//TODO
 
 }
 

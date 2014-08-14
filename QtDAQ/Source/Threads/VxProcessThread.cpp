@@ -568,8 +568,8 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 			//timeOffset=thresholdCrossing;
 
 			//Charge comparison
-			processSuccess &= calculateIntegrals(tempValArray, numSamples, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + shortGateOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-			//processSuccess&=calculateIntegralsCorrected(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+			//processSuccess &= calculateIntegrals(tempValArray, numSamples, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + shortGateOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+			processSuccess&=calculateIntegralsCorrected(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
 			//processSuccess&=calculateIntegralsTrapezoidal(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
 			//processSuccess&=calculateIntegralsSimpson(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
 			stats->channelStatistics[ch].shortGateIntegral *= analysisConfig->samplingReductionFactor;
@@ -691,7 +691,7 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 			{
 				float slope, offset;
 				//linear fit over 4 points of slope
-				processSuccess &= linearFit(tempValArray, numSamples, positionOfPulseThresholdCrossing - 2, positionOfPulseThresholdCrossing + 1, slope, offset);
+				processSuccess &= linearFit(tempValArray, numSamples, positionOfPulseThresholdCrossing - 8, positionOfPulseThresholdCrossing + 7, slope, offset);
 				indexTOF = (analysisConfig->stopPulseThreshold - offset) / slope;
 				int indexLow = (int)(indexTOF);
 				float d = indexTOF - indexLow;

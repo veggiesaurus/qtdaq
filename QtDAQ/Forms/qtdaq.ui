@@ -222,7 +222,7 @@
     <string>Start</string>
    </property>
    <property name="shortcut">
-    <string>Q, S</string>
+    <string>Q, Z</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
