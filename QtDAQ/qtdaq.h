@@ -118,6 +118,7 @@ public:
 	void onRestoreUILegacyClicked();
 	void onCascadeClicked();
 	void onTileClicked();
+	void onProjectorModeToggled(bool);
 	//tabs
 	void onMoveToPage1Clicked();
 	void onMoveToPage2Clicked();
@@ -219,4 +220,7 @@ private:
 
 	//run tracking
 	int runIndex = 0;
+
+	//projector mode
+	bool projectorMode = true;
 };

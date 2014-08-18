@@ -16,7 +16,8 @@ class Histogram2DWindow : public PlotWindow
 
 public:
 	Histogram2DWindow (QWidget * parent=0, HistogramParameter s_parameterX=LONG_INTEGRAL, HistogramParameter s_parameterY=PSD_FACTOR, int s_chPrimary=0, double s_parameterMinX=0, double s_parameterMaxX=100000, double s_parameterMinY=0, double s_parameterMaxY=100, int s_numBinsX=512, int s_numBinsY=512, bool s_logScale=false, bool s_smoothing=false);
-	~Histogram2DWindow ();
+	void setProjectorMode(bool s_projectorMode);
+	~Histogram2DWindow();
 
 
 public slots:

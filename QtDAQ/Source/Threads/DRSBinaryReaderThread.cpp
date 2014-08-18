@@ -464,6 +464,7 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 		sampleNextEvent = false;
 	}
 	processedEventsMutex.lock();
-	processedEvents->push_back(stats);
+	if (processedEvents)
+		processedEvents->push_back(stats);
 	processedEventsMutex.unlock();
 }

@@ -25,6 +25,7 @@ class PlotWindow: public QMainWindow
 public:
     PlotWindow (QWidget * parent=0, int s_chPrimary=0);	
 	void setCutVectors(QVector<LinearCut>*s_cuts,QVector<PolygonalCut>*s_polygonalCuts, bool updateConditions=true);
+	virtual void setProjectorMode(bool s_projectorMode){ projectorMode = s_projectorMode; }
 public slots:
 	void onLinearCutAdded(LinearCut& cut, bool updateConditions=true);
 	void onPolygonalCutAdded(PolygonalCut& cut, bool updateConditions=true);
@@ -66,6 +67,8 @@ protected:
 	QSettings settings;
 	QString name;
 	int numEvents=0;
+	bool projectorMode;
+
 	friend QDataStream &operator<<(QDataStream &out, const PlotWindow &obj);
 	friend QDataStream &operator>>(QDataStream &in, PlotWindow &obj);
 };

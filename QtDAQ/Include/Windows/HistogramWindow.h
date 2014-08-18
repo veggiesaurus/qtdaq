@@ -15,6 +15,8 @@ class HistogramWindow : public PlotWindow
 	Q_OBJECT
 public:
 	HistogramWindow (QWidget * parent=0, HistogramParameter s_parameter=LONG_INTEGRAL, int s_chPrimary=0, double s_parameterMin=0, double s_parameterMax=100000, int s_numBins=512, bool s_delta=false, bool s_logScale=false);
+	void setProjectorMode(bool s_projectorMode);
+
 	~HistogramWindow ();
 
 

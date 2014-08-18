@@ -25,6 +25,7 @@ public:
 	void setAlignSignals(bool);
 	void showToFGates(bool);
 	void showCIGates(bool);
+	void setProjectorMode(bool);
 public:
 	//temp arrays for storing the signal;
 	double* tempT=nullptr, *tempV=nullptr, *tempDV=nullptr;

@@ -345,6 +345,24 @@ void FoMWindow::updateSettings()
 	updateTitleAndAxis();
 }
 
+void FoMWindow::setProjectorMode(bool s_projectorMode)
+{
+	PlotWindow::setProjectorMode(s_projectorMode);
+	ui.qwtPlotFoM->setProjectorMode(projectorMode);
+
+	QPen effectiveSepMarkerPen(Qt::darkRed, 1);
+	QPen curvePen(Qt::darkBlue, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+
+	if (projectorMode)
+	{
+		effectiveSepMarkerPen.setWidth(3);
+		curvePen.setWidth(3);
+	}
+	
+	effectiveSepMarker->setLinePen(effectiveSepMarkerPen);
+	fomCurve->setPen(curvePen);	
+}
+
 QDataStream &operator<<(QDataStream &out, const FoMWindow &obj)
 {
 	out<<static_cast<const PlotWindow&>(obj);

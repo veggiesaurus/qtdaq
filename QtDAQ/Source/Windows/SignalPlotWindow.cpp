@@ -159,8 +159,12 @@ void SignalPlotWindow::updateSettings()
 	ui.qwtPlotSignal->setAlignSignals(alignSigs);
 	ui.qwtPlotSignal->showCIGates(showCIGates);
 	ui.qwtPlotSignal->showToFGates(showToFGates);
+}
 
-
+void SignalPlotWindow::setProjectorMode(bool s_projectorMode)
+{
+	PlotWindow::setProjectorMode(s_projectorMode);
+	ui.qwtPlotSignal->setProjectorMode(projectorMode);
 }
 
 QDataStream &operator<<(QDataStream &out, const SignalPlotWindow &obj)

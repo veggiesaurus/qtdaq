@@ -80,3 +80,33 @@ void CalibratedPlot::exportPlot(QString filename)
         renderer.renderDocument(this, filename, QSizeF(320, 180), 85);
     }
 }
+
+void CalibratedPlot::setProjectorMode(bool projectorMode)
+{
+	QFont currentFont = font();
+	if (projectorMode)
+	{
+		currentFont.setPixelSize(32);
+	}
+	else
+		currentFont.setPixelSize(14);
+
+	QwtText yTitle = this->axisTitle(yLeft);
+	yTitle.setFont(currentFont);
+	QwtText yTitleRight = this->axisTitle(yRight);
+	yTitleRight.setFont(currentFont);
+	QwtText xTitle = this->axisTitle(xBottom);
+	xTitle.setFont(currentFont);
+	QwtText xTitleTop = this->axisTitle(xTop);
+	xTitleTop.setFont(currentFont);
+
+	setAxisTitle(yLeft, yTitle);
+	setAxisTitle(yRight, yTitleRight);
+	setAxisTitle(xBottom, xTitle);
+	setAxisTitle(xTop, xTitleTop);
+
+	setAxisFont(yLeft, currentFont);
+	setAxisFont(yRight, currentFont);
+	setAxisFont(xBottom, currentFont);
+	setAxisFont(xTop, currentFont);
+}

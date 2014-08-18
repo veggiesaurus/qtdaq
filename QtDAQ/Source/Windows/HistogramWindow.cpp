@@ -417,6 +417,12 @@ void HistogramWindow::updateSettings()
 	updateTitleAndAxis();
 }
 
+void HistogramWindow::setProjectorMode(bool s_projectorMode)
+{
+	PlotWindow::setProjectorMode(s_projectorMode);	
+	ui.qwtPlotHistogram->setProjectorMode(projectorMode);
+}
+
 QDataStream &operator<<(QDataStream &out, const HistogramWindow &obj)
 {
 	out<<static_cast<const PlotWindow&>(obj);

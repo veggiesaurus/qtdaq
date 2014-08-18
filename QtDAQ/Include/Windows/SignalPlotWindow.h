@@ -13,10 +13,11 @@ class SignalPlotWindow : public PlotWindow
 	Q_OBJECT
 public:
 	SignalPlotWindow (QWidget * parent = 0, int s_chPrimary=0, int s_chSecondary=-1, int s_refreshDelay=100, bool s_autoscale=false, bool s_averageWaveform=false);
-	void onNewEventSample(EventSampleData* sample);
+	void setProjectorMode(bool s_projectorMode);
 	~SignalPlotWindow ();
 
 public slots:
+	void onNewEventSample(EventSampleData* sample);
 	void onOptionsClicked();
 	void onDisplayAverageClicked(bool checked);
 	void clearValues();

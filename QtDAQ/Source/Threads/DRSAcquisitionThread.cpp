@@ -234,6 +234,8 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 	stats->serial=*rawEvent.serial;	
 	bool processSuccess=true;
 
+	int sampleRateMSPS = (int)round((NUM_DIGITIZER_SAMPLES - 1)*1000.0f / (rawEvent.tValues[NUM_DIGITIZER_SAMPLES - 1] - rawEvent.tValues[0]));
+
 	EventSampleData* sample;
 	if (outputSample)
 	{
@@ -273,135 +275,139 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 				processSuccess&=lowPassFilter(tempValArray, NUM_DIGITIZER_SAMPLES,analysisConfig->preCFDFactor);
 			float CFDThreshold=512.0f;
 			processSuccess&=findBaseline(tempValArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
-			//if the digital gain is not unity
-			if (abs(analysisConfig->digitalGain-1.00f)>0.01f)
-			{				
-//SSE optimisation
+			if (abs(analysisConfig->digitalGain - 1.00f)>0.01f)
+			{
+				//SSE optimisation
 #if NUM_DIGITIZER_SAMPLES%4==0
-				float* stPtr=tempValArray;
+				float* stPtr = tempValArray;
 				Vec4f vValArray;
-				Vec4f vBaseline=stats->channelStatistics[ch].baseline;
-				Vec4f vDigitalGain=analysisConfig->digitalGain;
-				for (int i=0;i<NUM_DIGITIZER_SAMPLES/4;i++,stPtr+=4)
+				Vec4f vBaseline = stats->channelStatistics[ch].baseline;
+				Vec4f vDigitalGain = analysisConfig->digitalGain;
+				for (int i = 0; i<NUM_DIGITIZER_SAMPLES / 4; i++, stPtr += 4)
 				{
 					vValArray.load(stPtr);
-					vValArray=vBaseline+vDigitalGain*(vValArray-vBaseline);
+					vValArray = vBaseline + vDigitalGain*(vValArray - vBaseline);
 					vValArray.store(stPtr);
 				}
 #else
 				for (int i=0;i<NUM_DIGITIZER_SAMPLES;i++)
 				{
 					tempValArray[i]=stats->channelStatistics[ch].baseline+analysisConfig->digitalGain*(tempValArray[i]-stats->channelStatistics[ch].baseline);
-				}	
+				}
 #endif
-			}		
-			processSuccess&=cfdSampleOptimized(tempValArray, stats->channelStatistics[ch].baseline, NUM_DIGITIZER_SAMPLES, analysisConfig->CFDFraction, analysisConfig->CFDLength, analysisConfig->CFDOffset, CFDThreshold, 1.f, tempFilteredValArray);
-			if (analysisConfig->postCFDFilter)
-				processSuccess&=lowPassFilter(tempFilteredValArray, NUM_DIGITIZER_SAMPLES,analysisConfig->postCFDFactor);
-
-			if (outputSample)
-			{
-				sample->numSamples=NUM_DIGITIZER_SAMPLES;
-				sample->MSPS=config->sampleRateMSPS;
-				sample->fValues[ch]=new float[NUM_DIGITIZER_SAMPLES];
-				processSuccess&=clone(tempValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
-				//processSuccess&=clone(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
 			}
+			processSuccess &= cfdSampleOptimized(tempValArray, stats->channelStatistics[ch].baseline, NUM_DIGITIZER_SAMPLES, analysisConfig->CFDFraction, analysisConfig->CFDLength, analysisConfig->CFDOffset, CFDThreshold, 1.f, tempFilteredValArray);
+			if (analysisConfig->postCFDFilter)
+				processSuccess &= lowPassFilter(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, analysisConfig->postCFDFactor);
 
-			
-			
-            int positionOfThresholdCrossing;
+
+
+			int positionOfThresholdCrossing;
 			int positionOfCFDMin, positionOfCFDMax;
-            float minCFDValue, maxCFDValue;
+			float minCFDValue, maxCFDValue;
 
-			processSuccess&=findMinMaxValue(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, 0, NUM_DIGITIZER_SAMPLES, minCFDValue, positionOfCFDMin, maxCFDValue, positionOfCFDMax);
-                
-            processSuccess&=findIntersection(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, positionOfCFDMin, positionOfCFDMax, 2, CFDThreshold, false, positionOfThresholdCrossing);
-            float crossingPositionInterpolated;
-			float cfdIndex;
-            if (positionOfThresholdCrossing>=positionOfCFDMin)
-            {
-                float slope, offset;
-                //linear fit over 4 points of slope
-                processSuccess&=linearFit(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, positionOfThresholdCrossing-2, positionOfThresholdCrossing+1, slope, offset);
-				cfdIndex=(CFDThreshold-offset)/slope;
-				int indexLow=(int)(cfdIndex);
-				float d=cfdIndex-indexLow;
-				float time=rawEvent.tValues[indexLow]*(1-d)+(d)*rawEvent.tValues[indexLow+1];
+			processSuccess &= findMinMaxValue(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, 0, NUM_DIGITIZER_SAMPLES, minCFDValue, positionOfCFDMin, maxCFDValue, positionOfCFDMax);
+
+			processSuccess &= findIntersection(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, positionOfCFDMin, positionOfCFDMax, 2, CFDThreshold, false, positionOfThresholdCrossing);
+			float crossingPositionInterpolated;
+			float cfdIndex = 0;
+			if (positionOfThresholdCrossing >= positionOfCFDMin)
+			{
+				float slope, offset;
+				//linear fit over 4 points of slope
+				processSuccess &= linearFit(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, positionOfThresholdCrossing - 2, positionOfThresholdCrossing + 1, slope, offset);
+				cfdIndex = (CFDThreshold - offset) / slope;
+				int indexLow = (int)(cfdIndex);
+				float d = cfdIndex - indexLow;
+				float time = rawEvent.tValues[indexLow] * (1 - d) + (d)*rawEvent.tValues[indexLow + 1];
 				if (analysisConfig->useTimeCFD)
-					stats->channelStatistics[ch].timeOfCFDCrossing=time;
+					stats->channelStatistics[ch].timeOfCFDCrossing = time;
 				else
-					stats->channelStatistics[ch].timeOfCFDCrossing=cfdIndex/(config->sampleRateMSPS/1000.0);
+					stats->channelStatistics[ch].timeOfCFDCrossing = cfdIndex / (sampleRateMSPS / 1000.0);
 
 				//if there is a previous channel
-				if (ch>0 && stats->channelStatistics[ch-1].channelNumber!=-1 && stats->channelStatistics[ch-1].timeOfCFDCrossing>-1000)
+				if (ch>0 && stats->channelStatistics[ch - 1].channelNumber != -1 && stats->channelStatistics[ch - 1].timeOfCFDCrossing>-1000)
 				{
-					stats->channelStatistics[ch].deltaTprevChannelCFD=stats->channelStatistics[ch].timeOfCFDCrossing-stats->channelStatistics[ch-1].timeOfCFDCrossing;
+					stats->channelStatistics[ch].deltaTprevChannelCFD = stats->channelStatistics[ch].timeOfCFDCrossing - stats->channelStatistics[ch - 1].timeOfCFDCrossing;
 				}
 				else
 					//dummy deltaT
-					stats->channelStatistics[ch].deltaTprevChannelCFD=-1000;
-            }
+					stats->channelStatistics[ch].deltaTprevChannelCFD = -1000;
+			}
 			else
-				stats->channelStatistics[ch].timeOfCFDCrossing=-1000;
+				stats->channelStatistics[ch].timeOfCFDCrossing = -1000;
 
-			processSuccess&=findMinMaxValue(tempValArray, NUM_DIGITIZER_SAMPLES, 0, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].minValue, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].maxValue, stats->channelStatistics[ch].indexOfMax);
-			
+			processSuccess &= findMinMaxValue(tempValArray, NUM_DIGITIZER_SAMPLES, 0, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].minValue, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].maxValue, stats->channelStatistics[ch].indexOfMax);
+
 			if (stats->channelStatistics[ch].indexOfMin>0 && stats->channelStatistics[ch].indexOfMin<NUM_DIGITIZER_SAMPLES)
-				stats->channelStatistics[ch].timeOfMin=rawEvent.tValues[stats->channelStatistics[ch].indexOfMin];
+				stats->channelStatistics[ch].timeOfMin = rawEvent.tValues[stats->channelStatistics[ch].indexOfMin];
 
 			if (stats->channelStatistics[ch].indexOfMax>0 && stats->channelStatistics[ch].indexOfMax<NUM_DIGITIZER_SAMPLES)
-				stats->channelStatistics[ch].timeOfMax=rawEvent.tValues[stats->channelStatistics[ch].indexOfMax];
+				stats->channelStatistics[ch].timeOfMax = rawEvent.tValues[stats->channelStatistics[ch].indexOfMax];
 
-			processSuccess&=findHalfRise(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].baseline, stats->channelStatistics[ch].indexOfHalfRise);
+			processSuccess &= findHalfRise(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].baseline, stats->channelStatistics[ch].indexOfHalfRise);
 			if (stats->channelStatistics[ch].indexOfHalfRise>0 && stats->channelStatistics[ch].indexOfHalfRise<NUM_DIGITIZER_SAMPLES)
-				stats->channelStatistics[ch].timeOfHalfRise=rawEvent.tValues[stats->channelStatistics[ch].indexOfHalfRise];
+				stats->channelStatistics[ch].timeOfHalfRise = rawEvent.tValues[stats->channelStatistics[ch].indexOfHalfRise];
 
-			int samplesPerMicrosecond=config->sampleRateMSPS;
-			int startOffset=(analysisConfig->startGate*samplesPerMicrosecond)/1000;
-            int shortGateOffset=(analysisConfig->shortGate*samplesPerMicrosecond)/1000;
-            int longGateOffset=(analysisConfig->longGate*samplesPerMicrosecond)/1000;
+
+			int startOffset = (analysisConfig->startGate*sampleRateMSPS) / 1000;
+			int shortGateOffset = (analysisConfig->shortGate*sampleRateMSPS) / 1000;
+			int longGateOffset = (analysisConfig->longGate*sampleRateMSPS) / 1000;
 			int timeOffset;
 			switch (analysisConfig->timeOffset)
 			{
 			case CFD_TIME:
-				timeOffset=(int)cfdIndex;
+				timeOffset = (int)cfdIndex;
 				break;
 			case TIME_HALF_RISE:
-				timeOffset=stats->channelStatistics[ch].indexOfHalfRise;
+				timeOffset = stats->channelStatistics[ch].indexOfHalfRise;
 				break;
 			default:
-				timeOffset=stats->channelStatistics[ch].indexOfMin;
+				timeOffset = stats->channelStatistics[ch].indexOfMin;
 				break;
 			}
+
+			//processSuccess&=calculateIntegrals(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, timeOffset+startOffset, timeOffset+shortGateOffset, timeOffset+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+			processSuccess &= calculateIntegralsCorrected(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, cfdIndex + startOffset, cfdIndex + shortGateOffset, cfdIndex + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+			processSuccess &= calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
+
+			stats->channelStatistics[ch].secondsFromFirstEvent = getSecondsFromFirstEvent(firstEventTimestamp, *rawEvent.timestamp);
 
 			if (outputSample)
 			{
+				sample->numSamples = NUM_DIGITIZER_SAMPLES;
+				sample->MSPS = sampleRateMSPS;
+				if (!sample->tValues)
+				{
+					sample->tValues = new float[NUM_DIGITIZER_SAMPLES];
+					for (size_t i = 0; i < NUM_DIGITIZER_SAMPLES; i++)
+						sample->tValues[i] = rawEvent.tValues[i] - rawEvent.tValues[0];
+					//processSuccess &= clone(rawEvent.tValues, NUM_DIGITIZER_SAMPLES, sample->tValues);
+				}
+				sample->fValues[ch] = new float[NUM_DIGITIZER_SAMPLES];
+				//processSuccess&=clone(tempFilteredValArray, numSamples, sample->fValues[ch]);
+				if (analysisConfig->displayCFDSignal)
+					processSuccess &= clone(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
+				else
+					processSuccess &= clone(tempValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
 
-				sample->baseline=stats->channelStatistics[ch].baseline;
-				if (timeOffset+startOffset>=0 && timeOffset+startOffset<=NUM_DIGITIZER_SAMPLES)
-				sample->indexStart=timeOffset+startOffset;
-				if (timeOffset+shortGateOffset>=0 && timeOffset+shortGateOffset<=NUM_DIGITIZER_SAMPLES)
-				sample->indexShortEnd=timeOffset+shortGateOffset;
-				if (timeOffset+longGateOffset>=0 && timeOffset+longGateOffset<=NUM_DIGITIZER_SAMPLES)
-				sample->indexLongEnd=timeOffset+longGateOffset;
-				if (timeOffset>=0 && timeOffset<=NUM_DIGITIZER_SAMPLES)
-					sample->cfdTime=timeOffset;
+				sample->baseline = stats->channelStatistics[ch].baseline;
+				sample->indexStart = timeOffset + startOffset;
+				sample->indexShortEnd = timeOffset + shortGateOffset;
+				sample->indexLongEnd = timeOffset + longGateOffset;
+				sample->cfdTime = timeOffset / (sampleRateMSPS / 1000.0f);
 			}
 
-			processSuccess&=calculateIntegrals(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, timeOffset+startOffset, timeOffset+shortGateOffset, timeOffset+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-            processSuccess&=calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
-
-			stats->channelStatistics[ch].secondsFromFirstEvent=getSecondsFromFirstEvent(firstEventTimestamp, *rawEvent.timestamp);
-		}
+			}
 		//write -1 to channel number => no data
 		else
-			stats->channelStatistics[ch].channelNumber=-1;
-	}
+			stats->channelStatistics[ch].channelNumber = -1;
+		}
 	if (outputSample)
 	{
-		sample->stats=*stats;
+		sample->stats = *stats;
 		emit newEventSample(sample);
+		sampleNextEvent = false;
 	}
 	processedEventsMutex.lock();
 	if (processedEvents)

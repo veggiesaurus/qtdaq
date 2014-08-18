@@ -281,3 +281,50 @@ void SignalPlot::shiftSample(float* V, int numSamples, int shift)
 void SignalPlot::showCIGates(bool val) { ciGatesVisible = val; }
 void SignalPlot::showToFGates(bool val) { tofGatesVisible = val; }
 void SignalPlot::setAlignSignals(bool val) { alignSigs = val; }
+
+void SignalPlot::setProjectorMode(bool projectorMode)
+{
+	QPen baselinePen(Qt::darkRed, 1);
+	QPen tofPositionPen(Qt::darkGreen, 1);
+	QPen gatePositionPen(Qt::blue, 1);
+	QPen peakPositionPen(Qt::red, 1);
+	QPen signalPen(Qt::darkBlue, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+	QPen deltaSignalPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+
+	QFont currentFont = font();
+	if (projectorMode)
+	{
+		currentFont.setPixelSize(32);
+		baselinePen.setWidth(3);
+		tofPositionPen.setWidth(3);
+		gatePositionPen.setWidth(3);
+		peakPositionPen.setWidth(3);
+		signalPen.setWidth(3);
+		deltaSignalPen.setWidth(3);
+	}
+	else
+		currentFont.setPixelSize(14);
+	
+	QwtText yTitle = this->axisTitle(yLeft);
+	yTitle.setFont(currentFont);
+	QwtText xTitle = this->axisTitle(xBottom);
+	xTitle.setFont(currentFont);
+
+	setAxisTitle(yLeft, yTitle);
+	setAxisTitle(xBottom, xTitle);
+	
+	setAxisFont(yLeft, currentFont);
+	setAxisFont(xBottom, currentFont);
+
+
+	baseline->setLinePen(baselinePen);
+	triggerLine->setLinePen(baselinePen);
+	peakPosition->setLinePen(peakPositionPen);
+	halfPeakPosition->setLinePen(peakPositionPen);
+	startPosition->setLinePen(gatePositionPen);
+	shortGateEndPosition->setLinePen(gatePositionPen);
+	longGateEndPosition->setLinePen(gatePositionPen);
+	tofStartPosition->setLinePen(tofPositionPen);
+	cSignal->setPen(signalPen);
+	cDeltaSignal->setPen(deltaSignalPen);
+}

@@ -19,7 +19,7 @@ public:
 	void setYRange(double minY, double maxY);
 	void setCalibrationValues(EnergyCalibration s_energyCalibration);
 	void exportPlot(QString filename);
-	
+	virtual void setProjectorMode(bool projectorMode);
 	QwtPicker* picker;
 
 protected:

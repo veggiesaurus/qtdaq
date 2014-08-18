@@ -365,6 +365,12 @@ void Histogram2DWindow::updateSettings()
 	recreateHistogram();
 }
 
+void Histogram2DWindow::setProjectorMode(bool s_projectorMode)
+{
+	PlotWindow::setProjectorMode(s_projectorMode);
+	ui.qwtPlotHistogram2D->setProjectorMode(projectorMode);
+}
+
 QDataStream &operator<<(QDataStream &out, const Histogram2DWindow &obj)
 {
 	out<<static_cast<const PlotWindow&>(obj);

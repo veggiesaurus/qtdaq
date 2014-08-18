@@ -12,6 +12,9 @@ QtDAQ::QtDAQ(QWidget *parent)
 	mdiAreas[3] = ui.mdiArea4;
 
 	showMaximized();
+	projectorMode = ui.actionProjectorMode->isChecked();
+	onProjectorModeToggled(projectorMode);
+
 	acquisitionConfig = new AcquisitionConfig();
 	qRegisterMetaType<AcquisitionConfig>("AcquisitionConfig");
 	qRegisterMetaTypeStreamOperators<AcquisitionConfig>("AcquisitionConfig");
@@ -1000,6 +1003,7 @@ void QtDAQ::setupPlotWindow(PlotWindow* plotWindow, int page, bool appendConditi
 	mdiAreas[page]->addSubWindow(plotWindow);
 	plotWindow->tabIndex = page;
 	plotWindow->setCutVectors(&cuts, &polygonalCuts, appendConditions);
+	plotWindow->setProjectorMode(projectorMode);
 	connect(this, SIGNAL(cutAdded(LinearCut&, bool)), plotWindow, SLOT(onLinearCutAdded(LinearCut&, bool)));
 	connect(this, SIGNAL(polygonalCutAdded(PolygonalCut&, bool)), plotWindow, SLOT(onPolygonalCutAdded(PolygonalCut&, bool)));
 	connect(this, SIGNAL(cutRemoved(int, bool)), plotWindow, SLOT(onCutRemoved(int, bool)));
@@ -1413,4 +1417,25 @@ void QtDAQ::closeEvent(QCloseEvent*)
 	SAFE_DELETE(drs);
 	SAFE_DELETE(acquisitionConfig);
 	SAFE_DELETE(analysisConfig);
+}
+
+void QtDAQ::onProjectorModeToggled(bool checked)
+{
+	projectorMode = checked;
+
+	for (auto& i : signalPlots)
+		i->setProjectorMode(projectorMode);
+
+	for (auto& i : histograms)
+		i->setProjectorMode(projectorMode);
+
+	for (auto& i : histograms2D)
+		i->setProjectorMode(projectorMode);
+
+	for (auto& i : fomPlots)
+		i->setProjectorMode(projectorMode);
+
+	for (auto& i : sortedPairPlots)
+		i->setProjectorMode(projectorMode);
+
 }

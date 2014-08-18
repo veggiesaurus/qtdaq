@@ -20,7 +20,8 @@ class FoMWindow : public PlotWindow
 
 public:
 	FoMWindow (QWidget * parent=0, HistogramParameter s_parameterX=LONG_INTEGRAL, HistogramParameter s_parameterY=PSD_FACTOR, int s_chPrimary=0, int s_parameterMinX=0, int s_parameterMaxX=100000, int s_parameterMinY=0, int s_parameterMaxY=100, int s_numBinsX=64, int s_numBinsY=256);
-	~FoMWindow ();
+	void setProjectorMode(bool s_projectorMode);
+	~FoMWindow();
 	
 
 public slots:
