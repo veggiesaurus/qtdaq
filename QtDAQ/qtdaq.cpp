@@ -1428,7 +1428,7 @@ void QtDAQ::closeEvent(QCloseEvent*)
 void QtDAQ::onProjectorModeToggled(bool checked)
 {
 	projectorMode = checked;
-
+	statusBar()->setHidden(checked);
 	for (auto& i : signalPlots)
 		i->setProjectorMode(projectorMode);
 
