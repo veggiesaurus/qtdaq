@@ -7,11 +7,11 @@ SignalPlot::SignalPlot(QWidget *parent):
     setAutoReplot(false);
 
     // axes
-    setAxisTitle(xBottom, "time (n s)" );
+    setAxisTitle(xBottom, "time (ns)" );
 
     setAxisTitle(yLeft, "voltage (mV)");
 	//TODO: this is for deltas
-	setAxisScale(yLeft, 0, 1200);
+	setAxisScale(yLeft, 0, 1024, 256);
 
 	//setAxisScaleDiv(yLeft, QwtScaleDiv()
 	setCanvasBackground(Qt::white);
@@ -302,27 +302,22 @@ void SignalPlot::setAlignSignals(bool val) { alignSigs = val; }
 
 void SignalPlot::setProjectorMode(bool projectorMode)
 {
-	QPen baselinePen(Qt::darkRed, 1);
-	QPen tofPositionPen(Qt::darkGreen, 1);
-	QPen gatePositionPen(Qt::blue, 1);
-	QPen peakPositionPen(Qt::red, 1);
 	QPen signalPen(Qt::darkBlue, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 	QPen deltaSignalPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 
 	QFont currentFont = font();
+	int penWidth = 1;
 	if (projectorMode)
 	{
-		currentFont.setPixelSize(32);
-		baselinePen.setWidth(3);
-		tofPositionPen.setWidth(3);
-		gatePositionPen.setWidth(3);
-		peakPositionPen.setWidth(3);
-		signalPen.setWidth(3);
-		deltaSignalPen.setWidth(3);
+		penWidth = 3;
+		currentFont.setPixelSize(32);		
 	}
 	else
 		currentFont.setPixelSize(14);
 	
+	signalPen.setWidth(penWidth);
+	deltaSignalPen.setWidth(penWidth);
+
 	QwtText yTitle = this->axisTitle(yLeft);
 	yTitle.setFont(currentFont);
 	QwtText xTitle = this->axisTitle(xBottom);
@@ -334,15 +329,24 @@ void SignalPlot::setProjectorMode(bool projectorMode)
 	setAxisFont(yLeft, currentFont);
 	setAxisFont(xBottom, currentFont);
 
+	setMarkerFont(baseline, currentFont);
+	setMarkerFont(triggerLine, currentFont);
+	setMarkerFont(peakPosition, currentFont);
+	setMarkerFont(halfPeakPosition, currentFont);
+	setMarkerFont(startPosition, currentFont);
+	setMarkerFont(shortGateEndPosition, currentFont);
+	setMarkerFont(longGateEndPosition, currentFont);
+	setMarkerFont(tofStartPosition, currentFont);
 
-	baseline->setLinePen(baselinePen);
-	triggerLine->setLinePen(baselinePen);
-	peakPosition->setLinePen(peakPositionPen);
-	halfPeakPosition->setLinePen(peakPositionPen);
-	startPosition->setLinePen(gatePositionPen);
-	shortGateEndPosition->setLinePen(gatePositionPen);
-	longGateEndPosition->setLinePen(gatePositionPen);
-	tofStartPosition->setLinePen(tofPositionPen);
+	setMarkerPenWidth(baseline, penWidth);
+	setMarkerPenWidth(triggerLine, penWidth);
+	setMarkerPenWidth(peakPosition, penWidth);
+	setMarkerPenWidth(halfPeakPosition, penWidth);
+	setMarkerPenWidth(startPosition, penWidth);
+	setMarkerPenWidth(shortGateEndPosition, penWidth);
+	setMarkerPenWidth(longGateEndPosition, penWidth);
+	setMarkerPenWidth(tofStartPosition, penWidth);
+
 	cSignal->setPen(signalPen);
 	cSignalSecondary->setPen(deltaSignalPen);
 }
@@ -361,4 +365,18 @@ void SignalPlot::setLogarithmicScale(bool s_logScale)
 		setAxisAutoScale(QwtPlot::yLeft, true);
 	}
 	baseline->setVisible(!logScale);
+}
+
+void SignalPlot::setMarkerFont(QwtPlotMarker* marker, QFont font)
+{
+	QwtText markerLabel = marker->label();
+	markerLabel.setFont(font);
+	marker->setLabel(markerLabel);
+}
+
+void SignalPlot::setMarkerPenWidth(QwtPlotMarker* marker, int width)
+{
+	QPen markerPen = marker->linePen();
+	markerPen.setWidth(width);
+	marker->setLinePen(markerPen);
 }

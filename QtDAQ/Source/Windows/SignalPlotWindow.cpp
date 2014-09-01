@@ -9,7 +9,7 @@ SignalPlotWindow::SignalPlotWindow(QWidget * parent, int s_chPrimary, int s_chSe
 	ui.qwtPlotSignal->setMinimumHeight(200);
 	ui.qwtPlotSignal->setMinimumWidth(400);
 	ui.qwtPlotSignal->setCanvasBackground(QBrush(Qt::white));
-	ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1200, 200);
+	ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1024, 256);
 	ui.qwtPlotSignal->setAxisScale(QwtPlot::xBottom, 0, 1000, 200);
 	updateSettings();	
 }
@@ -85,7 +85,7 @@ void SignalPlotWindow::onAutoscaleToggled(bool checked)
 {
 	ui.qwtPlotSignal->setAxisAutoScale(QwtPlot::yLeft, checked);
 	if (!checked)
-		ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1200, 200);
+		ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1024, 256);
 	autoscale = checked;
 }
 void SignalPlotWindow::onAlignSignalsToggled(bool checked)

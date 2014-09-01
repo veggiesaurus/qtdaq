@@ -67,5 +67,6 @@ private:
 
 private:
 	void shiftSample(float* sample, int numSamples, int shift);
-
+	void setMarkerFont(QwtPlotMarker* marker, QFont font);
+	void setMarkerPenWidth(QwtPlotMarker* marker, int width);
 };
