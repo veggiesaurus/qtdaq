@@ -9,6 +9,8 @@
 #include <qwt_plot_magnifier.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_picker.h>
+#include <qwt_scale_engine.h>
+
 #include "globals.h"
 
 class SignalPlot: public QwtPlot
@@ -26,9 +28,10 @@ public:
 	void showToFGates(bool);
 	void showCIGates(bool);
 	void setProjectorMode(bool);
+	void setLogarithmicScale(bool);
 public:
 	//temp arrays for storing the signal;
-	double* tempT=nullptr, *tempV=nullptr, *tempDV=nullptr;
+	double* tempT=nullptr, *tempV=nullptr, *tempV2=nullptr;
 	//averaging and shifting
 	int numAveragedEvents=0;
 	double* vAverage=nullptr;
@@ -54,8 +57,10 @@ private:
 	QwtPlotMarker *tofEndPosition;
     
 	QwtPlotCurve *cSignal;
-	QwtPlotCurve *cDeltaSignal;
+	QwtPlotCurve *cSignalSecondary;
 
+	bool logScale = false;
+	double baselineVal = 0;
 	bool alignSigs = false;
 	bool tofGatesVisible = false;
 	bool ciGatesVisible = true;

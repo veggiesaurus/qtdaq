@@ -27,7 +27,7 @@ public slots:
 	void onShowCIToggled(bool);
 	void onAutoscaleToggled(bool);
 	void onAlignSignalsToggled(bool);
-
+	void onLogarithmicScaleToggled(bool);
 private:
 	void updateTitle();	
 	//called after serialization

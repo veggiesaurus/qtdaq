@@ -72,6 +72,7 @@
     </widget>
     <addaction name="actionRenameWindow"/>
     <addaction name="actionAutoscale"/>
+    <addaction name="actionLogarithmicScale"/>
     <addaction name="actionAlignSignals"/>
     <addaction name="menuShow"/>
    </widget>
@@ -173,6 +174,14 @@
    </property>
    <property name="text">
     <string>Align signals by CFD</string>
+   </property>
+  </action>
+  <action name="actionLogarithmicScale">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Logarithmic scale</string>
    </property>
   </action>
  </widget>
@@ -384,6 +393,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionLogarithmicScale</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>WindowSignalPlot</receiver>
+   <slot>onLogarithmicScaleToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSaveDataClicked()</slot>
@@ -397,5 +422,6 @@
   <slot>onAlignSignalsToggled(bool)</slot>
   <slot>onShowToFToggled(bool)</slot>
   <slot>onShowCIToggled(bool)</slot>
+  <slot>onLogarithmicScaleToggled(bool)</slot>
  </slots>
 </ui>

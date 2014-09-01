@@ -7,9 +7,9 @@ SignalPlot::SignalPlot(QWidget *parent):
     setAutoReplot(false);
 
     // axes
-    setAxisTitle(xBottom, "t (ns)" );
+    setAxisTitle(xBottom, "time (n s)" );
 
-    setAxisTitle(yLeft, "ADC Count");
+    setAxisTitle(yLeft, "voltage (mV)");
 	//TODO: this is for deltas
 	setAxisScale(yLeft, 0, 1200);
 
@@ -115,13 +115,13 @@ SignalPlot::SignalPlot(QWidget *parent):
     cSignal->attach(this);
 	cSignal->setVisible(false);
 
-	cDeltaSignal = new QwtPlotCurve();
+	cSignalSecondary = new QwtPlotCurve();
     //cDeltaSignal->setRenderHint(QwtPlotItem::RenderAntialiased);
-    cDeltaSignal->setLegendAttribute(QwtPlotCurve::LegendShowLine, true);
+    cSignalSecondary->setLegendAttribute(QwtPlotCurve::LegendShowLine, true);
 	QPen deltaSignalPen(Qt::red,1,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
-    cDeltaSignal->setPen(deltaSignalPen);
-    cDeltaSignal->attach(this);
-	cDeltaSignal->setVisible(false);
+    cSignalSecondary->setPen(deltaSignalPen);
+    cSignalSecondary->attach(this);
+	cSignalSecondary->setVisible(false);
 
 	// panning with the left mouse button
     (void )new QwtPlotPanner( canvas() );
@@ -137,10 +137,11 @@ void SignalPlot::clearAverages()
 	numSamples=0;
 }
 
-void SignalPlot::setBaseline(double baselineVal)
+void SignalPlot::setBaseline(double s_baselineVal)
 {
+	baselineVal = s_baselineVal;
 	baseline->setYValue(baselineVal);
-	baseline->setVisible(true);
+	baseline->setVisible(!logScale);
 }
 
 void SignalPlot::setGates(int start, int shortGateEnd, int longGateEnd, int tofStartPulse, int tofEndPulse)
@@ -165,23 +166,23 @@ void SignalPlot::setGates(int start, int shortGateEnd, int longGateEnd, int tofS
 	}
 }
 
-void SignalPlot::setData(float* t, float* V, float* DV, int s_numSamples, float s_sampleTime, float s_offsetTime)
+void SignalPlot::setData(float* t, float* V, float* V2, int s_numSamples, float s_sampleTime, float s_offsetTime)
 {
 	if (s_numSamples!=numSamples)
 	{
 		SAFE_DELETE_ARRAY(tempT);
 		SAFE_DELETE_ARRAY(tempV);
-		SAFE_DELETE_ARRAY(tempDV);
+		SAFE_DELETE_ARRAY(tempV2);
 		SAFE_DELETE_ARRAY(vAverage);
 		SAFE_DELETE_ARRAY(vShifted);
 
 		numSamples=s_numSamples;
 		tempT=new double[numSamples];
-		tempDV=new double[numSamples];
+		tempV2=new double[numSamples];
 		tempV=new double[numSamples];
 		vAverage=new double[numSamples];
 		memset(vAverage, 0, sizeof(double)*numSamples);
-		memset(tempDV, 0, sizeof(double)*numSamples);
+		memset(tempV2, 0, sizeof(double)*numSamples);
 		numAveragedEvents=0;
 		vShifted=new double[numSamples];
 		initOffset=s_offsetTime;
@@ -200,9 +201,9 @@ void SignalPlot::setData(float* t, float* V, float* DV, int s_numSamples, float 
 		for (int i=0;i<numSamples;i++)
 			tempV[i]=V[i];		
 
-	if (DV)
+	if (V2)
 		for (int i=0;i<numSamples;i++)
-			tempDV[i]=DV[i];		
+			tempV2[i]=V2[i];		
 
 
 	if (V)
@@ -217,14 +218,31 @@ void SignalPlot::setData(float* t, float* V, float* DV, int s_numSamples, float 
 			vAverage[i]=fmin(1024.0, vAverage[i]);
 		}
 		numAveragedEvents++;
-	}
+
+
+	}	
 
     //TODO: sensible axis ticks
 	if (displayAverage)
 		setAxisScale(xBottom, 0.0+initOffset, numSamples*sampleTime+initOffset, (numSamples*sampleTime<400)?20.0:100.0);
 	else
-		setAxisScale(xBottom, -200.0 + (alignSigs ? s_offsetTime : 0), numSamples*sampleTime + (alignSigs ? s_offsetTime : 0) + 100, (numSamples*sampleTime<400) ? 20.0 : 100.0);
+		setAxisScale(xBottom, (alignSigs ? s_offsetTime - 200.0 : 0), numSamples*sampleTime + (alignSigs ? s_offsetTime + 100 : 0), (numSamples*sampleTime<400) ? 20.0 : 100.0);
 
+	if (logScale)
+	{
+		double minVal = 1e-1;
+		double maxVal = 1e3;
+		setAxisScale(yLeft, minVal, maxVal);
+
+		if (V)
+			for (int i = 0; i < numSamples; i++)
+				tempV[i] = fmax(baselineVal - tempV[i], minVal);
+
+		if (V2)
+			for (int i = 0; i < numSamples; i++)
+				tempV2[i] = fmax(baselineVal - tempV[i], minVal);
+
+	}
 
 	if (V)
 	{
@@ -237,13 +255,13 @@ void SignalPlot::setData(float* t, float* V, float* DV, int s_numSamples, float 
 	else
 		cSignal->setVisible(false);
 
-	if (DV)
+	if (V2)
 	{
-		cDeltaSignal->setRawSamples(tempT, tempDV, numSamples);
-		cDeltaSignal->setVisible(true);	
+		cSignalSecondary->setRawSamples(tempT, tempV2, numSamples);
+		cSignalSecondary->setVisible(true);	
 	}
 	else
-		cDeltaSignal->setVisible(false);
+		cSignalSecondary->setVisible(false);
 
 }
 
@@ -326,5 +344,21 @@ void SignalPlot::setProjectorMode(bool projectorMode)
 	longGateEndPosition->setLinePen(gatePositionPen);
 	tofStartPosition->setLinePen(tofPositionPen);
 	cSignal->setPen(signalPen);
-	cDeltaSignal->setPen(deltaSignalPen);
+	cSignalSecondary->setPen(deltaSignalPen);
+}
+
+void SignalPlot::setLogarithmicScale(bool s_logScale)
+{
+	logScale = s_logScale;
+	if (logScale)
+	{
+		setAxisScaleEngine(yLeft, new QwtLogScaleEngine());
+		setAxisAutoScale(yLeft, false);
+	}
+	else
+	{
+		setAxisScaleEngine(QwtPlot::yLeft, new QwtLinearScaleEngine());
+		setAxisAutoScale(QwtPlot::yLeft, true);
+	}
+	baseline->setVisible(!logScale);
 }

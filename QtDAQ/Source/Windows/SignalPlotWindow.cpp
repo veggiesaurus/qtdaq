@@ -11,8 +11,6 @@ SignalPlotWindow::SignalPlotWindow(QWidget * parent, int s_chPrimary, int s_chSe
 	ui.qwtPlotSignal->setCanvasBackground(QBrush(Qt::white));
 	ui.qwtPlotSignal->setAxisScale(QwtPlot::yLeft, 0, 1200, 200);
 	ui.qwtPlotSignal->setAxisScale(QwtPlot::xBottom, 0, 1000, 200);
-	ui.qwtPlotSignal->setAxisTitle(QwtPlot::xBottom, "t (nS)");
-	ui.qwtPlotSignal->setAxisTitle(QwtPlot::yLeft, "ADC Count");
 	updateSettings();	
 }
 
@@ -124,17 +122,17 @@ void SignalPlotWindow::onSaveDataClicked()
 		return;
 
 	int numEntries=ui.qwtPlotSignal->numSamples;
-	if (numEntries && ui.qwtPlotSignal->tempT && (ui.qwtPlotSignal->tempV || ui.qwtPlotSignal->tempDV))
+	if (numEntries && ui.qwtPlotSignal->tempT && (ui.qwtPlotSignal->tempV || ui.qwtPlotSignal->tempV2))
 	{	
 		QTextStream stream( &exportFile );
-		stream<<"t (ns)"<<" \t"<<((ui.qwtPlotSignal->tempV)?"V (mV) \t":"")<<((ui.qwtPlotSignal->tempDV)?"V2 (mV)":"")<<endl;
+		stream<<"t (ns)"<<" \t"<<((ui.qwtPlotSignal->tempV)?"V (mV) \t":"")<<((ui.qwtPlotSignal->tempV2)?"V2 (mV)":"")<<endl;
 		for (int i=0;i<numEntries;i++)
 		{
 			stream<<ui.qwtPlotSignal->tempT[i];
 			if (ui.qwtPlotSignal->tempV)			
 				stream<<" \t \t "<<(ui.qwtPlotSignal->displayAverage?ui.qwtPlotSignal->vAverage[i]:ui.qwtPlotSignal->tempV[i]);
-			if (ui.qwtPlotSignal->tempDV)						
-				stream<<" \t"<<ui.qwtPlotSignal->tempDV[i];
+			if (ui.qwtPlotSignal->tempV2)						
+				stream<<" \t"<<ui.qwtPlotSignal->tempV2[i];
 			stream<<endl;
 		}
 		stream.flush();
@@ -165,6 +163,11 @@ void SignalPlotWindow::setProjectorMode(bool s_projectorMode)
 {
 	PlotWindow::setProjectorMode(s_projectorMode);
 	ui.qwtPlotSignal->setProjectorMode(projectorMode);
+}
+
+void SignalPlotWindow::onLogarithmicScaleToggled(bool logScale)
+{
+	ui.qwtPlotSignal->setLogarithmicScale(logScale);
 }
 
 QDataStream &operator<<(QDataStream &out, const SignalPlotWindow &obj)
