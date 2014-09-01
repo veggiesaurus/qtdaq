@@ -921,7 +921,13 @@ void QtDAQ::onTileClicked()
 	int page = ui.tabWidget->currentIndex();
 	if (page < 0 || page >= NUM_UI_PAGES)
 		return;
-	mdiAreas[page]->tileSubWindows();
+	//if there is only one subwindow, maximise it
+	if (mdiAreas[page]->subWindowList().count() == 1)
+	{
+		mdiAreas[page]->subWindowList()[0]->showMaximized();
+	}
+	else
+		mdiAreas[page]->tileSubWindows();
 	showNormal();
 	showMaximized();
 }
