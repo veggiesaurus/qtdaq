@@ -350,13 +350,26 @@ void FoMWindow::setProjectorMode(bool s_projectorMode)
 	PlotWindow::setProjectorMode(s_projectorMode);
 	ui.qwtPlotFoM->setProjectorMode(projectorMode);
 
+	QSettings settings;
+	double standardPenThickness = settings.value("ui/elements/lineThickness", QVariant(1.0)).toDouble();
+	double projectorPenThickness = settings.value("ui/projectorMode/elements/lineThickness", QVariant(3.0)).toDouble();
+
+	//update settings if they didn't exist
+	settings.setValue("ui/elements/lineThickness", QVariant(standardPenThickness));
+	settings.setValue("ui/projectorMode/elements/lineThickness", QVariant(projectorPenThickness));
+
 	QPen effectiveSepMarkerPen(Qt::darkRed, 1);
 	QPen curvePen(Qt::darkBlue, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 
 	if (projectorMode)
 	{
-		effectiveSepMarkerPen.setWidth(3);
-		curvePen.setWidth(3);
+		effectiveSepMarkerPen.setWidth(projectorPenThickness);
+		curvePen.setWidth(projectorPenThickness);
+	}
+	else
+	{
+		effectiveSepMarkerPen.setWidth(standardPenThickness);
+		curvePen.setWidth(standardPenThickness);	
 	}
 	
 	effectiveSepMarker->setLinePen(effectiveSepMarkerPen);

@@ -236,7 +236,8 @@ void SignalPlot::setData(float* t, float* V, float* V2, int s_numSamples, float 
 
 		if (V)
 			for (int i = 0; i < numSamples; i++)
-				tempV[i] = fmax(baselineVal - tempV[i], minVal);
+				//add a single offset (baseline => 1 ) for aesthetics
+				tempV[i] = fmax(baselineVal - tempV[i] + 1, minVal);
 
 		if (V2)
 			for (int i = 0; i < numSamples; i++)
@@ -302,18 +303,31 @@ void SignalPlot::setAlignSignals(bool val) { alignSigs = val; }
 
 void SignalPlot::setProjectorMode(bool projectorMode)
 {
-	QPen signalPen(Qt::darkBlue, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
-	QPen deltaSignalPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+	QSettings settings;	
+	double standardPenThickness = settings.value("ui/elements/lineThickness", QVariant(1.0)).toDouble();
+	double projectorPenThickness = settings.value("ui/projectorMode/elements/lineThickness", QVariant(3.0)).toDouble();
+	int standardFontSize = settings.value("ui/elements/axisFontSize", QVariant(14)).toInt();
+	int projectorFontSize = settings.value("ui/projectorMode/elements/axisFontSize", QVariant(32)).toInt();
+
+	//update settings if they didn't exist
+	settings.setValue("ui/elements/lineThickness", QVariant(standardPenThickness));
+	settings.setValue("ui/projectorMode/elements/lineThickness", QVariant(projectorPenThickness));
+	settings.setValue("ui/elements/axisFontSize", QVariant(standardFontSize));
+	settings.setValue("ui/projectorMode/elements/axisFontSize", QVariant(projectorFontSize));
+
+
+	QPen signalPen(Qt::darkBlue, standardPenThickness, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+	QPen deltaSignalPen(Qt::red, standardPenThickness, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
 
 	QFont currentFont = font();
-	int penWidth = 1;
+	int penWidth = standardPenThickness;
 	if (projectorMode)
 	{
-		penWidth = 3;
-		currentFont.setPixelSize(32);		
+		penWidth = projectorPenThickness;
+		currentFont.setPixelSize(projectorFontSize);
 	}
 	else
-		currentFont.setPixelSize(14);
+		currentFont.setPixelSize(standardFontSize);
 	
 	signalPen.setWidth(penWidth);
 	deltaSignalPen.setWidth(penWidth);

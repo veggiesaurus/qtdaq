@@ -83,13 +83,23 @@ void CalibratedPlot::exportPlot(QString filename)
 
 void CalibratedPlot::setProjectorMode(bool projectorMode)
 {
+
+	QSettings settings;
+	int standardFontSize = settings.value("ui/elements/axisFontSize", QVariant(14)).toInt();
+	int projectorFontSize = settings.value("ui/projectorMode/elements/axisFontSize", QVariant(32)).toInt();
+
+	//update settings if they didn't exist
+	settings.setValue("ui/elements/axisFontSize", QVariant(standardFontSize));
+	settings.setValue("ui/projectorMode/elements/axisFontSize", QVariant(projectorFontSize));
+
+
 	QFont currentFont = font();
 	if (projectorMode)
 	{
-		currentFont.setPixelSize(32);
+		currentFont.setPixelSize(projectorFontSize);
 	}
 	else
-		currentFont.setPixelSize(14);
+		currentFont.setPixelSize(standardFontSize);
 
 	QwtText yTitle = this->axisTitle(yLeft);
 	yTitle.setFont(currentFont);

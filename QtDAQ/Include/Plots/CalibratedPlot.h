@@ -7,6 +7,9 @@
 #include <qwt_picker_machine.h>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_renderer.h>
+
+#include <QSettings>
+
 #include "globals.h"
 
 class CalibratedPlot: public QwtPlot

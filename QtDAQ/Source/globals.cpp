@@ -9,13 +9,15 @@ QString axisNameFromParameter(HistogramParameter parameter)
 	switch (parameter)
 	{	
 	case LONG_INTEGRAL:
-		axisName="Long Integral";
+		axisName="Long Integral (Energy)";
 		break;
 	case SHORT_INTEGRAL:
 		axisName="Short Integral";
 		break;	
 	case PSD_FACTOR:
-		axisName="Pulse Shape Factor Projection";
+		//Switch back after 10 Sept
+		axisName = "Short Integral (Pulse Shape)";
+		//axisName = "Pulse Shape Factor Projection";
 		break;
 	case FILTERED_PSD_FACTOR:
 		axisName+="Filtered PSD";

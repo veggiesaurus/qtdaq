@@ -81,6 +81,50 @@ Histogram2DPlot::Histogram2DPlot(QWidget *parent):
 	selectedPolygon->attach(this);
 	//event filters
 	canvas()->installEventFilter(this);
+
+	//markers for Sept10 TODO: remove
+	QSettings settings;
+	double neutronsX = settings.value("experimental/labels/neutronsX", QVariant(4000.0)).toDouble();
+	double neutronsY = settings.value("experimental/labels/neutronsY", QVariant(50.0)).toDouble();
+	double gammaX = settings.value("experimental/labels/gammaX", QVariant(4000.0)).toDouble();
+	double gammaY = settings.value("experimental/labels/gammaY", QVariant(80.0)).toDouble();
+	int fontSize = settings.value("experimental/labels/fontSize", QVariant(32)).toInt();
+	//write settings back in case they weren't there
+	settings.setValue("experimental/labels/neutronsX", QVariant(neutronsX));
+	settings.setValue("experimental/labels/neutronsY", QVariant(neutronsY));
+	settings.setValue("experimental/labels/gammaX", QVariant(gammaX));
+	settings.setValue("experimental/labels/gammaY", QVariant(gammaY));
+	settings.setValue("experimental/labels/fontSize", QVariant(fontSize));
+
+
+	QFont markerFont;
+	markerFont.setPixelSize(fontSize);
+	
+	QwtText neutronMarkerLabel;
+	neutronMarker = new QwtPlotMarker();
+
+	neutronMarkerLabel.setText("Neutrons");
+	neutronMarkerLabel.setFont(markerFont);
+	neutronMarker->setLabel(neutronMarkerLabel);
+	neutronMarker->attach(this);
+	neutronMarker->setVisible(true);
+	neutronMarker->setXValue(neutronsX);
+	neutronMarker->setYValue(neutronsY);
+
+	
+
+	QwtText gammaMarkerLabel;
+	gammaMarker = new QwtPlotMarker();
+
+	gammaMarkerLabel.setText("Gammas");
+	gammaMarkerLabel.setFont(markerFont);
+	gammaMarker->setLabel(gammaMarkerLabel);
+	gammaMarker->attach(this);
+	gammaMarker->setVisible(true);
+	gammaMarker->setXValue(gammaX);
+	gammaMarker->setYValue(gammaY);
+
+	//end Sept10
 }
 
 Histogram2DPlot::~Histogram2DPlot()

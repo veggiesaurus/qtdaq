@@ -14,6 +14,7 @@
 #include <qwt_scale_widget.h>
 #include <qwt_plot_shapeitem.h>
 
+#include <QSettings>
 #include <QVector>
 #include <QPointF>
 #include "Plots/CalibratedPlot.h"
@@ -62,4 +63,7 @@ private:
 	QwtPickerClickPointMachine* pickerPointMachine;
 	QwtPlotShapeItem* selectedPolygon;
 	bool logScaleEnabled = false;
+
+	QwtPlotMarker* neutronMarker=nullptr;
+	QwtPlotMarker* gammaMarker=nullptr;
 };

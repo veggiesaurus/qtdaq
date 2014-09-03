@@ -11,6 +11,8 @@
 #include <qwt_plot_picker.h>
 #include <qwt_scale_engine.h>
 
+#include <QSettings>
+
 #include "globals.h"
 
 class SignalPlot: public QwtPlot
