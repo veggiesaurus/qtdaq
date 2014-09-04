@@ -291,7 +291,7 @@ void VxBinaryReaderThread::run()
 				break;
 			}
 			//error handling: bad event
-			if (ev.info.BoardId>100 || ev.info.EventSize>20000)
+			if (ev.info.BoardId>100 || ev.info.EventSize>200000)
 			{
 				freeEvent(ev);
 				break;

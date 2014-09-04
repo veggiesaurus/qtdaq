@@ -376,7 +376,7 @@ void SignalPlot::setLogarithmicScale(bool s_logScale)
 	else
 	{
 		setAxisScaleEngine(QwtPlot::yLeft, new QwtLinearScaleEngine());
-		setAxisAutoScale(QwtPlot::yLeft, true);
+		//setAxisAutoScale(QwtPlot::yLeft, autoscale);
 	}
 	baseline->setVisible(!logScale);
 }

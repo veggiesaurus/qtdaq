@@ -253,7 +253,7 @@ void QtDAQ::onReadVxFileClicked()
 	QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
 	QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
 	fileDialog.setDirectory(prevFileDir);
-	fileDialog.selectFile(prevFile);
+//	fileDialog.selectFile(prevFile);
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
 	if (fileDialog.exec())
 	{
@@ -549,7 +549,7 @@ void QtDAQ::onLoadAnalysisConfigClicked()
 		QString prevFileDir = settings.value("analysis/prevAnalysisDir").toString();
 		QString prevFile = settings.value("analysis/prevAnalysisFile").toString();
 		fileDialog.setDirectory(prevFileDir);
-		fileDialog.selectFile(prevFile);
+		//fileDialog.selectFile(prevFile);
 	}
 	if (fileDialog.exec())
 	{
@@ -734,7 +734,7 @@ void QtDAQ::restoreUI(bool legacy)
 	//open a file for config input
 	QFileDialog fileDialog(this, "Set input file", "", "UI config (*.uic);;All files (*.*)");
 	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-	fileDialog.restoreState(settings.value("ui/saveUIState").toByteArray());
+	//fileDialog.restoreState(settings.value("ui/saveUIState").toByteArray());
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
 	if (!rawFilename.isEmpty())
 	{ 
@@ -747,7 +747,7 @@ void QtDAQ::restoreUI(bool legacy)
 		QString prevFileDir = settings.value("ui/prevUIDir").toString();
 		QString prevFile = settings.value("ui/prevUIFile").toString();
 		fileDialog.setDirectory(prevFileDir);
-		fileDialog.selectFile(prevFile);
+		//fileDialog.selectFile(prevFile);
 	}
 
 	if (fileDialog.exec())
