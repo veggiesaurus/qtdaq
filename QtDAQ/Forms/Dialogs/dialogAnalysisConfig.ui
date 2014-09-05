@@ -51,7 +51,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabSettings">
       <attribute name="title">
@@ -736,11 +736,22 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+              <strikeout>false</strikeout>
+              <kerning>false</kerning>
+             </font>
+            </property>
             <property name="lineWrapMode">
              <enum>QPlainTextEdit::NoWrap</enum>
             </property>
             <property name="tabStopWidth">
              <number>20</number>
+            </property>
+            <property name="placeholderText">
+             <string>//place variable and function definitions here</string>
             </property>
            </widget>
           </item>
@@ -758,11 +769,20 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
             <property name="lineWrapMode">
              <enum>QPlainTextEdit::NoWrap</enum>
             </property>
             <property name="tabStopWidth">
              <number>20</number>
+            </property>
+            <property name="placeholderText">
+             <string>// initialise variables for each run here</string>
             </property>
            </widget>
           </item>
@@ -794,11 +814,20 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
             <property name="lineWrapMode">
              <enum>QPlainTextEdit::NoWrap</enum>
             </property>
             <property name="tabStopWidth">
              <number>20</number>
+            </property>
+            <property name="placeholderText">
+             <string>// perform per-event initialise</string>
             </property>
            </widget>
           </item>
@@ -823,11 +852,20 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
             <property name="lineWrapMode">
              <enum>QPlainTextEdit::NoWrap</enum>
             </property>
             <property name="tabStopWidth">
              <number>20</number>
+            </property>
+            <property name="placeholderText">
+             <string>// perform post-channel calculations</string>
             </property>
            </widget>
           </item>
@@ -852,11 +890,20 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
             <property name="lineWrapMode">
              <enum>QPlainTextEdit::NoWrap</enum>
             </property>
             <property name="tabStopWidth">
              <number>20</number>
+            </property>
+            <property name="placeholderText">
+             <string>// perform post-event calculations</string>
             </property>
            </widget>
           </item>
@@ -881,11 +928,20 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
             <property name="lineWrapMode">
              <enum>QPlainTextEdit::NoWrap</enum>
             </property>
             <property name="tabStopWidth">
              <number>20</number>
+            </property>
+            <property name="placeholderText">
+             <string>// perform post-run cleanup or calculations</string>
             </property>
            </widget>
           </item>
