@@ -52,6 +52,7 @@ struct AnalysisConfig
 	//advanced (instance) parameters
 	int samplingReductionFactor;
 	int bitsDropped;
+	int primaryCFDChannel;
 	//filtering
 	bool useOptimalFilter;
 	QVector<float> filter;

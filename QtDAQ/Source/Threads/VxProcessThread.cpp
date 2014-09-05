@@ -145,28 +145,43 @@ void VxProcessThread::compileV8()
 	globalTemplate.Reset(isolate, global);
 	Context::Scope context_scope(context);
 
+	v8::TryCatch try_catch;
+	try_catch.SetVerbose(true);
+	bool hasException = false;
 	Handle<String> sourceInitial = String::NewFromUtf8(isolate, analysisConfig->customCodeInitial.toStdString().c_str());
 	Handle<Script> handleScriptInitial = Script::Compile(sourceInitial);
+	hasException = try_catch.HasCaught();
 	scriptInitial.Reset(isolate, handleScriptInitial);
 
 	Handle<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str());
 	Handle<Script> handleScriptPre = Script::Compile(sourcePre);
+	hasException = try_catch.HasCaught();
+
 	scriptPre.Reset(isolate, handleScriptPre);
 
 	Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str());
 	Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
+	hasException = try_catch.HasCaught();
+
 	scriptPostChannel.Reset(isolate, handleScriptPostChannel);
 
 	Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, analysisConfig->customCodePostEvent.toStdString().c_str());
 	Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
+	hasException = try_catch.HasCaught();
+
+	
 	scriptPostEvent.Reset(isolate, handleScriptPostEvent);
 
 	Handle<String> sourceTimer = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str());
 	Handle<Script> handleScriptTimer = Script::Compile(sourceTimer);
+	hasException = try_catch.HasCaught();
+
 	scriptDef.Reset(isolate, handleScriptTimer);
 
 	Handle<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str());
 	Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
+	hasException = try_catch.HasCaught();
+
 	scriptFinished.Reset(isolate, handleScriptFinished);
 
 	Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
@@ -178,6 +193,14 @@ void VxProcessThread::compileV8()
 	Local<Object> localEventStats = eventStatsTemplate->NewInstance();
 	eventStatsObject.Reset(isolate, localEventStats);
 	context->Global()->Set(String::NewFromUtf8(isolate, "evStats"), localEventStats);
+
+	if (try_catch.HasCaught())
+	{
+		v8::String::Utf8Value exception(try_catch.Exception());
+		v8::Handle<v8::Message> message = try_catch.Message();
+		if (message->GetLineNumber())
+			qDebug() << "Error in line " << message->GetLineNumber();
+	}
 
 	if (analysisConfig->bDefV8)
 		runV8CodeDefinitions();
@@ -387,7 +410,7 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 
 	stats->serial = rawEvent->info.BoardId;
 	bool processSuccess = true;
-	EventSampleData* sample;
+	EventSampleData* sample = nullptr;
 	if (outputSample)
 	{
 		sample = new EventSampleData();
@@ -399,245 +422,20 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	if (vx1742Mode)
 		GSPS = 1.0 / analysisConfig->samplingReductionFactor;
 	bool foundNumSamples = false;
+
+	int primaryCFDChannel = 1;
+	//int primaryCFDChannel = 1;
+
+	float cfdOverrideTime = -1;
+	if (primaryCFDChannel >= 0 && primaryCFDChannel < NUM_DIGITIZER_CHANNELS)
+	{
+		processSuccess = processChannel(vx1742Mode, rawEvent, primaryCFDChannel, stats, GSPS, sample);
+		cfdOverrideTime = stats->channelStatistics[primaryCFDChannel].timeOfCFDCrossing;
+	}
 	for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS; ch++)
 	{
-		int chSize;
-		if (vx1742Mode)
-			chSize = rawEvent->fData.ChSize[ch];
-		else
-			chSize = rawEvent->data.ChSize[ch];
-		//ignore empty and stop pulse channels
-		if (((chSize && rawEvent->data.DataChannel[ch]) || (chSize && rawEvent->fData.DataChannel[ch])) && !(analysisConfig->useTimeOfFlight && ch == analysisConfig->stopPulseChannel))
-		{
-
-			//change of sample num (should only happen with first event)
-			if (chSize / analysisConfig->samplingReductionFactor != numSamples)
-			{
-				//sometimes ch1 has two extra entries, which are zero. Account for this special case by ignoring changes by +2
-				if (chSize == numSamples + 2)
-					break;
-				numSamples = chSize / analysisConfig->samplingReductionFactor;
-				SAFE_DELETE_ARRAY(tempValArray);
-				SAFE_DELETE_ARRAY(tempFilteredValArray);
-				SAFE_DELETE_ARRAY(tempMedianArray);
-				tempValArray = new float[numSamples];
-				tempFilteredValArray = new float[numSamples];
-				tempMedianArray = new float[numSamples];
-				memset(tempValArray, 0, sizeof(float)*numSamples);
-				memset(tempFilteredValArray, 0, sizeof(float)*numSamples);
-				memset(tempMedianArray, 0, sizeof(float)*numSamples);
-			}
-			stats->channelStatistics[ch].channelNumber = ch;
-			if (analysisConfig->bitsDropped)
-			{
-				int bitdropFactor = 1 << analysisConfig->bitsDropped;
-
-				if (vx1742Mode)
-				{
-					for (int i = 0; i < numSamples; i++)
-					{
-						int index = (i)*analysisConfig->samplingReductionFactor;
-						tempValArray[i] = 0.25f*bitdropFactor*((int)rawEvent->fData.DataChannel[ch][index] / bitdropFactor);
-					}
-				}
-				else
-				{
-					for (int i = 0; i < numSamples; i++)
-					{
-						int index = (i)*analysisConfig->samplingReductionFactor;
-						tempValArray[i] = bitdropFactor*((int)rawEvent->data.DataChannel[ch][index] / bitdropFactor);
-					}
-				}
-			}
-			else
-			{
-				if (vx1742Mode)
-				{
-					for (int i = 0; i < numSamples; i++)
-					{
-						int index = (i)*analysisConfig->samplingReductionFactor;
-						tempValArray[i] = 0.25f*rawEvent->fData.DataChannel[ch][index];
-					}
-				}
-				else
-				{
-					for (int i = 0; i < numSamples; i++)
-					{
-						int index = (i)*analysisConfig->samplingReductionFactor;
-						tempValArray[i] = ((float)rawEvent->data.DataChannel[ch][index]);
-					}
-				}
-			}
-
-			//medianfilter(tempValArray, tempMedianArray, numSamples);
-			//processSuccess &= findBaseline(tempMedianArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
-			processSuccess &= findBaseline(tempValArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
-
-			if (analysisConfig->preCFDFilter)
-				processSuccess &= lowPassFilter(tempValArray, numSamples, analysisConfig->preCFDFactor);
-			//if the digital gain is not unity
-			if (abs(analysisConfig->digitalGain - 1.00f) > 0.01f)
-			{
-				processSuccess &= applyGain(tempValArray, numSamples, analysisConfig->digitalGain, stats->channelStatistics[ch].baseline);
-				if (analysisConfig->digitalGain < 0)
-					stats->channelStatistics[ch].baseline = 1024 - stats->channelStatistics[ch].baseline;
-			}
-			//temp hack
-			int thresholdCrossing;
-			float threshold = 990.0f;
-			processSuccess &= findIntersection(tempValArray, numSamples, 0, numSamples, 4, threshold, true, thresholdCrossing);
-
-
-			processSuccess &= clone(tempValArray, numSamples, tempFilteredValArray);
-			float CFDThreshold = 512.0f;
-			processSuccess &= cfdSampleOptimized(tempValArray, stats->channelStatistics[ch].baseline, numSamples, analysisConfig->CFDFraction, analysisConfig->CFDLength, analysisConfig->CFDOffset, CFDThreshold, 1.f / GSPS, tempFilteredValArray);
-			if (analysisConfig->postCFDFilter)
-				processSuccess &= lowPassFilter(tempFilteredValArray, numSamples, analysisConfig->postCFDFactor);
-
-			int positionOfThresholdCrossing;
-			int positionOfCFDMin, positionOfCFDMax;
-			float minCFDValue, maxCFDValue;
-
-			processSuccess &= findMinMaxValue(tempFilteredValArray, numSamples, 0, numSamples, minCFDValue, positionOfCFDMin, maxCFDValue, positionOfCFDMax);
-
-			processSuccess &= findIntersection(tempFilteredValArray, numSamples, positionOfCFDMin, positionOfCFDMax, 2, CFDThreshold, false, positionOfThresholdCrossing);
-			float crossingPositionInterpolated;
-			float cfdIndex = 0;
-			if (positionOfThresholdCrossing >= positionOfCFDMin)
-			{
-				float slope, offset;
-				//linear fit over 4 points of slope
-				processSuccess &= linearFit(tempFilteredValArray, numSamples, positionOfThresholdCrossing - 2, positionOfThresholdCrossing + 1, slope, offset);
-				cfdIndex = (CFDThreshold - offset) / slope;
-				int indexLow = (int)(cfdIndex);
-				float d = cfdIndex - indexLow;
-
-				float time = (indexLow / GSPS)*(1 - d) + (d)*((indexLow + 1) / GSPS);
-				if (analysisConfig->useTimeCFD)
-					stats->channelStatistics[ch].timeOfCFDCrossing = time;
-				else
-					stats->channelStatistics[ch].timeOfCFDCrossing = cfdIndex / GSPS;
-
-				//if there is a previous channel
-				if (ch > 0 && stats->channelStatistics[ch - 1].channelNumber != -1 && stats->channelStatistics[ch - 1].timeOfCFDCrossing > -1000)
-				{
-					stats->channelStatistics[ch].deltaTprevChannelCFD = stats->channelStatistics[ch].timeOfCFDCrossing - stats->channelStatistics[ch - 1].timeOfCFDCrossing;
-				}
-				else
-					//dummy deltaT
-					stats->channelStatistics[ch].deltaTprevChannelCFD = -1000;
-			}
-			else
-			{
-				stats->channelStatistics[ch].timeOfCFDCrossing = -1000;
-
-			}
-
-			processSuccess &= findMinMaxValue(tempValArray, numSamples, 0, numSamples, stats->channelStatistics[ch].minValue, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].maxValue, stats->channelStatistics[ch].indexOfMax);
-
-			if (stats->channelStatistics[ch].indexOfMin > 0 && stats->channelStatistics[ch].indexOfMin < numSamples)
-				stats->channelStatistics[ch].timeOfMin = stats->channelStatistics[ch].indexOfMin / GSPS;
-
-			if (stats->channelStatistics[ch].indexOfMax>0 && stats->channelStatistics[ch].indexOfMax < numSamples)
-				stats->channelStatistics[ch].timeOfMax = stats->channelStatistics[ch].indexOfMax / GSPS;
-
-			processSuccess &= findHalfRise(tempValArray, numSamples, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].baseline, stats->channelStatistics[ch].indexOfHalfRise);
-			if (stats->channelStatistics[ch].indexOfHalfRise>0 && stats->channelStatistics[ch].indexOfHalfRise < numSamples)
-				stats->channelStatistics[ch].timeOfHalfRise = stats->channelStatistics[ch].indexOfHalfRise / GSPS;
-
-			//0.25 ns per sample
-			int samplesPerMicrosecond = (int)(1000 * GSPS);
-			int startOffset = (analysisConfig->startGate*samplesPerMicrosecond) / 1000;
-			int shortGateOffset = (analysisConfig->shortGate*samplesPerMicrosecond) / 1000;
-			int longGateOffset = (analysisConfig->longGate*samplesPerMicrosecond) / 1000;
-			int timeOffset;
-			switch (analysisConfig->timeOffset)
-			{
-			case CFD_TIME:
-				timeOffset = (int)cfdIndex;
-				break;
-			case TIME_HALF_RISE:
-				timeOffset = stats->channelStatistics[ch].indexOfHalfRise;
-				break;
-			default:
-				timeOffset = stats->channelStatistics[ch].indexOfMin;
-				break;
-			}
-
-			//temp hack
-			//timeOffset=thresholdCrossing;
-
-			//Charge comparison
-			//processSuccess &= calculateIntegrals(tempValArray, numSamples, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + shortGateOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-			processSuccess&=calculateIntegralsCorrected(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-			//processSuccess&=calculateIntegralsTrapezoidal(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-			//processSuccess&=calculateIntegralsSimpson(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-			stats->channelStatistics[ch].shortGateIntegral *= analysisConfig->samplingReductionFactor;
-			stats->channelStatistics[ch].longGateIntegral *= analysisConfig->samplingReductionFactor;
-			processSuccess &= calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
-
-			//Linear filter
-			if (analysisConfig->useOptimalFilter)
-			{
-				float S = 0;
-				processSuccess &= linearFilter(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex + startOffset, analysisConfig->filter.data(), analysisConfig->filter.size(), S);
-				if (stats->channelStatistics[ch].longGateIntegral > 0)
-					stats->channelStatistics[ch].filteredPSD = 100 * S / stats->channelStatistics[ch].longGateIntegral;
-			}
-
-			//Zero crossing
-			//gen
-			//float ZCstart=0.152f;
-			//float ZCstop=0.662f;
-			//62mev
-			float ZCstart = 0.095f;
-			float ZCstop = 0.608f;
-
-			float ZCint;
-			processSuccess &= calculateZeroCrossing(tempValArray, numSamples, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].longGateIntegral, ZCstart, ZCstop, ZCint);
-			stats->channelStatistics[ch].custom5 = ZCint;
-			if (outputSample)
-			{
-				sample->numSamples = numSamples;
-				sample->MSPS = GSPS * 1000;
-				if (!sample->tValues)
-				{
-					sample->tValues = new float[numSamples];
-					for (int i = 0; i < numSamples; i++)
-						sample->tValues[i] = i / GSPS;
-				}
-				sample->fValues[ch] = new float[numSamples];
-				//processSuccess&=clone(tempFilteredValArray, numSamples, sample->fValues[ch]);
-				if (analysisConfig->displayCFDSignal)
-					processSuccess &= clone(tempFilteredValArray, numSamples, sample->fValues[ch]);
-				else
-					processSuccess &= clone(tempValArray, numSamples, sample->fValues[ch]);
-
-				sample->baseline = stats->channelStatistics[ch].baseline;
-				sample->indexStart = timeOffset + startOffset;
-				sample->indexShortEnd = timeOffset + shortGateOffset;
-				sample->indexLongEnd = timeOffset + longGateOffset;
-				sample->cfdTime = timeOffset / GSPS;
-			}
-
-			if (analysisConfig->bPostChannelV8)
-				runV8CodePostChannelAnalysis(&(stats->channelStatistics[ch]));
-
-			//do output if necessary
-			if (outputCurrentChannel)
-			{
-				printTruncatedSamples(tempValArray, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + longGateOffset);
-				outputCurrentChannel = false;
-			}
-			else if (outputCurrentChannelUncorrected)
-			{
-				printTruncatedSamples(tempValArray, 0, 0, numSamples - 1);
-				outputCurrentChannelUncorrected = false;
-			}
-		}
-		//write -1 to channel number => no data
-		else
-			stats->channelStatistics[ch].channelNumber = -1;
+		if (ch!=primaryCFDChannel)
+			processSuccess = processChannel(vx1742Mode, rawEvent, ch, stats, GSPS, sample, cfdOverrideTime);
 	}
 
 	//Time of flight
@@ -732,6 +530,249 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	processedEventsMutex.unlock();
 	//delete stats;
 }
+
+bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch, EventStatistics* stats, float GSPS, EventSampleData* sample, float cfdOverrideTime)
+{
+	bool processSuccess = true;
+	int chSize;
+	if (vx1742Mode)
+		chSize = rawEvent->fData.ChSize[ch];
+	else
+		chSize = rawEvent->data.ChSize[ch];
+	//ignore empty and stop pulse channels
+	if (((chSize && rawEvent->data.DataChannel[ch]) || (chSize && rawEvent->fData.DataChannel[ch])) && !(analysisConfig->useTimeOfFlight && ch == analysisConfig->stopPulseChannel))
+	{
+
+		//change of sample num (should only happen with first event)
+		if (chSize / analysisConfig->samplingReductionFactor != numSamples)
+		{
+			//sometimes ch1 has two extra entries, which are zero. Account for this special case by ignoring changes by +2
+			if (chSize == numSamples + 2)
+				return false;
+			numSamples = chSize / analysisConfig->samplingReductionFactor;
+			SAFE_DELETE_ARRAY(tempValArray);
+			SAFE_DELETE_ARRAY(tempFilteredValArray);
+			SAFE_DELETE_ARRAY(tempMedianArray);
+			tempValArray = new float[numSamples];
+			tempFilteredValArray = new float[numSamples];
+			tempMedianArray = new float[numSamples];
+			memset(tempValArray, 0, sizeof(float)*numSamples);
+			memset(tempFilteredValArray, 0, sizeof(float)*numSamples);
+			memset(tempMedianArray, 0, sizeof(float)*numSamples);
+		}
+		stats->channelStatistics[ch].channelNumber = ch;
+		if (analysisConfig->bitsDropped)
+		{
+			int bitdropFactor = 1 << analysisConfig->bitsDropped;
+
+			if (vx1742Mode)
+			{
+				for (int i = 0; i < numSamples; i++)
+				{
+					int index = (i)*analysisConfig->samplingReductionFactor;
+					tempValArray[i] = 0.25f*bitdropFactor*((int)rawEvent->fData.DataChannel[ch][index] / bitdropFactor);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < numSamples; i++)
+				{
+					int index = (i)*analysisConfig->samplingReductionFactor;
+					tempValArray[i] = bitdropFactor*((int)rawEvent->data.DataChannel[ch][index] / bitdropFactor);
+				}
+			}
+		}
+		else
+		{
+			if (vx1742Mode)
+			{
+				for (int i = 0; i < numSamples; i++)
+				{
+					int index = (i)*analysisConfig->samplingReductionFactor;
+					tempValArray[i] = 0.25f*rawEvent->fData.DataChannel[ch][index];
+				}
+			}
+			else
+			{
+				for (int i = 0; i < numSamples; i++)
+				{
+					int index = (i)*analysisConfig->samplingReductionFactor;
+					tempValArray[i] = ((float)rawEvent->data.DataChannel[ch][index]);
+				}
+			}
+		}
+
+		//medianfilter(tempValArray, tempMedianArray, numSamples);
+		//processSuccess &= findBaseline(tempMedianArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
+		processSuccess &= findBaseline(tempValArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
+
+		if (analysisConfig->preCFDFilter)
+			processSuccess &= lowPassFilter(tempValArray, numSamples, analysisConfig->preCFDFactor);
+		//if the digital gain is not unity
+		if (abs(analysisConfig->digitalGain - 1.00f) > 0.01f)
+		{
+			processSuccess &= applyGain(tempValArray, numSamples, analysisConfig->digitalGain, stats->channelStatistics[ch].baseline);
+			if (analysisConfig->digitalGain < 0)
+				stats->channelStatistics[ch].baseline = 1024 - stats->channelStatistics[ch].baseline;
+		}
+		int thresholdCrossing;
+		float threshold = 990.0f;
+		processSuccess &= findIntersection(tempValArray, numSamples, 0, numSamples, 4, threshold, true, thresholdCrossing);
+
+
+		processSuccess &= clone(tempValArray, numSamples, tempFilteredValArray);
+		float CFDThreshold = 512.0f;
+		processSuccess &= cfdSampleOptimized(tempValArray, stats->channelStatistics[ch].baseline, numSamples, analysisConfig->CFDFraction, analysisConfig->CFDLength, analysisConfig->CFDOffset, CFDThreshold, 1.f / GSPS, tempFilteredValArray);
+		if (analysisConfig->postCFDFilter)
+			processSuccess &= lowPassFilter(tempFilteredValArray, numSamples, analysisConfig->postCFDFactor);
+
+		int positionOfThresholdCrossing;
+		int positionOfCFDMin, positionOfCFDMax;
+		float minCFDValue, maxCFDValue;
+
+		processSuccess &= findMinMaxValue(tempFilteredValArray, numSamples, 0, numSamples, minCFDValue, positionOfCFDMin, maxCFDValue, positionOfCFDMax);
+
+		processSuccess &= findIntersection(tempFilteredValArray, numSamples, positionOfCFDMin, positionOfCFDMax, 2, CFDThreshold, false, positionOfThresholdCrossing);
+		float cfdCrossing = 0;
+		if (positionOfThresholdCrossing >= positionOfCFDMin)
+		{
+			float slope, offset;
+			//linear fit over 4 points of slope
+			processSuccess &= linearFit(tempFilteredValArray, numSamples, positionOfThresholdCrossing - 2, positionOfThresholdCrossing + 1, slope, offset);
+			cfdCrossing = (CFDThreshold - offset) / slope;
+			int indexLow = (int)(cfdCrossing);
+			float d = cfdCrossing - indexLow;
+
+			float time = (indexLow / GSPS)*(1 - d) + (d)*((indexLow + 1) / GSPS);
+			if (analysisConfig->useTimeCFD)
+				stats->channelStatistics[ch].timeOfCFDCrossing = time;
+			else
+				stats->channelStatistics[ch].timeOfCFDCrossing = cfdCrossing / GSPS;
+
+			//if there is a previous channel
+			if (ch > 0 && stats->channelStatistics[ch - 1].channelNumber != -1 && stats->channelStatistics[ch - 1].timeOfCFDCrossing > -1000)
+			{
+				stats->channelStatistics[ch].deltaTprevChannelCFD = stats->channelStatistics[ch].timeOfCFDCrossing - stats->channelStatistics[ch - 1].timeOfCFDCrossing;
+			}
+			else
+				//dummy deltaT
+				stats->channelStatistics[ch].deltaTprevChannelCFD = -1000;
+		}
+		else
+		{
+			stats->channelStatistics[ch].timeOfCFDCrossing = -1000;
+
+		}
+
+		processSuccess &= findMinMaxValue(tempValArray, numSamples, 0, numSamples, stats->channelStatistics[ch].minValue, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].maxValue, stats->channelStatistics[ch].indexOfMax);
+
+		if (stats->channelStatistics[ch].indexOfMin > 0 && stats->channelStatistics[ch].indexOfMin < numSamples)
+			stats->channelStatistics[ch].timeOfMin = stats->channelStatistics[ch].indexOfMin / GSPS;
+
+		if (stats->channelStatistics[ch].indexOfMax>0 && stats->channelStatistics[ch].indexOfMax < numSamples)
+			stats->channelStatistics[ch].timeOfMax = stats->channelStatistics[ch].indexOfMax / GSPS;
+
+		processSuccess &= findHalfRise(tempValArray, numSamples, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].baseline, stats->channelStatistics[ch].indexOfHalfRise);
+		if (stats->channelStatistics[ch].indexOfHalfRise>0 && stats->channelStatistics[ch].indexOfHalfRise < numSamples)
+			stats->channelStatistics[ch].timeOfHalfRise = stats->channelStatistics[ch].indexOfHalfRise / GSPS;
+
+		//0.25 ns per sample
+		int samplesPerMicrosecond = (int)(1000 * GSPS);
+		int startOffset = (analysisConfig->startGate*samplesPerMicrosecond) / 1000;
+		int shortGateOffset = (analysisConfig->shortGate*samplesPerMicrosecond) / 1000;
+		int longGateOffset = (analysisConfig->longGate*samplesPerMicrosecond) / 1000;
+		int timeOffset;
+		switch (analysisConfig->timeOffset)
+		{
+		case CFD_TIME:
+			timeOffset = (int)cfdCrossing;
+			break;
+		case TIME_HALF_RISE:
+			timeOffset = stats->channelStatistics[ch].indexOfHalfRise;
+			break;
+		default:
+			timeOffset = stats->channelStatistics[ch].indexOfMin;
+			break;
+		}
+
+		//temp hack
+		//timeOffset=thresholdCrossing;
+		if (cfdOverrideTime >= 0)
+			cfdCrossing = cfdOverrideTime*GSPS;
+		//Charge comparison
+		//processSuccess &= calculateIntegrals(tempValArray, numSamples, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + shortGateOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+		processSuccess &= calculateIntegralsCorrected(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdCrossing + startOffset, cfdCrossing + shortGateOffset, cfdCrossing + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+		//processSuccess&=calculateIntegralsTrapezoidal(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+		//processSuccess&=calculateIntegralsSimpson(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+		stats->channelStatistics[ch].shortGateIntegral *= analysisConfig->samplingReductionFactor;
+		stats->channelStatistics[ch].longGateIntegral *= analysisConfig->samplingReductionFactor;
+		processSuccess &= calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
+
+		//Linear filter
+		if (analysisConfig->useOptimalFilter)
+		{
+			float S = 0;
+			processSuccess &= linearFilter(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdCrossing + startOffset, analysisConfig->filter.data(), analysisConfig->filter.size(), S);
+			if (stats->channelStatistics[ch].longGateIntegral > 0)
+				stats->channelStatistics[ch].filteredPSD = 100 * S / stats->channelStatistics[ch].longGateIntegral;
+		}
+
+		//Zero crossing
+		//gen
+		//float ZCstart=0.152f;
+		//float ZCstop=0.662f;
+		//62mev
+		float ZCstart = 0.095f;
+		float ZCstop = 0.608f;
+
+		float ZCint;
+		processSuccess &= calculateZeroCrossing(tempValArray, numSamples, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].longGateIntegral, ZCstart, ZCstop, ZCint);
+		stats->channelStatistics[ch].custom5 = ZCint;
+		if (sample)
+		{
+			sample->numSamples = numSamples;
+			sample->MSPS = GSPS * 1000;
+			if (!sample->tValues)
+			{
+				sample->tValues = new float[numSamples];
+				for (int i = 0; i < numSamples; i++)
+					sample->tValues[i] = i / GSPS;
+			}
+			sample->fValues[ch] = new float[numSamples];
+			//processSuccess&=clone(tempFilteredValArray, numSamples, sample->fValues[ch]);
+			if (analysisConfig->displayCFDSignal)
+				processSuccess &= clone(tempFilteredValArray, numSamples, sample->fValues[ch]);
+			else
+				processSuccess &= clone(tempValArray, numSamples, sample->fValues[ch]);
+
+			sample->baseline = stats->channelStatistics[ch].baseline;
+			sample->indexStart = timeOffset + startOffset;
+			sample->indexShortEnd = timeOffset + shortGateOffset;
+			sample->indexLongEnd = timeOffset + longGateOffset;
+			sample->cfdTime = timeOffset / GSPS;
+		}
+
+		if (analysisConfig->bPostChannelV8)
+			runV8CodePostChannelAnalysis(&(stats->channelStatistics[ch]));
+
+		//do output if necessary
+		if (outputCurrentChannel)
+		{
+			printTruncatedSamples(tempValArray, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + longGateOffset);
+			outputCurrentChannel = false;
+		}
+		else if (outputCurrentChannelUncorrected)
+		{
+			printTruncatedSamples(tempValArray, 0, 0, numSamples - 1);
+			outputCurrentChannelUncorrected = false;
+		}
+	}
+	//write -1 to channel number => no data
+	else
+		stats->channelStatistics[ch].channelNumber = -1;
+	return processSuccess;
+}
+
 
 bool VxProcessThread::runV8CodeInitial()
 {

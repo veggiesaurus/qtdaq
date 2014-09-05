@@ -28,7 +28,7 @@ public:
 	~VxProcessThread();
 	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=125);
 	void restartProcessThread();
-	void processEvent(EventVx* rawEvent, bool outputSample);	
+	
 	void resetTriggerTimerAdjustments();
  signals:
 	 void newProcessedEvents(QVector<EventStatistics*>*);
@@ -36,7 +36,11 @@ public:
 	 void eventReadingFinished();
 
  private:
-	
+
+	 void processEvent(EventVx* rawEvent, bool outputSample);
+	 bool processChannel(bool vx1742Mode, EventVx* rawEvent, int ch, EventStatistics* stats, float GSPS, EventSampleData* sample, float  cfdOverrideTime=-1);
+
+
 	//v8
 	void compileV8();
     void run();
@@ -47,6 +51,8 @@ public:
 	bool runV8CodeFinal();
 	bool runV8CodeDefinitions();
 	
+
+
 	void printTruncatedSamples(float* sampleArray, float baseline, float startIndex, float endIndex);
 	static void printSampleToStream(const FunctionCallbackInfo<Value>& args);
 	static void printUncorrectedSampleToStream(const FunctionCallbackInfo<Value>& args);

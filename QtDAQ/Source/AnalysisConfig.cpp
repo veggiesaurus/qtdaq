@@ -36,6 +36,7 @@ AnalysisConfig::AnalysisConfig()
 	samplingReductionFactor=1;
 	useOptimalFilter=false;
 	displayCFDSignal=false;
+	primaryCFDChannel = -1;
 }
 
 QDataStream &operator<<(QDataStream &out, const AnalysisConfig &obj)
