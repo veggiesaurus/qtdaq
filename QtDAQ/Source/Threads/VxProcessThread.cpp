@@ -122,90 +122,6 @@ void VxProcessThread::resetTriggerTimerAdjustments()
 	eventCounter = 0;
 }
 
-void VxProcessThread::compileV8()
-{
-	Isolate::Scope isolate_scope(isolate);
-	HandleScope handle_scope(isolate);
-
-	Local<ObjectTemplate> global = ObjectTemplate::New();
-	//functions
-
-	global->Set(isolate, "printMessage", FunctionTemplate::New(isolate, printMessage));
-	global->Set(isolate, "setCustomParameterName", FunctionTemplate::New(isolate, setCustomParameterName));
-	global->Set(isolate, "printSampleToStream", FunctionTemplate::New(isolate, printSampleToStream, External::New(isolate, this)));
-	global->Set(isolate, "printUncorrectedSampleToStream", FunctionTemplate::New(isolate, printUncorrectedSampleToStream, External::New(isolate, this)));
-	global->Set(isolate, "readFilterFile", FunctionTemplate::New(isolate, readFilterFile, External::New(isolate, this)));
-	global->Set(isolate, "openFileStream", FunctionTemplate::New(isolate, openFileStream, External::New(isolate, this)));
-	global->Set(isolate, "closeStream", FunctionTemplate::New(isolate, closeStream, External::New(isolate, this)));
-	global->Set(isolate, "openBinaryFileStream", FunctionTemplate::New(isolate, openBinaryFileStream, External::New(isolate, this)));
-	global->Set(isolate, "setDownsampleFactor", FunctionTemplate::New(isolate, setDownsampleFactor, External::New(isolate, this)));
-
-	Handle<Context> context = Context::New(isolate, NULL, global);
-	persContext.Reset(isolate, context);
-	globalTemplate.Reset(isolate, global);
-	Context::Scope context_scope(context);
-
-	v8::TryCatch try_catch;
-	try_catch.SetVerbose(true);
-	bool hasException = false;
-	Handle<String> sourceInitial = String::NewFromUtf8(isolate, analysisConfig->customCodeInitial.toStdString().c_str());
-	Handle<Script> handleScriptInitial = Script::Compile(sourceInitial);
-	hasException = try_catch.HasCaught();
-	scriptInitial.Reset(isolate, handleScriptInitial);
-
-	Handle<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str());
-	Handle<Script> handleScriptPre = Script::Compile(sourcePre);
-	hasException = try_catch.HasCaught();
-
-	scriptPre.Reset(isolate, handleScriptPre);
-
-	Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str());
-	Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
-	hasException = try_catch.HasCaught();
-
-	scriptPostChannel.Reset(isolate, handleScriptPostChannel);
-
-	Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, analysisConfig->customCodePostEvent.toStdString().c_str());
-	Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
-	hasException = try_catch.HasCaught();
-
-	
-	scriptPostEvent.Reset(isolate, handleScriptPostEvent);
-
-	Handle<String> sourceTimer = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str());
-	Handle<Script> handleScriptTimer = Script::Compile(sourceTimer);
-	hasException = try_catch.HasCaught();
-
-	scriptDef.Reset(isolate, handleScriptTimer);
-
-	Handle<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str());
-	Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
-	hasException = try_catch.HasCaught();
-
-	scriptFinished.Reset(isolate, handleScriptFinished);
-
-	Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
-	Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
-	sampleStatsObject.Reset(isolate, localSampleStats);
-	context->Global()->Set(String::NewFromUtf8(isolate, "chStats"), localSampleStats);
-
-	Handle<ObjectTemplate> eventStatsTemplate = GetEventStatsTemplate(isolate);
-	Local<Object> localEventStats = eventStatsTemplate->NewInstance();
-	eventStatsObject.Reset(isolate, localEventStats);
-	context->Global()->Set(String::NewFromUtf8(isolate, "evStats"), localEventStats);
-
-	if (try_catch.HasCaught())
-	{
-		v8::String::Utf8Value exception(try_catch.Exception());
-		v8::Handle<v8::Message> message = try_catch.Message();
-		if (message->GetLineNumber())
-			qDebug() << "Error in line " << message->GetLineNumber();
-	}
-
-	if (analysisConfig->bDefV8)
-		runV8CodeDefinitions();
-}
-
 void VxProcessThread::run()
 {
 	currentBufferIndex = 0;
@@ -423,7 +339,7 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 		GSPS = 1.0 / analysisConfig->samplingReductionFactor;
 	bool foundNumSamples = false;
 
-	int primaryCFDChannel = 1;
+	int primaryCFDChannel = -1;
 	//int primaryCFDChannel = 1;
 
 	float cfdOverrideTime = -1;
@@ -773,7 +689,107 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 	return processSuccess;
 }
 
+void VxProcessThread::compileV8()
+{
+	Isolate::Scope isolate_scope(isolate);
+	HandleScope handle_scope(isolate);
 
+	Local<ObjectTemplate> global = ObjectTemplate::New();
+	//functions
+
+	global->Set(isolate, "printMessage", FunctionTemplate::New(isolate, printMessage));
+	global->Set(isolate, "setCustomParameterName", FunctionTemplate::New(isolate, setCustomParameterName));
+	global->Set(isolate, "printSampleToStream", FunctionTemplate::New(isolate, printSampleToStream, External::New(isolate, this)));
+	global->Set(isolate, "printUncorrectedSampleToStream", FunctionTemplate::New(isolate, printUncorrectedSampleToStream, External::New(isolate, this)));
+	global->Set(isolate, "readFilterFile", FunctionTemplate::New(isolate, readFilterFile, External::New(isolate, this)));
+	global->Set(isolate, "openFileStream", FunctionTemplate::New(isolate, openFileStream, External::New(isolate, this)));
+	global->Set(isolate, "closeStream", FunctionTemplate::New(isolate, closeStream, External::New(isolate, this)));
+	global->Set(isolate, "openBinaryFileStream", FunctionTemplate::New(isolate, openBinaryFileStream, External::New(isolate, this)));
+	global->Set(isolate, "setDownsampleFactor", FunctionTemplate::New(isolate, setDownsampleFactor, External::New(isolate, this)));
+
+	Handle<Context> context = Context::New(isolate, NULL, global);
+	persContext.Reset(isolate, context);
+	globalTemplate.Reset(isolate, global);
+	Context::Scope context_scope(context);
+
+	v8::TryCatch try_catch;
+	try_catch.SetVerbose(true);
+	bool hasException = false;
+	Handle<String> sourceInitial = String::NewFromUtf8(isolate, analysisConfig->customCodeInitial.toStdString().c_str());
+	Handle<Script> handleScriptInitial = Script::Compile(sourceInitial);
+	hasException = try_catch.HasCaught();
+	scriptInitial.Reset(isolate, handleScriptInitial);
+
+	Handle<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str());
+	Handle<Script> handleScriptPre = Script::Compile(sourcePre);
+	hasException = try_catch.HasCaught();
+	scriptPre.Reset(isolate, handleScriptPre);
+
+	Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str());
+	Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
+	hasException = try_catch.HasCaught();
+	scriptPostChannel.Reset(isolate, handleScriptPostChannel);
+
+	//allow v8 code to access each channel stats via an array (channels 0-8)
+	QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + analysisConfig->customCodePostEvent;
+	Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str());
+	Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
+	hasException = try_catch.HasCaught();
+	scriptPostEvent.Reset(isolate, handleScriptPostEvent);
+
+	Handle<String> sourceDef = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str());
+	Handle<Script> handleScriptDef = Script::Compile(sourceDef);
+	hasException = try_catch.HasCaught();
+	scriptDef.Reset(isolate, handleScriptDef);
+
+	Handle<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str());
+	Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
+	hasException = try_catch.HasCaught();
+
+	scriptFinished.Reset(isolate, handleScriptFinished);
+
+	Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
+	for (int i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
+	{
+		Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
+		allChannelsStatsObject[i].Reset(isolate, localSampleStats);
+		context->Global()->Set(String::NewFromUtf8(isolate, "chStats" + QString::number(i).toLatin1()), localSampleStats);
+	}
+
+	Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
+	sampleStatsObject.Reset(isolate, localSampleStats);
+	context->Global()->Set(String::NewFromUtf8(isolate, "currentChStats"), localSampleStats);
+
+	Handle<ObjectTemplate> eventStatsTemplate = GetEventStatsTemplate(isolate);
+	Local<Object> localEventStats = eventStatsTemplate->NewInstance();
+	eventStatsObject.Reset(isolate, localEventStats);
+	context->Global()->Set(String::NewFromUtf8(isolate, "evStats"), localEventStats);
+
+	if (try_catch.HasCaught())
+	{
+		v8::String::Utf8Value exception(try_catch.Exception());
+		v8::Handle<v8::Message> message = try_catch.Message();
+		if (message->GetLineNumber())
+			qDebug() << "Error in line " << message->GetLineNumber();
+	}
+
+	if (analysisConfig->bDefV8)
+		runV8CodeDefinitions();
+}
+
+bool VxProcessThread::runV8CodeDefinitions()
+{
+	Isolate::Scope isolate_scope(isolate);
+	HandleScope handle_scope(isolate);
+	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
+	Handle<Context> context = Local<Context>::New(isolate, persContext);
+	Handle<Script> handleScript = Local<Script>::New(isolate, scriptDef);
+	Context::Scope context_scope(context);
+	
+	handleScript->Run();
+
+	return true;
+}
 bool VxProcessThread::runV8CodeInitial()
 {
 	Isolate::Scope isolate_scope(isolate);
@@ -801,7 +817,6 @@ bool VxProcessThread::runV8CodePreAnalysis()
 
 	return true;
 }
-
 bool VxProcessThread::runV8CodePostChannelAnalysis(SampleStatistics* chStats)
 {
 	Isolate::Scope isolate_scope(isolate);
@@ -828,11 +843,19 @@ bool VxProcessThread::runV8CodePostEventAnalysis(EventStatistics* evStats)
 
 	Local<Object> obj = Local<Object>::New(isolate, eventStatsObject);
 	obj->SetInternalField(0, External::New(isolate, evStats));
+
+	Local<Object> objsCh[NUM_DIGITIZER_CHANNELS];
+
+	for (int i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
+	{
+		objsCh[i] = Local<Object>::New(isolate, allChannelsStatsObject[i]);
+		objsCh[i]->SetInternalField(0, External::New(isolate, &evStats->channelStatistics[i]));
+	}
+
 	handleScript->Run();
 
 	return true;
 }
-
 bool VxProcessThread::runV8CodeFinal()
 {
 	Isolate::Scope isolate_scope(isolate);
@@ -854,19 +877,6 @@ bool VxProcessThread::runV8CodeFinal()
 	return true;
 }
 
-bool VxProcessThread::runV8CodeDefinitions()
-{
-	Isolate::Scope isolate_scope(isolate);
-	HandleScope handle_scope(isolate);
-	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
-	Handle<Context> context = Local<Context>::New(isolate, persContext);
-	Handle<Script> handleScript = Local<Script>::New(isolate, scriptDef);
-	Context::Scope context_scope(context);
-
-	handleScript->Run();
-
-	return true;
-}
 
 void VxProcessThread::printTruncatedSamples(float* sampleArray, float baseline, float startIndex, float endIndex)
 {
