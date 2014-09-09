@@ -14,7 +14,7 @@ CalibratedPlot::CalibratedPlot(QWidget *parent):
     
 	setAxisTitle(xBottom, "Parameter" );
     setAxisTitle(xTop, "Energy (MeVee)");
-    setAxisTitle(yLeft, "Count");
+    setAxisTitle(yLeft, "Counts");
 
 	// grid 
     grid = new QwtPlotGrid();
