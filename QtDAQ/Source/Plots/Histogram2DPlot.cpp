@@ -116,7 +116,7 @@ Histogram2DPlot::Histogram2DPlot(QWidget *parent):
 	QwtText gammaMarkerLabel;
 	gammaMarker = new QwtPlotMarker();
 
-	gammaMarkerLabel.setText("Gammas");
+	gammaMarkerLabel.setText("Gamma-rays");
 	gammaMarkerLabel.setFont(markerFont);
 	gammaMarker->setLabel(gammaMarkerLabel);
 	gammaMarker->attach(this);
