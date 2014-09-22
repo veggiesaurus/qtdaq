@@ -43,7 +43,9 @@ public:
 
 	//v8
 	void compileV8();
-    void run();
+	void checkV8Exceptions(v8::TryCatch &try_catch, QString codeblockName="General");
+
+	void run();
 	bool runV8CodeInitial();
 	bool runV8CodePreAnalysis();
 	bool runV8CodePostChannelAnalysis(SampleStatistics* chStats);
@@ -107,5 +109,8 @@ private:
 	int currentBufferPosition;
 
 	QMutex processedEventsMutex;
+	QMutex v8Mutex;
+	bool v8RecompileRequired = false;
+
 
 };

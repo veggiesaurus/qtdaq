@@ -21,7 +21,9 @@ VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2
 	processedEvents->setSharable(true);
 
 	//v8
+	v8Mutex.lock();
 	isolate = Isolate::GetCurrent();
+	v8Mutex.unlock();
 
 	//buffers
 	rawBuffers[0] = s_rawBuffer1;
@@ -292,11 +294,22 @@ void VxProcessThread::onUpdateTimerTimeout()
 
 void VxProcessThread::onAnalysisConfigChanged()
 {
-	compileV8();
+	v8Mutex.lock();
+	v8RecompileRequired = true;
+	v8Mutex.unlock();
 }
 
 void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 {
+	v8Mutex.lock();
+	if (v8RecompileRequired)
+	{
+		v8Mutex.unlock();
+		compileV8();
+	}
+	else
+		v8Mutex.unlock();
+
 	if (analysisConfig->bPreAnalysisV8)
 		runV8CodePreAnalysis();
 	EventStatistics* stats = new EventStatistics();
@@ -691,8 +704,7 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 
 void VxProcessThread::compileV8()
 {
-	v8::TryCatch try_catch;
-	try_catch.SetVerbose(true);
+	v8Mutex.lock();
 	bool hasException = false;
 
 	Isolate::Scope isolate_scope(isolate);
@@ -716,19 +728,25 @@ void VxProcessThread::compileV8()
 	globalTemplate.Reset(isolate, global);
 	Context::Scope context_scope(context);
 
+	v8::TryCatch try_catch;
+	try_catch.SetVerbose(true);
 	
 	Handle<String> sourceInitial = String::NewFromUtf8(isolate, analysisConfig->customCodeInitial.toStdString().c_str());
 	Handle<Script> handleScriptInitial = Script::Compile(sourceInitial);
-	hasException = try_catch.HasCaught();
+	if (handleScriptInitial.IsEmpty())
+		checkV8Exceptions(try_catch, "Initialization");
 	scriptInitial.Reset(isolate, handleScriptInitial);
 
 	Handle<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str());
 	Handle<Script> handleScriptPre = Script::Compile(sourcePre);
-	hasException = try_catch.HasCaught();
+	if (handleScriptPre.IsEmpty())
+		checkV8Exceptions(try_catch, "Pre-analysis");
 	scriptPre.Reset(isolate, handleScriptPre);
 
 	Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str());
 	Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
+	if (handleScriptPostChannel.IsEmpty())
+		checkV8Exceptions(try_catch, "Post-analysis (per channel)");
 	hasException = try_catch.HasCaught();
 	scriptPostChannel.Reset(isolate, handleScriptPostChannel);
 
@@ -736,18 +754,20 @@ void VxProcessThread::compileV8()
 	QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + analysisConfig->customCodePostEvent;
 	Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str());
 	Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
-	hasException = try_catch.HasCaught();
+	if (handleScriptPostEvent.IsEmpty())
+		checkV8Exceptions(try_catch, "Post-analysis (per event)");
 	scriptPostEvent.Reset(isolate, handleScriptPostEvent);
 
 	Handle<String> sourceDef = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str());
 	Handle<Script> handleScriptDef = Script::Compile(sourceDef);
-	hasException = try_catch.HasCaught();
+	if (handleScriptDef.IsEmpty())
+		checkV8Exceptions(try_catch, "Definitions");
 	scriptDef.Reset(isolate, handleScriptDef);
 
 	Handle<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str());
 	Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
-	hasException = try_catch.HasCaught();
-
+	if (handleScriptFinished.IsEmpty())
+		checkV8Exceptions(try_catch, "After reading");
 	scriptFinished.Reset(isolate, handleScriptFinished);
 
 	Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
@@ -766,34 +786,50 @@ void VxProcessThread::compileV8()
 	Local<Object> localEventStats = eventStatsTemplate->NewInstance();
 	eventStatsObject.Reset(isolate, localEventStats);
 	context->Global()->Set(String::NewFromUtf8(isolate, "evStats"), localEventStats);
-
-	if (try_catch.HasCaught())
-	{
-		v8::String::Utf8Value exception(try_catch.Exception());
-		v8::Handle<v8::Message> message = try_catch.Message();
-		if (message->GetLineNumber())
-			qDebug() << "Error in line " << message->GetLineNumber();
-	}
+	
+	v8Mutex.unlock();
+	v8RecompileRequired = false;
 
 	if (analysisConfig->bDefV8)
 		runV8CodeDefinitions();
 }
 
+void VxProcessThread::checkV8Exceptions(v8::TryCatch &try_catch, QString codeblockName)
+{
+	if (try_catch.HasCaught())
+	{
+		v8::String::Utf8Value exception(try_catch.Exception());
+		QString exceptionMessage = *exception;
+		int lineNumber = 0;
+		
+		v8::Handle<v8::Message> message = try_catch.Message();
+		if (message->GetLineNumber())
+			lineNumber = message->GetLineNumber();
+		
+
+		QMessageBox::critical(nullptr, codeblockName+": " + (lineNumber ? "Error in line " + QString::number(lineNumber): "Compile error"), exceptionMessage);
+		qDebug()<<*exception;
+
+		
+	}
+}
+
 bool VxProcessThread::runV8CodeDefinitions()
 {
+	v8Mutex.lock();
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
 	Handle<Context> context = Local<Context>::New(isolate, persContext);
 	Handle<Script> handleScript = Local<Script>::New(isolate, scriptDef);
 	Context::Scope context_scope(context);
-	
 	handleScript->Run();
-
+	v8Mutex.unlock();
 	return true;
 }
 bool VxProcessThread::runV8CodeInitial()
 {
+	v8Mutex.lock();
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
@@ -803,39 +839,42 @@ bool VxProcessThread::runV8CodeInitial()
 	Context::Scope context_scope(context);
 
 	handleScript->Run();
-	//todo: exceptions
+	v8Mutex.unlock();
 	return true;
 }
+
 bool VxProcessThread::runV8CodePreAnalysis()
 {
+	v8Mutex.lock();
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
 	Handle<Context> context = Local<Context>::New(isolate, persContext);
 	Handle<Script> handleScript = Local<Script>::New(isolate, scriptPre);
 	Context::Scope context_scope(context);
-
 	handleScript->Run();
-
+	v8Mutex.unlock();
 	return true;
 }
+
 bool VxProcessThread::runV8CodePostChannelAnalysis(SampleStatistics* chStats)
 {
+	v8Mutex.lock();
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
 	Handle<Context> context = Local<Context>::New(isolate, persContext);
 	Handle<Script> handleScript = Local<Script>::New(isolate, scriptPostChannel);
 	Context::Scope context_scope(context);
-
 	Local<Object> obj = Local<Object>::New(isolate, sampleStatsObject);
 	obj->SetInternalField(0, External::New(isolate, chStats));
 	handleScript->Run();
-
+	v8Mutex.unlock();
 	return true;
 }
 bool VxProcessThread::runV8CodePostEventAnalysis(EventStatistics* evStats)
 {
+	v8Mutex.lock();
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
@@ -855,11 +894,12 @@ bool VxProcessThread::runV8CodePostEventAnalysis(EventStatistics* evStats)
 	}
 
 	handleScript->Run();
-
+	v8Mutex.unlock();
 	return true;
 }
 bool VxProcessThread::runV8CodeFinal()
 {
+	v8Mutex.lock();
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 	v8::Local<v8::ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
@@ -874,8 +914,7 @@ bool VxProcessThread::runV8CodeFinal()
 	//sampleStatsObject.Reset(isolate, obj);
 
 	handleScriptFinished->Run();
-
-	//todo: exceptions
+	v8Mutex.unlock();
 	return true;
 }
 
