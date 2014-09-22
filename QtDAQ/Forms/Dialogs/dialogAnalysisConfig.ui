@@ -51,7 +51,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabSettings">
       <attribute name="title">
@@ -669,10 +669,10 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The start point (in nanoseconds) for the charge integrals&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="minimum">
-             <number>-200</number>
+             <number>-400</number>
             </property>
             <property name="maximum">
-             <number>200</number>
+             <number>400</number>
             </property>
             <property name="singleStep">
              <number>5</number>
