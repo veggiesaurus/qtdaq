@@ -691,12 +691,16 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 
 void VxProcessThread::compileV8()
 {
+	v8::TryCatch try_catch;
+	try_catch.SetVerbose(true);
+	bool hasException = false;
+
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
 
 	Local<ObjectTemplate> global = ObjectTemplate::New();
 	//functions
-
+	
 	global->Set(isolate, "printMessage", FunctionTemplate::New(isolate, printMessage));
 	global->Set(isolate, "setCustomParameterName", FunctionTemplate::New(isolate, setCustomParameterName));
 	global->Set(isolate, "printSampleToStream", FunctionTemplate::New(isolate, printSampleToStream, External::New(isolate, this)));
@@ -712,9 +716,7 @@ void VxProcessThread::compileV8()
 	globalTemplate.Reset(isolate, global);
 	Context::Scope context_scope(context);
 
-	v8::TryCatch try_catch;
-	try_catch.SetVerbose(true);
-	bool hasException = false;
+	
 	Handle<String> sourceInitial = String::NewFromUtf8(isolate, analysisConfig->customCodeInitial.toStdString().c_str());
 	Handle<Script> handleScriptInitial = Script::Compile(sourceInitial);
 	hasException = try_catch.HasCaught();
