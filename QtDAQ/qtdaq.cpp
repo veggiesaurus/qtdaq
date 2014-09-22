@@ -83,6 +83,14 @@ QtDAQ::QtDAQ(QWidget *parent)
 	//auto trigger: 17ms: ~ 60 Hz
 	autoTrigTimer.setInterval(17);
 	connect(&autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);	
+
+	//progress taskbar
+	QWinTaskbarButton *button = new QWinTaskbarButton(this);	
+	button->setWindow(windowHandle());
+	//button->setOverlayIcon(QIcon(":/loading.png"));
+	progressTaskbar = button->progress();
+	progressTaskbar->setVisible(true);
+	progressTaskbar->setValue(0);
 }
 
 QtDAQ::~QtDAQ()
@@ -108,8 +116,9 @@ void QtDAQ::onUiUpdateTimerTimeout()
 			int timeMillis = uiUpdateTimer.interval();
 			double rate = ((double)max(0, numEventsProcessed - prevNumEventsProcessed)) / timeMillis*1000.0;
 			prevNumEventsProcessed = numEventsProcessed;
-			numUITimerTimeouts++;
-			statusBar()->showMessage("Processing data: " + QString::number(numEventsProcessed) + " events processed @ " + QString::number(rate) + " events/s", uiUpdateTimer.interval());
+			numUITimerTimeouts++;			
+			statusBar()->showMessage(QString("Processing data: %1 events processed @ %2 events/s (%3%)").arg(QString::number(numEventsProcessed), QString::number(rate), QString::number(filePercent*100)));
+			//statusBar()->showMessage("Processing data: " + QString::number(numEventsProcessed) + " events processed @ " + QString::number(rate) + " events/s" + QString("(%f%)").arg(filePercent), uiUpdateTimer.interval());
 		}
 	}
 
@@ -342,6 +351,7 @@ void QtDAQ::readVxFile(QString filename, bool compressedInput)
 
 	vxReaderThread = new VxBinaryReaderThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
 	connect(vxReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
+	connect(vxReaderThread, SIGNAL(filePercentUpdate(float)), this, SLOT(onFilePercentUpdated(float)));
 
 	runIndex++;
 	vxReaderThread->initVxBinaryReaderThread(rawFilename, compressedInput, runIndex);
@@ -1444,4 +1454,11 @@ void QtDAQ::onProjectorModeToggled(bool checked)
 	for (auto& i : sortedPairPlots)
 		i->setProjectorMode(projectorMode);
 
+}
+
+void QtDAQ::onFilePercentUpdated(float filePercent)
+{
+	
+	progressTaskbar->setValue(round(filePercent * 100));
+	this->filePercent = filePercent;
 }

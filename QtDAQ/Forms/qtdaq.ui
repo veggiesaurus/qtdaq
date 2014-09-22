@@ -387,7 +387,7 @@
     <string>Save UI</string>
    </property>
    <property name="shortcut">
-    <string>U, S</string>
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionRestoreUI">
@@ -395,7 +395,7 @@
     <string>Restore UI</string>
    </property>
    <property name="shortcut">
-    <string>U, R</string>
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionAddHistogram">

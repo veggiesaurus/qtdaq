@@ -11,7 +11,8 @@
 #include <QtSerialPort\QSerialPort>
 #include <QtSerialPort\QSerialPortInfo>
 #include <QInputDialog>
-#include <QJSEngine>
+#include <QtWinExtras/QWinTaskbarProgress>
+#include <QtWinExtras/QWinTaskbarButton>
 
 #include "ui_qtdaq.h"
 #include "ui_dialogAcquisitionConfig.h"
@@ -75,6 +76,7 @@ public:
 	void onNewEventSample(EventSampleData* sample);
 	void onUiUpdateTimerTimeout();
 	void onEventReadingFinished();
+	void onFilePercentUpdated(float filePercent);
 	//file slots
 	void onReadDRSFileClicked();
 	void onReadVxFileClicked();
@@ -223,4 +225,9 @@ private:
 
 	//projector mode
 	bool projectorMode = true;
+
+	//progress in taskbar
+	QWinTaskbarProgress* progressTaskbar = nullptr;
+	float filePercent = 0;
+
 };

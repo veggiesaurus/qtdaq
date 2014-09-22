@@ -369,16 +369,14 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 
 	//Time of flight
 	int chTOF = analysisConfig->stopPulseChannel;
-	if (analysisConfig->useTimeOfFlight && rawEvent->data.ChSize[chTOF] && rawEvent->data.ChSize[chTOF] == numSamples)
+	if (analysisConfig->useTimeOfFlight && rawEvent->data.ChSize[chTOF] && rawEvent->data.ChSize[chTOF] == numSamples && rawEvent->data.DataChannel[chTOF])
 	{
 		for (int i = 0; i < numSamples; i++)
-		{
 			tempValArray[i] = ((float)rawEvent->data.DataChannel[chTOF][i]);
-		}
+
 		if (outputSample)
 		{
 			sample->fValues[chTOF] = new float[numSamples];
-
 			processSuccess &= clone(tempValArray, numSamples, sample->fValues[chTOF]);
 		}
 		for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS; ch++)

@@ -1,7 +1,6 @@
 #include "Threads/VxBinaryReaderThread.h"
 
 
-
 EventVx* EventVx::eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data)
 {
 	EventVx* ev=new EventVx();	
@@ -100,6 +99,7 @@ bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isC
 {	
 	filename=s_filename;
 	runIndex = s_runIndex;
+
 	if (isReadingFile)
 	{
 		gzclose(inputFileCompressed);
@@ -110,7 +110,9 @@ bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isC
 
 	if (inputFileCompressed)
 		gzclose(inputFileCompressed);
-	inputFileCompressed=gzopen(filename.toStdString().data(), "rb");
+	fileLength = getFileSize(filename);
+	inputFileCompressed = gzopen(filename.toLatin1(), "rb");
+	filePercent = 0;
 
 	if (!inputFileCompressed)
 	{
@@ -212,15 +214,18 @@ void VxBinaryReaderThread::run()
 			rawMutexes[currentBufferIndex]->lock();
 			currentBufferPosition=0;			
 		}
-
+		qint64 byteCount = gzoffset64(inputFileCompressed);
+		//overflow!
+		if (byteCount < 0)
+			byteCount += 2147483648;
+		filePercent = (float)(byteCount) / fileLength;
 		EventVx& ev=rawBuffers[currentBufferIndex][currentBufferPosition];
 		//retain previous event sizes
 		uint32_t prevEventChSize[MAX_UINT16_CHANNEL_SIZE];
 		uint32_t prevEventChSizeFloat[MAX_UINT16_CHANNEL_SIZE];
 		memcpy(prevEventChSize, ev.data.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE);		
 		memcpy(prevEventChSizeFloat, ev.fData.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE);		
-		//ev.processed=false;
-
+		//ev.processed=false;		
 		if (gzread(inputFileCompressed, &ev.info, sizeof(CAEN_DGTZ_EventInfo_t))!=sizeof(CAEN_DGTZ_EventInfo_t))
 		{
 			freeEvent(ev);
@@ -337,7 +342,7 @@ void VxBinaryReaderThread::run()
 
 void VxBinaryReaderThread::onUpdateTimerTimeout()
 {
-	
+	emit filePercentUpdate(filePercent);
 }
 
 void VxBinaryReaderThread::setPaused(bool paused)
@@ -363,4 +368,12 @@ void VxBinaryReaderThread::stopReading(bool forceExit)
 bool VxBinaryReaderThread::isReading()
 {
 	return isReadingFile;
+}
+
+qint64 VxBinaryReaderThread::getFileSize(QString filename)
+{
+	QFile f(filename);
+	qint64 fileSize = f.size();
+	f.close();
+	return fileSize;
 }
