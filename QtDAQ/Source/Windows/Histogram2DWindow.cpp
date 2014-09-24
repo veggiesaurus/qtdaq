@@ -134,10 +134,23 @@ void Histogram2DWindow::timerUpdate()
 {
 	if (numBinsX && numBinsY)
 	{
-		QVector<double>::iterator itValues = std::max_element(values.begin(), values.end());
-		//TODO: this scaling should come from options!
-		double maxVal=(*itValues);
-		ui.qwtPlotHistogram2D->setRasterData(values, numBinsX, parameterMinX, parameterMaxX, parameterMinY, parameterMaxY, 0, maxVal);
+
+
+		double maxVal;
+		if (normPerColumn || normPerRow)
+		{
+			QVector<double> normalisedValues = GetNormalisedValues();
+			QVector<double>::iterator itValues = std::max_element(normalisedValues.begin(), normalisedValues.end());
+			maxVal = (*itValues);
+			ui.qwtPlotHistogram2D->setRasterData(normalisedValues, numBinsX, parameterMinX, parameterMaxX, parameterMinY, parameterMaxY, 0, maxVal);
+		}
+		else
+		{
+			QVector<double>::iterator itValues = std::max_element(values.begin(), values.end());
+			maxVal = (*itValues); 
+			ui.qwtPlotHistogram2D->setRasterData(values, numBinsX, parameterMinX, parameterMaxX, parameterMinY, parameterMaxY, 0, maxVal);
+		}
+		
 		ui.qwtPlotHistogram2D->setResampleMode(smoothing?QwtMatrixRasterData::BilinearInterpolation:QwtMatrixRasterData::NearestNeighbour);
 	}
 	ui.qwtPlotHistogram2D->replot();
@@ -282,6 +295,27 @@ void Histogram2DWindow::onBilinearSmoothingToggled(bool smoothingEnabled)
 	smoothing=smoothingEnabled;
 }
 
+
+void Histogram2DWindow::onPerRowToggled(bool checked)
+{
+	normPerRow = checked;
+	if (normPerRow)
+	{
+		normPerColumn = false;
+		ui.actionPerColumn->setChecked(false);
+	}
+}
+
+void Histogram2DWindow::onPerColumnToggled(bool checked)
+{
+	normPerColumn = checked;
+	if (normPerColumn)
+	{
+		normPerRow = false;
+		ui.actionPerRow->setChecked(false);
+	}
+}
+
 void Histogram2DWindow::onNewEventStatistics(QVector<EventStatistics*>* events)
 {
 	 if (!events)
@@ -335,6 +369,12 @@ void Histogram2DWindow::onSaveDataClicked()
 	headingY=axisNameFromParameter(parameterY);
 	double intervalX=(parameterMaxX-parameterMinX)/numBinsX;
 	double intervalY=(parameterMaxY-parameterMinY)/numBinsY;
+
+	QVector<double>& outputValues = values;
+	if (normPerColumn || normPerRow)
+	{
+		outputValues = GetNormalisedValues();
+	}
 	QTextStream stream( &exportFile );
 	//stream<<headingX<<" \t"<<headingY<<endl;
 	for (int i=0;i<numBinsX;i++)
@@ -344,7 +384,7 @@ void Histogram2DWindow::onSaveDataClicked()
 			double xVal=parameterMinX+i*intervalX;
 			double yVal=parameterMinY+j*intervalY;
 			//stream<<xVal<<" \t"<<yVal<<" \t"<<values[i+j*numBinsX]<<endl;
-			stream<<values[i+j*numBinsX]<<" ";
+			stream << outputValues[i + j*numBinsX] << " ";
 			//stream<<values[i+j*numBinsX]<<" ";
 		}
 		stream<<endl;
@@ -370,6 +410,47 @@ void Histogram2DWindow::setProjectorMode(bool s_projectorMode)
 	PlotWindow::setProjectorMode(s_projectorMode);
 	ui.qwtPlotHistogram2D->setProjectorMode(projectorMode);
 }
+
+QVector<double> Histogram2DWindow::GetNormalisedValues()
+{
+	QVector<double> normalisedValues;
+	normalisedValues.resize(numBinsX*numBinsY);
+	if (normPerRow)
+	{
+		//for each row
+		for (int j = 0; j < numBinsY; j++)
+		{
+			double rowSum = 0;
+			for (int i = 0; i < numBinsX; i++)
+				rowSum += values[i + j*numBinsX];
+			double rowAverage = fmax(rowSum, 1) / numBinsX;
+			for (int i = 0; i < numBinsX; i++)
+				normalisedValues[i + j*numBinsX] = values[i + j*numBinsX] / rowAverage * 100;
+
+			double normalisedSum = 0;
+			for (int i = 0; i < numBinsX; i++)
+				normalisedSum += normalisedValues[i + j*numBinsX];
+			double ratio = normalisedSum / rowSum;
+		}
+	}
+	else if (normPerColumn)
+	{
+		//for each column
+		for (int i = 0; i < numBinsX; i++)
+		{
+			double columnSum = 0;
+			for (int j = 0; j < numBinsY; j++)
+				columnSum += values[i + j*numBinsX];
+
+			//get column average
+			double columnAverage = fmax(columnSum, 1) / numBinsY;
+			for (int j = 0; j < numBinsY; j++)
+				normalisedValues[i + j*numBinsX] = values[i + j*numBinsX] / columnAverage * 100;
+		}
+	}
+	return normalisedValues;
+}
+
 
 QDataStream &operator<<(QDataStream &out, const Histogram2DWindow &obj)
 {

@@ -94,8 +94,16 @@
     <property name="title">
      <string>View</string>
     </property>
+    <widget class="QMenu" name="menuNormalisation">
+     <property name="title">
+      <string>Normalisation</string>
+     </property>
+     <addaction name="actionPerRow"/>
+     <addaction name="actionPerColumn"/>
+    </widget>
     <addaction name="actionLogarithmicColourScale"/>
     <addaction name="actionBilinearSmoothing"/>
+    <addaction name="menuNormalisation"/>
     <addaction name="separator"/>
     <addaction name="actionRename_window"/>
    </widget>
@@ -242,6 +250,22 @@
    </property>
    <property name="shortcut">
     <string>C, D</string>
+   </property>
+  </action>
+  <action name="actionPerRow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Per row</string>
+   </property>
+  </action>
+  <action name="actionPerColumn">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Per column</string>
    </property>
   </action>
  </widget>
@@ -533,6 +557,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPerRow</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onPerRowToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPerColumn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Window2DHistogramPlot</receiver>
+   <slot>onPerColumnToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSaveDataClicked()</slot>
@@ -551,5 +607,7 @@
   <slot>onLogColoursToggled(bool)</slot>
   <slot>onRenameClicked()</slot>
   <slot>onDuplicateClicked()</slot>
+  <slot>onPerRowToggled(bool)</slot>
+  <slot>onPerColumnToggled(bool)</slot>
  </slots>
 </ui>

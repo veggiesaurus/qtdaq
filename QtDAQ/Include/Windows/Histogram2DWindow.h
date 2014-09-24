@@ -39,6 +39,13 @@ public slots:
 	void onAddLinearCutClicked();
 
 	void timerUpdate();
+
+	void onPerRowToggled(bool checked);
+	void onPerColumnToggled(bool checked);
+
+	QVector<double> GetNormalisedValues();
+	
+
 	void clearValues();
 	void onSaveDataClicked();
 
@@ -65,6 +72,10 @@ private:
 
 	bool logScale, smoothing, displayRegions;
 	QVector<double>values;
+	//normalising
+	bool normPerRow = false;
+	bool normPerColumn = false;
+
 	QFile* file;
 	QTextStream* hackOutput;
 
