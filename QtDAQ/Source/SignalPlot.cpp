@@ -394,3 +394,10 @@ void SignalPlot::setMarkerPenWidth(QwtPlotMarker* marker, int width)
 	markerPen.setWidth(width);
 	marker->setLinePen(markerPen);
 }
+
+SignalPlot::~SignalPlot()
+{
+	SAFE_DELETE_ARRAY(tempT);
+	SAFE_DELETE_ARRAY(tempV);
+	SAFE_DELETE_ARRAY(tempV2);
+}

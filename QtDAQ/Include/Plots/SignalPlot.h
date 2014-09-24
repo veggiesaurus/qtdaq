@@ -20,6 +20,7 @@ class SignalPlot: public QwtPlot
 	Q_OBJECT
 public:
     SignalPlot(QWidget * = NULL);
+	~SignalPlot();
 	void setBaseline(double baseline);
 	void setDisplayAverage(bool s_displayAverage);
 	void setTrigger(float trigger);
