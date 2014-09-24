@@ -118,7 +118,6 @@ void QtDAQ::onUiUpdateTimerTimeout()
 			prevNumEventsProcessed = numEventsProcessed;
 			numUITimerTimeouts++;			
 			statusBar()->showMessage(QString("Processing data: %1 events processed @ %2 events/s (%3%)").arg(QString::number(numEventsProcessed), QString::number(rate), QString::number(filePercent*100)));
-			//statusBar()->showMessage("Processing data: " + QString::number(numEventsProcessed) + " events processed @ " + QString::number(rate) + " events/s" + QString("(%f%)").arg(filePercent), uiUpdateTimer.interval());
 		}
 	}
 
@@ -1459,6 +1458,6 @@ void QtDAQ::onProjectorModeToggled(bool checked)
 void QtDAQ::onFilePercentUpdated(float filePercent)
 {
 	
-	progressTaskbar->setValue(round(filePercent * 100));
+	progressTaskbar->setValue((int)(round(filePercent * 100))%100);
 	this->filePercent = filePercent;
 }
