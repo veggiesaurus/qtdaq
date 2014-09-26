@@ -27,6 +27,8 @@ GET_SET_DEFINITION_FLOAT(SampleStatistics, custom4);
 GET_SET_DEFINITION_FLOAT(SampleStatistics, custom5);
 
 GET_SET_DEFINITION_INT(EventStatistics, serial);
+GET_SET_DEFINITION_FLOAT(EventStatistics, triggerTimeAdjustedMillis);
+
 GET_SET_DEFINITION_FLOAT(EventStatistics, custom1);
 GET_SET_DEFINITION_FLOAT(EventStatistics, custom2);
 GET_SET_DEFINITION_FLOAT(EventStatistics, custom3);
@@ -104,6 +106,7 @@ Handle<ObjectTemplate> GetEventStatsTemplate(Isolate* isolate)
 	Handle<ObjectTemplate> eventStatsTemplate = ObjectTemplate::New();
 	eventStatsTemplate->SetInternalFieldCount(1);
 	SET_TEMPLATE_ACCESSOR(eventStatsTemplate, EventStatistics, serial);
+	SET_TEMPLATE_ACCESSOR(eventStatsTemplate, EventStatistics, triggerTimeAdjustedMillis);
 	SET_TEMPLATE_ACCESSOR(eventStatsTemplate, EventStatistics, custom1);
 	SET_TEMPLATE_ACCESSOR(eventStatsTemplate, EventStatistics, custom2);
 	SET_TEMPLATE_ACCESSOR(eventStatsTemplate, EventStatistics, custom3);

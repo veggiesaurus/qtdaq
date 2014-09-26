@@ -322,9 +322,10 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	//timing
 
 	//check for wraparound (once every 35s?)
+	rawEvent->info.TriggerTimeTag %= INT32_MAX;
 	if (rawEvent->info.TriggerTimeTag <= previousRawTriggerTag)
 		wraparoundCounter++;
-	uint64_t adjustedTime = (uint64_t)wraparoundCounter*(uint64_t)UINT32_MAX + (uint64_t)rawEvent->info.TriggerTimeTag;
+	uint64_t adjustedTime = (uint64_t)wraparoundCounter*(uint64_t)INT32_MAX + (uint64_t)rawEvent->info.TriggerTimeTag;
 	//converting from counter to time in millis (trigger time tag has 8ns LSB)
 	double timeMillis = adjustedTime*(8.0e-9)*1e3;
 	//if this is the start event
