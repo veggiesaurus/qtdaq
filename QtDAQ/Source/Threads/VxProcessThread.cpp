@@ -67,17 +67,11 @@ bool VxProcessThread::initVxProcessThread(AnalysisConfig* s_analysisConfig, int 
 	}
 	processedEvents->clear();
 	eventSize = 0;
-	resetTriggerTimerAdjustments();
 	analysisConfig = s_analysisConfig;
-	updateTimer.stop();
-
-
 	compileV8();
 
-	if (analysisConfig->bInitialV8)
-	{
-		runV8CodeInitial();
-	}
+	resetTriggerTimerAndV8();
+	updateTimer.stop();
 
 	updateTimer.setInterval(updateTime);
 	connect(&updateTimer, SIGNAL(timeout()), this, SLOT(onUpdateTimerTimeout()));
@@ -117,11 +111,16 @@ void VxProcessThread::onResumeProcessing()
 	}
 }
 
-void VxProcessThread::resetTriggerTimerAdjustments()
+void VxProcessThread::resetTriggerTimerAndV8()
 {
 	previousRawTriggerTag = 0;
 	wraparoundCounter = 0;
 	eventCounter = 0;
+
+	if (analysisConfig->bInitialV8)
+	{
+		runV8CodeInitial();
+	}
 }
 
 void VxProcessThread::run()

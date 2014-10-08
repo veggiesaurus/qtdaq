@@ -6,7 +6,7 @@ AnalysisConfigDialog::AnalysisConfigDialog (AnalysisConfig* s_config, QWidget * 
 {
 	ui.setupUi(this);	
 	config=s_config;
-
+	setWindowFlags(Qt::Window);
 	
 	setUIFromConfig(config);
 }

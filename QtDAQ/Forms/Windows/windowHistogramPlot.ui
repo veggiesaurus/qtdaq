@@ -66,6 +66,7 @@
     </property>
     <addaction name="actionSaveImage"/>
     <addaction name="actionSaveData"/>
+    <addaction name="actionSaveDataHEPRO"/>
    </widget>
    <widget class="QMenu" name="menuFitting">
     <property name="title">
@@ -234,6 +235,11 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionSaveDataHEPRO">
+   <property name="text">
+    <string>Save data (HEPRO)</string>
    </property>
   </action>
  </widget>
@@ -509,6 +515,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSaveDataHEPRO</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowHistogramPlot</receiver>
+   <slot>onSaveDataHEPROClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSaveDataClicked()</slot>
@@ -526,5 +548,6 @@
   <slot>onAddLinearCutClicked()</slot>
   <slot>onEditLinearCutClicked()</slot>
   <slot>onRemoveLinearCutClicked()</slot>
+  <slot>onSaveDataHEPROClicked()</slot>
  </slots>
 </ui>

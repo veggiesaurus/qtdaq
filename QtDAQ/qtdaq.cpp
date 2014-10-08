@@ -387,7 +387,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 		{
 			if (!finishedReading)
 			{
-				vxProcessThread->resetTriggerTimerAdjustments();
+				vxProcessThread->resetTriggerTimerAndV8();
 				runIndex++;
 				vxReaderThread->rewindFile(runIndex);
 				vxReaderThread->setPaused(false);

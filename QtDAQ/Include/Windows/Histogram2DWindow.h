@@ -48,6 +48,7 @@ public slots:
 
 	void clearValues();
 	void onSaveDataClicked();
+	void onSaveDataHEPROClicked();
 
 signals:
 	void polygonalCutCreated(PolygonalCut);

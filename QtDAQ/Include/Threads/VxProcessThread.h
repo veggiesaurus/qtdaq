@@ -29,7 +29,7 @@ public:
 	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=125);
 	void restartProcessThread();
 	
-	void resetTriggerTimerAdjustments();
+	void resetTriggerTimerAndV8();
  signals:
 	 void newProcessedEvents(QVector<EventStatistics*>*);
 	 void newEventSample(EventSampleData*);

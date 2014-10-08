@@ -394,6 +394,47 @@ void Histogram2DWindow::onSaveDataClicked()
 	exportFile.close();
 }
 
+
+void Histogram2DWindow::onSaveDataHEPROClicked()
+{
+	//open a file for output
+	QFileDialog fileDialog(this, "Set export file", "", "Text File (*.txt);;All files (*.*)");
+	fileDialog.restoreState(settings.value("plotWindow/saveDataState").toByteArray());
+	fileDialog.setFileMode(QFileDialog::AnyFile);
+
+	if (!fileDialog.exec())
+		return;
+	settings.setValue("plotWindow/saveDataState", fileDialog.saveState());
+	QString fileName = fileDialog.selectedFiles().first();
+	QFile exportFile(fileName);
+	if (!exportFile.open(QIODevice::WriteOnly))
+		return;
+
+	QString headingX, headingY;
+	headingX = axisNameFromParameter(parameterX);
+	headingY = axisNameFromParameter(parameterY);
+	double intervalX = (parameterMaxX - parameterMinX) / numBinsX;
+	double intervalY = (parameterMaxY - parameterMinY) / numBinsY;
+
+	QVector<double>& outputValues = values;
+	if (normPerColumn || normPerRow)
+	{
+		outputValues = GetNormalisedValues();
+	}
+	QTextStream stream(&exportFile);
+	stream << "1" << endl;
+	//stream<<headingX<<" \t"<<headingY<<endl;
+	for (int j = 0; j<numBinsY; j++)
+	{
+		stream << j+1 << " " << numBinsY << " 0 " << numBinsX << endl;
+		for (int i = 0; i<numBinsX; i++)
+			stream << outputValues[i + j*numBinsX] << endl;
+	}
+
+	stream.flush();
+	exportFile.close();
+}
+
 void Histogram2DWindow::updateSettings()
 {
 	ui.qwtPlotHistogram2D->setLogScale(logScale);	

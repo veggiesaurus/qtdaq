@@ -275,6 +275,38 @@ void HistogramWindow::onSaveDataClicked()
 	exportFile.close();
 }
 
+void HistogramWindow::onSaveDataHEPROClicked()
+{
+	//open a file for output
+	QFileDialog fileDialog(this, "Set export file", "", "Text File (*.txt);;All files (*.*)");
+	fileDialog.restoreState(settings.value("plotWindow/saveDataState").toByteArray());
+	fileDialog.setFileMode(QFileDialog::AnyFile);
+
+	if (!fileDialog.exec())
+		return;
+	settings.setValue("plotWindow/saveDataState", fileDialog.saveState());
+	QString fileName = fileDialog.selectedFiles().first();
+	QFile exportFile(fileName);
+	if (!exportFile.open(QIODevice::WriteOnly))
+		return;
+
+	QwtSeriesData<QwtIntervalSample>* data = ui.qwtPlotHistogram->getValues();
+	QString headingX, headingY;
+	headingY = "Counts";
+	headingX = axisNameFromParameter(parameter);
+
+	QTextStream stream(&exportFile);
+	stream << name;
+	stream << "0 1 1 1 1 1 0" << endl;
+	int numEntries = data->size();
+	for (int i = 0; i<numEntries; i++)
+	{
+		QwtIntervalSample sample = data->sample(i);
+		stream << sample.value << endl;
+	}
+	stream.flush();
+	exportFile.close();
+}
 
 void HistogramWindow::onFitGaussianClicked()
 {
@@ -422,6 +454,8 @@ void HistogramWindow::setProjectorMode(bool s_projectorMode)
 	PlotWindow::setProjectorMode(s_projectorMode);	
 	ui.qwtPlotHistogram->setProjectorMode(projectorMode);
 }
+
+
 
 QDataStream &operator<<(QDataStream &out, const HistogramWindow &obj)
 {

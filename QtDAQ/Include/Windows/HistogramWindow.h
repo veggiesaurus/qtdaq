@@ -27,8 +27,11 @@ public slots:
 	void onNewCalibration(int channel, EnergyCalibration calibration);
 	void onNewEventStatistics(QVector<EventStatistics*>* events);
 	void timerUpdate();
-	void clearValues();
+
+	void clearValues();	
 	void onSaveDataClicked();
+	void onSaveDataHEPROClicked();
+
 	void onLogScaleToggled(bool logScaleEnabled);
 	void onDeltaHistogramToggled(bool deltaEnabled);
 	void onDuplicateClicked();
