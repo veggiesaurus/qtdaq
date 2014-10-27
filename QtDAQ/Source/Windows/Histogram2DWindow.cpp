@@ -426,7 +426,7 @@ void Histogram2DWindow::onSaveDataHEPROClicked()
 	//stream<<headingX<<" \t"<<headingY<<endl;
 	for (int j = 0; j<numBinsY; j++)
 	{
-		stream << j+1 << " " << numBinsY << " 0 " << numBinsX << endl;
+		stream << j + 1 << " " << numBinsX << " 0 " << numBinsX << endl;
 		for (int i = 0; i<numBinsX; i++)
 			stream << outputValues[i + j*numBinsX] << endl;
 	}

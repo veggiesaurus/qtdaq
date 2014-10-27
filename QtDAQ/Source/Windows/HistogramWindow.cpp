@@ -296,7 +296,7 @@ void HistogramWindow::onSaveDataHEPROClicked()
 	headingX = axisNameFromParameter(parameter);
 
 	QTextStream stream(&exportFile);
-	stream << name;
+	stream << name <<endl;
 	stream << "0 1 1 1 1 1 0" << endl;
 	int numEntries = data->size();
 	for (int i = 0; i<numEntries; i++)

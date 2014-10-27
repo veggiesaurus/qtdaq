@@ -357,7 +357,7 @@
    <item row="4" column="1">
     <widget class="QSpinBox" name="spinBoxChannelsX">
      <property name="minimum">
-      <number>32</number>
+      <number>16</number>
      </property>
      <property name="maximum">
       <number>4096</number>
@@ -542,7 +542,7 @@
    <item row="8" column="1">
     <widget class="QSpinBox" name="spinBoxChannelsY">
      <property name="minimum">
-      <number>32</number>
+      <number>16</number>
      </property>
      <property name="maximum">
       <number>4096</number>
