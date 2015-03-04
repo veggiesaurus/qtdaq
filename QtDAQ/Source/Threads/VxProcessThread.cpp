@@ -336,6 +336,11 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	eventCounter++;
 	previousRawTriggerTag = rawEvent->info.TriggerTimeTag;
 
+	//temperature
+	int temperatureIndex = (int)(timeMillis / 5000);
+	float currentTemperature = 0;
+	if (temperatureIndex >= 0 && temperatureIndex < temperatureArray.size())
+		currentTemperature = temperatureArray[temperatureIndex];
 
 	stats->serial = rawEvent->info.BoardId;
 	bool processSuccess = true;
@@ -353,7 +358,6 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	bool foundNumSamples = false;
 
 	int primaryCFDChannel = -1;
-	//int primaryCFDChannel = 1;
 
 	float cfdOverrideTime = -1;
 	if (primaryCFDChannel >= 0 && primaryCFDChannel < NUM_DIGITIZER_CHANNELS)
@@ -363,8 +367,10 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	}
 	for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS; ch++)
 	{
-		if (ch!=primaryCFDChannel)
+		stats->channelStatistics[ch].temperature = currentTemperature;
+		if (ch != primaryCFDChannel)
 			processSuccess = processChannel(vx1742Mode, rawEvent, ch, stats, GSPS, sample, cfdOverrideTime);
+		stats->channelStatistics[ch].secondsFromFirstEvent = stats->triggerTimeAdjustedMillis / 1000.0f;
 	}
 
 	//Time of flight
@@ -627,6 +633,8 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 		if (cfdOverrideTime >= 0)
 			cfdCrossing = cfdOverrideTime*GSPS;
 		//Charge comparison
+		//processSuccess &= calculateIntegralsLinearBaseline(tempValArray, numSamples, analysisConfig->baselineSampleSize, timeOffset + startOffset, timeOffset + shortGateOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+		
 		//processSuccess &= calculateIntegrals(tempValArray, numSamples, stats->channelStatistics[ch].baseline, timeOffset + startOffset, timeOffset + shortGateOffset, timeOffset + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
 		processSuccess &= calculateIntegralsCorrected(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdCrossing + startOffset, cfdCrossing + shortGateOffset, cfdCrossing + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
 		//processSuccess&=calculateIntegralsTrapezoidal(tempValArray, numSamples, stats->channelStatistics[ch].baseline, cfdIndex+startOffset, cfdIndex+shortGateOffset, cfdIndex+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
@@ -634,6 +642,17 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 		stats->channelStatistics[ch].shortGateIntegral *= analysisConfig->samplingReductionFactor;
 		stats->channelStatistics[ch].longGateIntegral *= analysisConfig->samplingReductionFactor;
 		processSuccess &= calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
+
+		//temperature corrections (only if defined)
+		if (analysisConfig->useTempCorrection && stats->channelStatistics[ch].temperature>0.01)
+		{
+			//float temperatureFactor = 1.00 + (stats->channelStatistics[ch].temperature - analysisConfig->referenceTemperature)* (-analysisConfig->scalingVariation / 100);
+			float temperatureFactor = 1.00 / (1.00 + (stats->channelStatistics[ch].temperature - analysisConfig->referenceTemperature)*(analysisConfig->scalingVariation / 100)); 
+
+			stats->channelStatistics[ch].shortGateIntegral *= temperatureFactor;
+			stats->channelStatistics[ch].longGateIntegral *= temperatureFactor;
+		}
+
 
 		//Linear filter
 		if (analysisConfig->useOptimalFilter)
@@ -942,4 +961,23 @@ void VxProcessThread::printTruncatedSamples(float* sampleArray, float baseline, 
 			(*textStream) << endl;
 		}
 	}
+}
+
+void VxProcessThread::loadTemperatureLog(QString filename)
+{
+	QFile* file = new QFile(filename);
+	if (!file->open(QIODevice::ReadOnly))
+		return;
+	temperatureArray.clear();
+	QTextStream* textStream = new QTextStream(file);
+	while (!textStream->atEnd())
+	{
+		float tempVal;
+		(*textStream) >> tempVal;
+		temperatureArray.push_back(tempVal);
+	}
+
+	file->close();
+	SAFE_DELETE(textStream);
+	SAFE_DELETE(file);
 }

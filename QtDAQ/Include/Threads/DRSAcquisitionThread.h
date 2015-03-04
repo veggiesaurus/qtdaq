@@ -18,7 +18,7 @@ class DRSAcquisitionThread : public QThread
 public:
 	DRSAcquisitionThread(QObject *parent = 0);
 	~DRSAcquisitionThread();
-	bool initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime=100);
+	bool initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime=33);
 	void reInit(AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig);
 	void processEvent(EventRawData rawEvent, bool outputSample);
 	void lockConfig();

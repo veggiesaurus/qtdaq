@@ -345,7 +345,8 @@ void QtDAQ::readVxFile(QString filename, bool compressedInput)
 	connect(vxProcessThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
 	connect(vxProcessThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
 	vxProcessThread->initVxProcessThread(analysisConfig);
-
+	if (!temperatureLogFilename.isEmpty())
+		vxProcessThread->loadTemperatureLog(temperatureLogFilename);
 
 
 	vxReaderThread = new VxBinaryReaderThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
@@ -1460,4 +1461,34 @@ void QtDAQ::onFilePercentUpdated(float filePercent)
 	
 	progressTaskbar->setValue((int)(round(filePercent * 100))%100);
 	this->filePercent = filePercent;
+}
+
+void QtDAQ::onLoadTemperatureLogClicked()
+{
+	QFileDialog fileDialog(this, "Set input file", "", "Log files (*.txt);;All files (*.*)");
+	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+	fileDialog.setFileMode(QFileDialog::ExistingFile);
+	if (!rawFilename.isEmpty())
+	{
+		QFileInfo fileInfo(rawFilename);
+		fileDialog.setDirectory(fileInfo.dir().absolutePath());
+		fileDialog.selectFile(fileInfo.fileName() + ".txt");
+	}
+	else
+	{
+		QString prevFileDir = settings.value("analysis/prevLogDir").toString();
+		QString prevFile = settings.value("analysis/prevLogFile").toString();
+		fileDialog.setDirectory(prevFileDir);
+	}
+
+	if (fileDialog.exec())
+	{
+		temperatureLogFilename = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(temperatureLogFilename);
+		settings.setValue("analysis/prevLogDir", fileInfo.dir().absolutePath());
+		settings.setValue("analysis/prevLogFile", fileInfo.fileName());
+		if (vxProcessThread)
+			vxProcessThread->loadTemperatureLog(temperatureLogFilename);
+	}
+
 }

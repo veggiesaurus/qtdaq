@@ -335,6 +335,57 @@ bool calculateIntegrals(float* inputData, int inputNumSamples, float inputBaseli
     return true;
 }
 
+//calculates charge integrals after determining a linear baseline to subtract
+bool calculateIntegralsLinearBaseline(float* inputData, int inputNumSamples, int inputNumBaselineSamples, int inputStartGate, int inputShortGateEnd, int inputLongGateEnd, float& outputShortIntegral, float& outputLongIntegral)
+{
+	//check bounds
+	if (inputNumBaselineSamples==0 || inputStartGate<inputNumBaselineSamples || inputShortGateEnd<inputStartGate || inputShortGateEnd>inputLongGateEnd || inputLongGateEnd >= inputNumSamples - inputNumBaselineSamples)
+		return false;
+
+	//calculate baseline
+	int hackOffset = 30;
+	int i_A = inputNumBaselineSamples / 2;
+	int i_B = inputNumSamples - hackOffset - inputNumBaselineSamples / 2;
+
+	float V_A = 0, V_B = 0;
+
+	for (int i = 0; i < inputNumBaselineSamples; i++)
+	{
+		V_A += inputData[i];
+		V_B += inputData[inputNumSamples - hackOffset - inputNumBaselineSamples + i];
+	}
+	V_A /= inputNumBaselineSamples;
+	V_B /= inputNumBaselineSamples;
+
+	float m = (V_B - V_A) / (i_B - i_A);
+	float C = V_A - m * i_A;
+	
+
+	float shortIntegralUncorrected = 0;
+	float longIntegralUncorrected = 0;
+
+	for (int i = inputStartGate; i<inputShortGateEnd; i++)
+	{
+		//within short gate, both integrals incremented
+		shortIntegralUncorrected += (m*i + C) - inputData[i];
+	}
+	longIntegralUncorrected = shortIntegralUncorrected;
+	//after short gate end, only increment long gate
+	for (int i = inputShortGateEnd; i < inputLongGateEnd; i++)
+		longIntegralUncorrected += (m*i + C) - inputData[i];
+
+	shortIntegralUncorrected -= (m*inputStartGate + C) - (inputStartGate - (int)inputStartGate)*inputData[(int)inputStartGate];
+	longIntegralUncorrected -= (m*inputStartGate + C) - (inputStartGate - (int)inputStartGate)*inputData[(int)inputStartGate];
+	shortIntegralUncorrected += (m*inputShortGateEnd + C) - (inputShortGateEnd - (int)inputShortGateEnd)*inputData[(int)inputShortGateEnd];
+	longIntegralUncorrected += (m*inputLongGateEnd + C) - (inputLongGateEnd - (int)inputLongGateEnd)*inputData[(int)inputLongGateEnd];
+	//correct for baseline
+	outputShortIntegral = shortIntegralUncorrected;
+	outputLongIntegral = longIntegralUncorrected;
+
+	return true;
+}
+
+
 //calculates the charge integrals using the input data and gates.
 bool calculateIntegralsCorrected(float* inputData, int inputNumSamples, float inputBaseline, float inputStartGate, float inputShortGateEnd, float inputLongGateEnd, float& outputShortIntegral, float& outputLongIntegral)
 {
@@ -349,12 +400,12 @@ bool calculateIntegralsCorrected(float* inputData, int inputNumSamples, float in
 	for (int i=inputStartGate;i<inputShortGateEnd;i++)
 	{
 		//within short gate, both integrals incremented
-		shortIntegralUncorrected+=inputBaseline-inputData[i];
-	}
+		shortIntegralUncorrected+=(inputBaseline-inputData[i]);
+	} 
 	longIntegralUncorrected=shortIntegralUncorrected;
 	//after short gate end, only increment long gate
 	for (int i=inputShortGateEnd;i<inputLongGateEnd;i++)
-		longIntegralUncorrected+=inputBaseline-inputData[i];
+		longIntegralUncorrected += (inputBaseline - inputData[i]);
 
 	shortIntegralUncorrected-=inputBaseline-(inputStartGate-(int)inputStartGate)*inputData[(int)inputStartGate];
 	longIntegralUncorrected-=inputBaseline-(inputStartGate-(int)inputStartGate)*inputData[(int)inputStartGate];
@@ -671,3 +722,5 @@ bool linearFilter(float* inputData, int inputNumSamples, float inputBaseline, fl
 	}
 	return true;
 }
+
+

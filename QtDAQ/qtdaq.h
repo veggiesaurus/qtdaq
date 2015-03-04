@@ -101,6 +101,7 @@ public:
 	void onSaveAnalysisConfigClicked();
 	void onLoadAnalysisConfigClicked();
 	void onPauseReadingToggled(bool checked);
+	void onLoadTemperatureLogClicked();
 	//cuts
 	void onAddLinearCutClicked();
 	void onEditLinearCutClicked();
@@ -229,5 +230,8 @@ private:
 	//progress in taskbar
 	QWinTaskbarProgress* progressTaskbar = nullptr;
 	float filePercent = 0;
+
+	//temperature
+	QString temperatureLogFilename;
 
 };

@@ -34,6 +34,8 @@ bool findHalfRise(float* inputData, int inputNumSamples, int inputPositionOfMin,
 
 //calculates the charge integrals using the input data and gates.
 bool calculateIntegrals(float* inputData, int inputNumSamples, float inputBaseline, int inputStartGate, int inputShortGateEnd, int inputLongGateEnd, float& outputShortIntegral, float& outputLongIntegral);
+//calculates the charge integrals using the input data and gates.
+bool calculateIntegralsLinearBaseline(float* inputData, int inputNumSamples, int inputNumBaselineSamples, int inputStartGate, int inputShortGateEnd, int inputLongGateEnd, float& outputShortIntegral, float& outputLongIntegral);
 //with partial corrections (requires float arguments)
 bool calculateIntegralsCorrected(float* inputData, int inputNumSamples, float inputBaseline, float inputStartGate, float inputShortGateEnd, float inputLongGateEnd, float& outputShortIntegral, float& outputLongIntegral);
 

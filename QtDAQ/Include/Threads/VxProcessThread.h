@@ -28,8 +28,9 @@ public:
 	~VxProcessThread();
 	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=125);
 	void restartProcessThread();
-	
 	void resetTriggerTimerAndV8();
+	void loadTemperatureLog(QString filename);
+
  signals:
 	 void newProcessedEvents(QVector<EventStatistics*>*);
 	 void newEventSample(EventSampleData*);
@@ -69,6 +70,7 @@ public slots:
 	void onUpdateTimerTimeout();
 	void onAnalysisConfigChanged();
 	void onResumeProcessing();
+	
 private:
 	int eventIndex;
 	int eventSize;
@@ -112,5 +114,7 @@ private:
 	QMutex v8Mutex;
 	bool v8RecompileRequired = false;
 
+	//temperature stored in array (per 5 seconds)
+	QVector<float> temperatureArray;
 
 };
