@@ -337,7 +337,7 @@
       <double>-250000.000000000000000</double>
      </property>
      <property name="maximum">
-      <double>250000.000000000000000</double>
+      <double>750000.000000000000000</double>
      </property>
      <property name="singleStep">
       <double>100.000000000000000</double>
@@ -522,7 +522,7 @@
       <double>-250000.000000000000000</double>
      </property>
      <property name="maximum">
-      <double>250000.000000000000000</double>
+      <double>750000.000000000000000</double>
      </property>
      <property name="singleStep">
       <double>100.000000000000000</double>
