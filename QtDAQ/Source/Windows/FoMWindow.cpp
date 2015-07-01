@@ -8,7 +8,9 @@ FoMWindow::FoMWindow (QWidget * parent, HistogramParameter s_parameterX, Histogr
 	parameterIntervalX=((parameterMaxX-parameterMinX))/numBinsX;
 	parameterIntervalY=((parameterMaxY-parameterMinY))/numBinsY;
 	xVals=new double[numBinsX];
-	yVals=new double[numBinsX];
+	yVals = new double[numBinsX];
+	lowerCurveVals = new double[numBinsX];
+	upperCurveVals = new double[numBinsX];
 
 	plot=ui.qwtPlotFoM;
 	ui.qwtPlotFoM->setXRangeParameter(parameterMinX, parameterMaxX);
@@ -16,6 +18,12 @@ FoMWindow::FoMWindow (QWidget * parent, HistogramParameter s_parameterX, Histogr
 	ui.qwtPlotFoM->setAxisAutoScale(QwtPlot::yLeft, true);
 	fomCurve=new QwtPlotCurve("Figure of Merit");
 	fomCurve->attach(ui.qwtPlotFoM);
+	separateCurveLower = new QwtPlotCurve("Lower Plot");
+	separateCurveUpper = new QwtPlotCurve("Upper Plot");
+	separateCurveLower->attach(ui.qwtPlotFoM);
+	separateCurveLower->setVisible(false);
+	separateCurveUpper->attach(ui.qwtPlotFoM);
+	separateCurveUpper->setVisible(false);
 
 	 //baseline marker
 	QPen effectiveSepMarkerPen(Qt::darkRed,1);
@@ -126,7 +134,7 @@ void FoMWindow::updateTitleAndAxis()
 		windowTitle+=" "+QString::number(numEvents)+" events.";	
 	setWindowTitle(windowTitle);
 	ui.qwtPlotFoM->setAxisTitle(QwtPlot::xBottom, axisNameX);
-	ui.qwtPlotFoM->setAxisTitle(QwtPlot::yLeft, "Figure of Merit");
+	ui.qwtPlotFoM->setAxisTitle(QwtPlot::yLeft, showSeparatedPlots?"Counts":"Figure of Merit");
 }
 
 void FoMWindow::clearValues()
@@ -164,6 +172,8 @@ void FoMWindow::clearValues()
 		values.fill(0);
 	}
 	fomCurve->setSamples(NULL, NULL, 0);
+	separateCurveLower->setSamples(NULL, NULL, 0);
+	separateCurveUpper->setSamples(NULL, NULL, 0);
 	ui.qwtPlotFoM->replot();
 }
 void FoMWindow::onRefreshClicked()
@@ -173,17 +183,32 @@ void FoMWindow::onRefreshClicked()
 	{
 		SAFE_DELETE_ARRAY(xVals);
 		SAFE_DELETE_ARRAY(yVals);
+		SAFE_DELETE_ARRAY(lowerCurveVals);
+		SAFE_DELETE_ARRAY(upperCurveVals);
 		xVals=new double[numBinsX];
 		yVals=new double[numBinsX];
+		lowerCurveVals = new double[numBinsX];
+		upperCurveVals = new double[numBinsX];
 		for (int i=0;i<numBinsX;i++)
 		{
 			xVals[i]=parameterMinX+i*parameterIntervalX;
 			yVals[i]=getFigureOfMerit(i);
+			lowerCurveVals[i] = A1[i]*sigma1[i];
+			upperCurveVals[i] = A2[i]*sigma2[i];
 		}
 		fomCurve->setSamples(xVals, yVals, numBinsX);
+		separateCurveLower->setSamples(xVals, lowerCurveVals, numBinsX);
+		separateCurveUpper->setSamples(xVals, upperCurveVals, numBinsX);
 	}
 	ui.qwtPlotFoM->replot();
 	updateTitleAndAxis();
+}
+
+void FoMWindow::onShowSeparatedPlotsToggled(bool showPlots)
+{
+	showSeparatedPlots = showPlots;
+	separateCurveLower->setVisible(showPlots);
+	separateCurveUpper->setVisible(showPlots);
 }
 
 void FoMWindow::onNewCalibration(int channel, EnergyCalibration calibration)
@@ -256,6 +281,66 @@ void FoMWindow::onSaveDataClicked()
 	exportFile.close();
 }
 
+
+void FoMWindow::onSaveUpperClicked()
+{
+	//open a file for output
+	QFileDialog fileDialog(this, "Set export file", "", "Text File (*.txt);;All files (*.*)");
+	fileDialog.restoreState(settings.value("plotWindow/saveDataState").toByteArray());
+	fileDialog.setFileMode(QFileDialog::AnyFile);
+
+	if (!fileDialog.exec())
+		return;
+	settings.setValue("plotWindow/saveDataState", fileDialog.saveState());
+	QString fileName = fileDialog.selectedFiles().first();
+	QFile exportFile(fileName);
+	if (!exportFile.open(QIODevice::WriteOnly))
+		return;
+
+	QString headingX, headingY;
+	headingY = "Counts";
+	headingX = axisNameFromParameter(parameterX);
+
+	QTextStream stream(&exportFile);
+	stream << headingX << " \t" << headingY << endl;
+	int numEntries = numBinsX;
+	for (int i = 0; i<numEntries; i++)
+	{
+		stream << xVals[i] << " \t" << upperCurveVals[i] << endl;
+	}
+	stream.flush();
+	exportFile.close();
+}
+
+void FoMWindow::onSaveLowerClicked()
+{
+	//open a file for output
+	QFileDialog fileDialog(this, "Set export file", "", "Text File (*.txt);;All files (*.*)");
+	fileDialog.restoreState(settings.value("plotWindow/saveDataState").toByteArray());
+	fileDialog.setFileMode(QFileDialog::AnyFile);
+
+	if (!fileDialog.exec())
+		return;
+	settings.setValue("plotWindow/saveDataState", fileDialog.saveState());
+	QString fileName = fileDialog.selectedFiles().first();
+	QFile exportFile(fileName);
+	if (!exportFile.open(QIODevice::WriteOnly))
+		return;
+
+	QString headingX, headingY;
+	headingY = "Counts";
+	headingX = axisNameFromParameter(parameterX);
+
+	QTextStream stream(&exportFile);
+	stream << headingX << " \t" << headingY << endl;
+	int numEntries = numBinsX;
+	for (int i = 0; i<numEntries; i++)
+	{
+		stream << xVals[i] << " \t" << lowerCurveVals[i] << endl;
+	}
+	stream.flush();
+	exportFile.close();
+}
 
 double FoMWindow::getFigureOfMerit(int indexX)
 {

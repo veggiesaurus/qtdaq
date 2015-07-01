@@ -35,7 +35,7 @@ AnalysisConfig::AnalysisConfig()
 	bitsDropped=0;
 	samplingReductionFactor=1;
 	useOptimalFilter=false;
-	displayCFDSignal=false;
+	displayCFDSignal=true;
 	primaryCFDChannel = -1;
 }
 

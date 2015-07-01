@@ -30,6 +30,8 @@ if (ptr != NULL)            \
 #define UI_SAVE_VERSION ((quint32)(0x03))
 #define ANALYSIS_SAVE_VERSION ((quint32)(0x01))
 #define ACQUISITION_SAVE_VERSION ((quint32)(0x01))
+#define PI (3.141592654f)
+#define SQRT_2PI (2.506628275f)
 
 enum HistogramParameter
 {

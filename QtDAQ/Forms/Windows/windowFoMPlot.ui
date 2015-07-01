@@ -56,14 +56,23 @@
     <property name="title">
      <string>Plot</string>
     </property>
+    <widget class="QMenu" name="menuSave_separated_plots">
+     <property name="title">
+      <string>Save separated plots</string>
+     </property>
+     <addaction name="actionLower"/>
+     <addaction name="actionUpper"/>
+    </widget>
     <addaction name="actionSaveImage"/>
     <addaction name="actionSaveData"/>
+    <addaction name="menuSave_separated_plots"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
      <string>View</string>
     </property>
     <addaction name="actionRename_window"/>
+    <addaction name="actionShowSeparatedPlots"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuConfigure"/>
@@ -129,6 +138,24 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionShowSeparatedPlots">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show separated plots</string>
+   </property>
+  </action>
+  <action name="actionLower">
+   <property name="text">
+    <string>Lower</string>
+   </property>
+  </action>
+  <action name="actionUpper">
+   <property name="text">
+    <string>Upper</string>
    </property>
   </action>
  </widget>
@@ -270,6 +297,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShowSeparatedPlots</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>WindowFoMPlot</receiver>
+   <slot>onShowSeparatedPlotsToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLower</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowFoMPlot</receiver>
+   <slot>onSaveLowerClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionUpper</sender>
+   <signal>triggered()</signal>
+   <receiver>WindowFoMPlot</receiver>
+   <slot>onSaveUpperClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>476</x>
+     <y>283</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSaveDataClicked()</slot>
@@ -279,5 +354,8 @@
   <slot>onActiveCutsClicked()</slot>
   <slot>clearValues()</slot>
   <slot>onRenameClicked()</slot>
+  <slot>onShowSeparatedPlotsToggled(bool)</slot>
+  <slot>onSaveLowerClicked()</slot>
+  <slot>onSaveUpperClicked()</slot>
  </slots>
 </ui>

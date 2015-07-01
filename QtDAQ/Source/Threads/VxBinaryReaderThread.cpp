@@ -326,7 +326,6 @@ void VxBinaryReaderThread::run()
 					break;
 				}
 			}
-
 		}
 
 		ev.processed=false;

@@ -27,11 +27,14 @@ public:
 public slots:
 	void onOptionsClicked();
 	void onRefreshClicked();
+	void onShowSeparatedPlotsToggled(bool showPlots);
 	void onNewCalibration(int channel, EnergyCalibration calibration);
 	void onNewEventStatistics(QVector<EventStatistics*>* events);
 	void clearValues();
 	void timerUpdate();
 	void onSaveDataClicked();
+	void onSaveUpperClicked();
+	void onSaveLowerClicked();
 signals:
 	void channelChanged(int);
 
@@ -45,8 +48,12 @@ private:
 	Ui::WindowFoMPlot ui;
 	Ui::DialogHistogram2DConfig uiDialogHistogramConfig;
 	QwtPlotCurve* fomCurve;
+	QwtPlotCurve* separateCurveUpper;
+	QwtPlotCurve* separateCurveLower;
 	QwtPlotMarker *effectiveSepMarker;
-	
+	bool showSeparatedPlots;
+
+
 	HistogramParameter parameterX, parameterY;
 	int numBinsX,numBinsY;
 	double parameterMinX, parameterMaxX;
@@ -61,6 +68,9 @@ private:
 	double *A1, *A2;
 	double *x_c1, *x_c2;
 	double *sigma1, *sigma2;
+	//values for separated plots
+	double* lowerCurveVals;
+	double* upperCurveVals;
 
 private:
 	friend QDataStream &operator<<(QDataStream &out, const FoMWindow &obj);
