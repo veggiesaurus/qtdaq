@@ -251,68 +251,43 @@ void AnalysisConfigDialog::updateUI()
 void AnalysisConfigDialog::codeChanged()
 {
 	Isolate* isolate = Isolate::New();
+	QPlainTextEdit* codeEdit = dynamic_cast<QPlainTextEdit*>(sender());
+	if (codeEdit)
 	{
+		disconnect(codeEdit, SIGNAL(textChanged()), 0, 0);
+
+		QTextCursor cursor(codeEdit->document());
+		cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+		QTextCharFormat highlightFormat;
+		highlightFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
+		cursor.mergeCharFormat(highlightFormat);
+
 		Isolate::Scope isolate_scope(isolate);
 		HandleScope handle_scope(isolate);
-
 		Local<ObjectTemplate> global = ObjectTemplate::New();
-		//functions
-
 		Handle<Context> context = Context::New(isolate, NULL, global);
 		Context::Scope context_scope(context);
 
 		v8::TryCatch try_catch;
 		try_catch.SetVerbose(true);
+		QString errorMessage;
+		
+		Handle<String> source = String::NewFromUtf8(isolate, codeEdit->toPlainText().toStdString().c_str());
+		Handle<Script> handleScript = Script::Compile(source);
+		if (handleScript.IsEmpty())
+			underlineError(codeEdit, getCompileErrorLine(try_catch, errorMessage)-1);
 
-		Handle<String> sourceDefinitions = String::NewFromUtf8(isolate, ui.plainTextEditDef->toPlainText().toStdString().c_str());
-		Handle<Script> handleScriptDefinitions = Script::Compile(sourceDefinitions);
-		if (handleScriptDefinitions.IsEmpty())
-			checkV8Exceptions(try_catch, "Definitions", false);
+		connect(codeEdit, SIGNAL(textChanged()), this, SLOT(codeChanged()), Qt::QueuedConnection);
 
-
-		Handle<String> sourceInitial = String::NewFromUtf8(isolate, ui.plainTextEditInitialCode->toPlainText().toStdString().c_str());
-		Handle<Script> handleScriptInitial = Script::Compile(sourceInitial);
-		if (handleScriptInitial.IsEmpty())
-			checkV8Exceptions(try_catch, "Initialization", false);
-
-		Handle<String> sourcePre = String::NewFromUtf8(isolate, ui.plainTextEditPreAnalysis->toPlainText().toStdString().c_str());
-		Handle<Script> handleScriptPre = Script::Compile(sourcePre);
-		if (handleScriptPre.IsEmpty())
-			checkV8Exceptions(try_catch, "Pre-analysis", false);
-
-		Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, ui.plainTextEditPostChannel->toPlainText().toStdString().c_str());
-		Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
-		if (handleScriptPostChannel.IsEmpty())
-			checkV8Exceptions(try_catch, "Post-analysis (per channel)", false);
-
-		//allow v8 code to access each channel stats via an array (channels 0-3)
-		QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + ui.plainTextEditPostEvent->toPlainText();
-		Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str());
-		Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
-		if (handleScriptPostEvent.IsEmpty())
-			checkV8Exceptions(try_catch, "Post-analysis (per event)", false);
-
-		Handle<String> sourceFinished = String::NewFromUtf8(isolate, ui.plainTextEditFinalCode->toPlainText().toStdString().c_str());
-		Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
-		if (handleScriptFinished.IsEmpty())
-			checkV8Exceptions(try_catch, "After reading", false);		
 	}
-	//isolate->Exit();
 	isolate->Dispose();
-
-	underlineError(ui.plainTextEditDef, 1);
-	underlineError(ui.plainTextEditDef, 3);
 }
 
 
 void AnalysisConfigDialog::underlineError(QPlainTextEdit* textEdit, int lineNum)
-{
-
-	disconnect(textEdit, SIGNAL(textChanged()), 0, 0);
-
+{	
 	QTextBlock block = textEdit->document()->findBlockByLineNumber(lineNum);	
 	QTextCursor errorLine(block);
-	errorLine.movePosition(QTextCursor::StartOfWord);
 	errorLine.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
 
 	QTextCharFormat highlightFormat;
@@ -320,7 +295,6 @@ void AnalysisConfigDialog::underlineError(QPlainTextEdit* textEdit, int lineNum)
 	highlightFormat.setUnderlineStyle(QTextCharFormat::WaveUnderline);
 	errorLine.mergeCharFormat(highlightFormat);
 
-	connect(textEdit, SIGNAL(textChanged()), this, SLOT(codeChanged()), Qt::QueuedConnection);
 }
 
 #pragma endregion

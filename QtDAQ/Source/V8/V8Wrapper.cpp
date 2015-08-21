@@ -134,3 +134,18 @@ void checkV8Exceptions(v8::TryCatch &try_catch, QString codeblockName, bool show
 		qDebug() << *exception;
 	}
 }
+
+int getCompileErrorLine(v8::TryCatch &try_catch, QString& errorMessage)
+{
+	if (try_catch.HasCaught())
+	{
+		v8::String::Utf8Value exception(try_catch.Exception());
+		errorMessage = *exception;
+		int lineNumber = 0;
+
+		v8::Handle<v8::Message> message = try_catch.Message();
+		return message->GetLineNumber();
+	}
+	else
+		return -1;
+}
