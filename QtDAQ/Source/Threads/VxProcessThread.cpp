@@ -767,7 +767,7 @@ void VxProcessThread::compileV8()
 	hasException = try_catch.HasCaught();
 	scriptPostChannel.Reset(isolate, handleScriptPostChannel);
 
-	//allow v8 code to access each channel stats via an array (channels 0-8)
+	//allow v8 code to access each channel stats via an array (channels 0-3)
 	QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + analysisConfig->customCodePostEvent;
 	Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str());
 	Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);

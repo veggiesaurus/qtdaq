@@ -1211,6 +1211,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>plainTextEditInitialCode</sender>
+   <signal>textChanged()</signal>
+   <receiver>DialogAnalysisConfig</receiver>
+   <slot>codeChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>550</x>
+     <y>143</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>plainTextEditPreAnalysis</sender>
+   <signal>textChanged()</signal>
+   <receiver>DialogAnalysisConfig</receiver>
+   <slot>codeChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>196</x>
+     <y>321</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>plainTextEditPostChannel</sender>
+   <signal>textChanged()</signal>
+   <receiver>DialogAnalysisConfig</receiver>
+   <slot>codeChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>553</x>
+     <y>321</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>plainTextEditPostEvent</sender>
+   <signal>textChanged()</signal>
+   <receiver>DialogAnalysisConfig</receiver>
+   <slot>codeChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>196</x>
+     <y>502</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>plainTextEditFinalCode</sender>
+   <signal>textChanged()</signal>
+   <receiver>DialogAnalysisConfig</receiver>
+   <slot>codeChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>550</x>
+     <y>505</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>updateUI()</slot>

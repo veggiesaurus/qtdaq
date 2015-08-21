@@ -17,8 +17,8 @@ public:
 	void updateConfig();
 private:
 	void setUIFromConfig(AnalysisConfig* s_config);
-	
-	AnalysisConfig* config;
+	void underlineError(QPlainTextEdit* textEdit, int lineNum);
+
 private slots:
 	void updateUI();
 	void codeChanged();
@@ -27,7 +27,8 @@ signals:
 private:
 	Ui::DialogAnalysisConfig ui;
 	JSHighlighter* highlighters[6];
-	
+	AnalysisConfig* config;
+
 	//v8
 	Isolate* isolate;
 
