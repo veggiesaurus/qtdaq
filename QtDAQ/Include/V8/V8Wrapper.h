@@ -1,6 +1,7 @@
 #pragma once
 #include <v8.h>
 #include <QDebug>
+#include <QMessageBox>
 #include "globals.h"
 #include "DRS4Acquisition.h"
 
@@ -86,3 +87,5 @@ void setCustomParameterName(const FunctionCallbackInfo<Value>& args);
 
 Handle<ObjectTemplate> GetSampleStatsTemplate(Isolate* isolate);
 Handle<ObjectTemplate> GetEventStatsTemplate(Isolate* isolate);
+
+void checkV8Exceptions(v8::TryCatch &try_catch, QString codeblockName = "General", bool showErrorBox = true);

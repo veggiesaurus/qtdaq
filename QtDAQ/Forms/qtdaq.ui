@@ -163,19 +163,37 @@
     <property name="title">
      <string>Acquisition</string>
     </property>
-    <addaction name="actionEditAcquisitionConfig"/>
-    <addaction name="actionSaveAcquisitionConfig"/>
-    <addaction name="actionLoadAcquisitionConfig"/>
+    <widget class="QMenu" name="menuDRS4_Eval_board">
+     <property name="title">
+      <string>DRS4 Eval board</string>
+     </property>
+     <addaction name="actionLoadAcquisitionConfig"/>
+     <addaction name="actionSaveAcquisitionConfig"/>
+     <addaction name="actionEditAcquisitionConfig"/>
+     <addaction name="separator"/>
+     <addaction name="actionInit"/>
+     <addaction name="actionStart"/>
+     <addaction name="actionStop"/>
+     <addaction name="actionReset"/>
+     <addaction name="separator"/>
+     <addaction name="actionSoftTrigger"/>
+     <addaction name="actionAutoTrigger"/>
+     <addaction name="separator"/>
+    </widget>
+    <widget class="QMenu" name="menuVx1761">
+     <property name="title">
+      <string>Vx1761</string>
+     </property>
+     <addaction name="actionLoad_Config_File"/>
+     <addaction name="actionSave_Config_File"/>
+     <addaction name="actionEdit_Config_File"/>
+     <addaction name="separator"/>
+     <addaction name="actionLoad_Previous_Config"/>
+    </widget>
+    <addaction name="menuDRS4_Eval_board"/>
+    <addaction name="menuVx1761"/>
     <addaction name="separator"/>
     <addaction name="actionSerialInterface"/>
-    <addaction name="separator"/>
-    <addaction name="actionInit"/>
-    <addaction name="actionStart"/>
-    <addaction name="actionStop"/>
-    <addaction name="actionReset"/>
-    <addaction name="separator"/>
-    <addaction name="actionSoftTrigger"/>
-    <addaction name="actionAutoTrigger"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -648,6 +666,26 @@
   <action name="actionLoadTemperatureLog">
    <property name="text">
     <string>Load Temperature Log</string>
+   </property>
+  </action>
+  <action name="actionLoad_Config_File">
+   <property name="text">
+    <string>Load Config File</string>
+   </property>
+  </action>
+  <action name="actionEdit_Config_File">
+   <property name="text">
+    <string>Edit Config File</string>
+   </property>
+  </action>
+  <action name="actionLoad_Previous_Config">
+   <property name="text">
+    <string>Load Previous Config</string>
+   </property>
+  </action>
+  <action name="actionSave_Config_File">
+   <property name="text">
+    <string>Save Config File</string>
    </property>
   </action>
  </widget>

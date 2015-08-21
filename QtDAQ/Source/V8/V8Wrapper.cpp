@@ -114,3 +114,23 @@ Handle<ObjectTemplate> GetEventStatsTemplate(Isolate* isolate)
 	SET_TEMPLATE_ACCESSOR(eventStatsTemplate, EventStatistics, custom5);
 	return eventStatsTemplate;
 }
+
+
+void checkV8Exceptions(v8::TryCatch &try_catch, QString codeblockName, bool showErrorBox)
+{
+	if (try_catch.HasCaught())
+	{
+		v8::String::Utf8Value exception(try_catch.Exception());
+		QString exceptionMessage = *exception;
+		int lineNumber = 0;
+
+		v8::Handle<v8::Message> message = try_catch.Message();
+		if (message->GetLineNumber())
+			lineNumber = message->GetLineNumber();
+
+		if (showErrorBox)
+			QMessageBox::critical(nullptr, codeblockName + ": " + (lineNumber ? "Error in line " + QString::number(lineNumber) : "Compile error"), exceptionMessage);
+		qDebug() << codeblockName + ": " + (lineNumber ? "Error in line " + QString::number(lineNumber) : "Compile error");
+		qDebug() << *exception;
+	}
+}

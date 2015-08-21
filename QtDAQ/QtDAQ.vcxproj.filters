@@ -427,6 +427,18 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AcquisitionConfigDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_JSHighlighter.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_JSHighlighter.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_JSHighlighter.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="JSHighlighter.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtdaq.qrc">
@@ -565,6 +577,9 @@
       <Filter>Form Files\Dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Include\Dialogs\AcquisitionConfigDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="JSHighlighter.h">
       <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
   </ItemGroup>

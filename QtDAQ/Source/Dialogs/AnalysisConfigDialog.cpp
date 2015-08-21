@@ -8,9 +8,28 @@ AnalysisConfigDialog::AnalysisConfigDialog (AnalysisConfig* s_config, QWidget * 
 	config=s_config;
 	setWindowFlags(Qt::Window);
 	
+	QFont font;
+	font.setFamily("Courier");
+	font.setFixedPitch(true);
+
+#pragma region codeFormatting
+	ui.plainTextEditDef->setFont(font);
+	ui.plainTextEditInitialCode->setFont(font);
+	ui.plainTextEditPreAnalysis->setFont(font);
+	ui.plainTextEditPostChannel->setFont(font);
+	ui.plainTextEditPostEvent->setFont(font);
+	ui.plainTextEditFinalCode->setFont(font);
+	
+	highlighters[0] = new JSHighlighter(ui.plainTextEditDef->document());
+	highlighters[1] = new JSHighlighter(ui.plainTextEditInitialCode->document());
+	highlighters[2] = new JSHighlighter(ui.plainTextEditPreAnalysis->document());
+	highlighters[3] = new JSHighlighter(ui.plainTextEditPostChannel->document());
+	highlighters[4] = new JSHighlighter(ui.plainTextEditPostEvent->document());
+	highlighters[5] = new JSHighlighter(ui.plainTextEditFinalCode->document());
+#pragma endregion
+
 	setUIFromConfig(config);
 }
-
 /////////////////////////////////////////////////
 // initialises the UI based on a config object
 /////////////////////////////////////////////////
@@ -228,4 +247,33 @@ void AnalysisConfigDialog::updateUI()
 	ui.spinBoxStartGatePulse->setEnabled(ui.checkBoxTimeOfFlight->isChecked());
 	ui.spinBoxPulseThreshold->setEnabled(ui.checkBoxTimeOfFlight->isChecked());
 }
+
+void AnalysisConfigDialog::codeChanged()
+{
+	Isolate* isolate = Isolate::New();
+	{
+		Isolate::Scope isolate_scope(isolate);
+		HandleScope handle_scope(isolate);
+
+		Local<ObjectTemplate> global = ObjectTemplate::New();
+		//functions
+
+		Handle<Context> context = Context::New(isolate, NULL, global);
+		Context::Scope context_scope(context);
+
+		v8::TryCatch try_catch;
+		try_catch.SetVerbose(true);
+
+		QString code = ui.plainTextEditDef->toPlainText();
+
+		Handle<String> sourceDefinitions = String::NewFromUtf8(isolate, code.toStdString().c_str());
+		Handle<Script> handleScriptDefinitions = Script::Compile(sourceDefinitions);
+		if (handleScriptDefinitions.IsEmpty())
+			checkV8Exceptions(try_catch, "Definitions", false);
+
+	}
+	//isolate->Exit();
+	isolate->Dispose();
+}
+
 #pragma endregion

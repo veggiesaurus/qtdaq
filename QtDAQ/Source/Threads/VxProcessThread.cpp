@@ -811,26 +811,6 @@ void VxProcessThread::compileV8()
 		runV8CodeDefinitions();
 }
 
-void VxProcessThread::checkV8Exceptions(v8::TryCatch &try_catch, QString codeblockName)
-{
-	if (try_catch.HasCaught())
-	{
-		v8::String::Utf8Value exception(try_catch.Exception());
-		QString exceptionMessage = *exception;
-		int lineNumber = 0;
-		
-		v8::Handle<v8::Message> message = try_catch.Message();
-		if (message->GetLineNumber())
-			lineNumber = message->GetLineNumber();
-		
-
-		QMessageBox::critical(nullptr, codeblockName+": " + (lineNumber ? "Error in line " + QString::number(lineNumber): "Compile error"), exceptionMessage);
-		qDebug()<<*exception;
-
-		
-	}
-}
-
 bool VxProcessThread::runV8CodeDefinitions()
 {
 	v8Mutex.lock();

@@ -44,7 +44,6 @@ public:
 
 	//v8
 	void compileV8();
-	void checkV8Exceptions(v8::TryCatch &try_catch, QString codeblockName="General");
 
 	void run();
 	bool runV8CodeInitial();

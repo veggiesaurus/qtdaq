@@ -506,6 +506,8 @@ void QtDAQ::onEditAnalysisConfigClicked()
 	if (vxProcessThread)
 		vxProcessThread->onAnalysisConfigChanged();
 	settings.setValue("analysis/previousSettings", QVariant::fromValue(*analysisConfig));
+	dialog->close();	
+	SAFE_DELETE(dialog);
 }
 
 void QtDAQ::onLoadAcquisitionConfigClicked()

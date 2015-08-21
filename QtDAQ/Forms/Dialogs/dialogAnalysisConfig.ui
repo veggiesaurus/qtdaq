@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>554</width>
+    <width>755</width>
     <height>627</height>
    </rect>
   </property>
@@ -51,7 +51,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabSettings">
       <attribute name="title">
@@ -1195,8 +1195,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>plainTextEditDef</sender>
+   <signal>textChanged()</signal>
+   <receiver>DialogAnalysisConfig</receiver>
+   <slot>codeChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>193</x>
+     <y>143</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>updateUI()</slot>
+  <slot>codeChanged()</slot>
  </slots>
 </ui>
