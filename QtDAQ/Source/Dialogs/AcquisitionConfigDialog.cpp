@@ -4,7 +4,7 @@
 
 AcquisitionConfigDialog::AcquisitionConfigDialog(AcquisitionConfig* s_config, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
-	ui.setupUi(this);	
+	ui.setupUi(this);
 	config=s_config;
 
 #pragma region ui array instantiation

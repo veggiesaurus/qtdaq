@@ -163,34 +163,38 @@
     <property name="title">
      <string>Acquisition</string>
     </property>
-    <widget class="QMenu" name="menuDRS4_Eval_board">
+    <widget class="QMenu" name="menuDRS4EvalBoard">
      <property name="title">
       <string>DRS4 Eval board</string>
      </property>
-     <addaction name="actionLoadAcquisitionConfig"/>
-     <addaction name="actionSaveAcquisitionConfig"/>
-     <addaction name="actionEditAcquisitionConfig"/>
+     <addaction name="actionDRSLoadConfigFile"/>
+     <addaction name="actionDRSSaveConfigFile"/>
+     <addaction name="actionDRSEditConfigFile"/>
      <addaction name="separator"/>
-     <addaction name="actionInit"/>
-     <addaction name="actionStart"/>
-     <addaction name="actionStop"/>
-     <addaction name="actionReset"/>
+     <addaction name="actionDRSInit"/>
+     <addaction name="actionDRSStart"/>
+     <addaction name="actionDRSStop"/>
+     <addaction name="actionDRSReset"/>
      <addaction name="separator"/>
-     <addaction name="actionSoftTrigger"/>
-     <addaction name="actionAutoTrigger"/>
+     <addaction name="actionDRSSoftTrigger"/>
+     <addaction name="actionDRSAutoTrigger"/>
      <addaction name="separator"/>
     </widget>
     <widget class="QMenu" name="menuVx1761">
      <property name="title">
       <string>Vx1761</string>
      </property>
-     <addaction name="actionLoad_Config_File"/>
-     <addaction name="actionSave_Config_File"/>
-     <addaction name="actionEdit_Config_File"/>
+     <addaction name="actionVxLoadConfigFile"/>
+     <addaction name="actionVxEditConfigFile"/>
+     <addaction name="actionVxLoadPreviousConfigFile"/>
      <addaction name="separator"/>
-     <addaction name="actionLoad_Previous_Config"/>
+     <addaction name="actionVxStart"/>
+     <addaction name="actionVxStop"/>
+     <addaction name="actionVxReset"/>
+     <addaction name="separator"/>
+     <addaction name="actionVxSoftTrigger"/>
     </widget>
-    <addaction name="menuDRS4_Eval_board"/>
+    <addaction name="menuDRS4EvalBoard"/>
     <addaction name="menuVx1761"/>
     <addaction name="separator"/>
     <addaction name="actionSerialInterface"/>
@@ -265,40 +269,40 @@
    <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionLoadAcquisitionConfig">
+  <action name="actionDRSLoadConfigFile">
    <property name="text">
-    <string>Load Acquisition Config</string>
+    <string>Load Config File</string>
    </property>
    <property name="shortcut">
-    <string>Q, L</string>
+    <string>D, L</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionSaveAcquisitionConfig">
+  <action name="actionDRSSaveConfigFile">
    <property name="text">
-    <string>Save Acquisition Config</string>
+    <string>Save Config File</string>
    </property>
    <property name="shortcut">
-    <string>Q, S</string>
+    <string>D, S</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionEditAcquisitionConfig">
+  <action name="actionDRSEditConfigFile">
    <property name="text">
-    <string>Edit Acquisition Config</string>
+    <string>Edit Config File</string>
    </property>
    <property name="shortcut">
-    <string>Q, E</string>
+    <string>D, E</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionStart">
+  <action name="actionDRSStart">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -312,7 +316,7 @@
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionStop">
+  <action name="actionDRSStop">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -326,7 +330,7 @@
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionReset">
+  <action name="actionDRSReset">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -388,7 +392,7 @@
     <string>F5</string>
    </property>
   </action>
-  <action name="actionInit">
+  <action name="actionDRSInit">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -615,7 +619,7 @@
     <string>Restore UI (Legacy)</string>
    </property>
   </action>
-  <action name="actionSoftTrigger">
+  <action name="actionDRSSoftTrigger">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -629,7 +633,7 @@
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionAutoTrigger">
+  <action name="actionDRSAutoTrigger">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -668,24 +672,77 @@
     <string>Load Temperature Log</string>
    </property>
   </action>
-  <action name="actionLoad_Config_File">
+  <action name="actionVxLoadConfigFile">
    <property name="text">
     <string>Load Config File</string>
    </property>
+   <property name="shortcut">
+    <string>X, L</string>
+   </property>
   </action>
-  <action name="actionEdit_Config_File">
+  <action name="actionVxEditConfigFile">
    <property name="text">
     <string>Edit Config File</string>
    </property>
+   <property name="shortcut">
+    <string>X, E</string>
+   </property>
   </action>
-  <action name="actionLoad_Previous_Config">
+  <action name="actionVxLoadPreviousConfigFile">
    <property name="text">
-    <string>Load Previous Config</string>
+    <string>Load Previous Config File</string>
+   </property>
+   <property name="shortcut">
+    <string>X, P</string>
    </property>
   </action>
   <action name="actionSave_Config_File">
    <property name="text">
     <string>Save Config File</string>
+   </property>
+  </action>
+  <action name="actionVxStart">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+   <property name="shortcut">
+    <string>X, Z</string>
+   </property>
+  </action>
+  <action name="actionVxReset">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Reset</string>
+   </property>
+   <property name="shortcut">
+    <string>X, R</string>
+   </property>
+  </action>
+  <action name="actionVxStop">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>X, X</string>
+   </property>
+  </action>
+  <action name="actionVxSoftTrigger">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Soft Trigger</string>
+   </property>
+   <property name="shortcut">
+    <string>X, Space</string>
    </property>
   </action>
  </widget>
@@ -695,10 +752,10 @@
  </resources>
  <connections>
   <connection>
-   <sender>actionEditAcquisitionConfig</sender>
+   <sender>actionDRSEditConfigFile</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onEditAcquisitionConfigClicked()</slot>
+   <slot>onDRSEditConfigFileClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -711,10 +768,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionLoadAcquisitionConfig</sender>
+   <sender>actionDRSLoadConfigFile</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onLoadAcquisitionConfigClicked()</slot>
+   <slot>onDRSLoadConfigFileClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -727,10 +784,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionSaveAcquisitionConfig</sender>
+   <sender>actionDRSSaveConfigFile</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onSaveAcquisitionConfigClicked()</slot>
+   <slot>onDRSSaveConfigFileClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -919,10 +976,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionReset</sender>
+   <sender>actionDRSReset</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onResetClicked()</slot>
+   <slot>onDRSResetClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -935,10 +992,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionStart</sender>
+   <sender>actionDRSStart</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onStartClicked()</slot>
+   <slot>onDRSStartClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -951,10 +1008,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionStop</sender>
+   <sender>actionDRSStop</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onStopClicked()</slot>
+   <slot>onDRSStopClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -967,10 +1024,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionInit</sender>
+   <sender>actionDRSInit</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onInitClicked()</slot>
+   <slot>onDRSInitClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1271,10 +1328,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionSoftTrigger</sender>
+   <sender>actionDRSSoftTrigger</sender>
    <signal>triggered()</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onSoftTriggerClicked()</slot>
+   <slot>onDRSSoftTriggerClicked()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1287,10 +1344,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionAutoTrigger</sender>
+   <sender>actionDRSAutoTrigger</sender>
    <signal>toggled(bool)</signal>
    <receiver>QtDAQClass</receiver>
-   <slot>onAutoTriggerToggled(bool)</slot>
+   <slot>onDRSAutoTriggerToggled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1334,11 +1391,59 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionVxLoadConfigFile</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onVxLoadConfigFileClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionVxLoadPreviousConfigFile</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onVxLoadPreviousConfigClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionVxEditConfigFile</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onVxEditConfigFileClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>onEditAcquisitionConfigClicked()</slot>
-  <slot>onSaveAcquisitionConfigClicked()</slot>
-  <slot>onLoadAcquisitionConfigClicked()</slot>
+  <slot>onDRSEditConfigFileClicked()</slot>
+  <slot>onDRSSaveConfigFileClicked()</slot>
+  <slot>onDRSLoadConfigFileClicked()</slot>
   <slot>onCalibrateClicked()</slot>
   <slot>onAddSignalPlotClicked()</slot>
   <slot>onAddHistogramClicked()</slot>
@@ -1350,10 +1455,10 @@
   <slot>onAddLinearCutClicked()</slot>
   <slot>onRemoveLinearCutClicked()</slot>
   <slot>onReadDRSFileClicked()</slot>
-  <slot>onInitClicked()</slot>
-  <slot>onStartClicked()</slot>
-  <slot>onStopClicked()</slot>
-  <slot>onResetClicked()</slot>
+  <slot>onDRSInitClicked()</slot>
+  <slot>onDRSStartClicked()</slot>
+  <slot>onDRSStopClicked()</slot>
+  <slot>onDRSResetClicked()</slot>
   <slot>onAddSortedPairPlotClicked()</slot>
   <slot>onEditAnalysisConfigClicked()</slot>
   <slot>onReadVxFileClicked()</slot>
@@ -1372,9 +1477,16 @@
   <slot>onMoveToPage3Clicked()</slot>
   <slot>onMoveToPage4Clicked()</slot>
   <slot>onRestoreUILegacyClicked()</slot>
-  <slot>onSoftTriggerClicked()</slot>
-  <slot>onAutoTriggerToggled(bool)</slot>
+  <slot>onDRSSoftTriggerClicked()</slot>
+  <slot>onDRSAutoTriggerToggled(bool)</slot>
   <slot>onProjectorModeToggled(bool)</slot>
   <slot>onLoadTemperatureLogClicked()</slot>
+  <slot>onVxLoadConfigFileClicked()</slot>
+  <slot>onVxEditConfigFileClicked()</slot>
+  <slot>onVxLoadPreviousConfigFileClicked()</slot>
+  <slot>onVxStartClicked()</slot>
+  <slot>onVxResetClicked()</slot>
+  <slot>onVxStopClicked()</slot>
+  <slot>onVxSoftTriggerClicked()</slot>
  </slots>
 </ui>

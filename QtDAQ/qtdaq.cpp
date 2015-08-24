@@ -25,6 +25,7 @@ QtDAQ::QtDAQ(QWidget *parent)
 		*acquisitionConfig = varAcquisition.value<AcquisitionConfig>();
 	else
 		acquisitionConfig = AcquisitionConfig::DefaultConfig();
+	vxAcquisitionConfig = settings.value("acquisition/vxPreviousSettings").toString();
 
 	analysisConfig = new AnalysisConfig();
 	qRegisterMetaType<AnalysisConfig>("AnalysisConfig");
@@ -82,7 +83,7 @@ QtDAQ::QtDAQ(QWidget *parent)
 
 	//auto trigger: 17ms: ~ 60 Hz
 	autoTrigTimer.setInterval(17);
-	connect(&autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onSoftTriggerClicked);	
+	connect(&autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onDRSSoftTriggerClicked);	
 
 	//progress taskbar
 	QWinTaskbarButton *button = new QWinTaskbarButton(this);	
@@ -136,19 +137,88 @@ void QtDAQ::onDRSObjectChanged(DRS* s_drs, DRSBoard* s_board)
 	if (s_board != NULL)
 	{
 		drs = s_drs;
-		board = s_board;
-		ui.actionInit->setEnabled(true);
+		board = s_board;		
+		ui.actionDRSInit->setEnabled(true);
 	}
 	else
 	{
-		ui.actionInit->setEnabled(false);
-		ui.actionStart->setEnabled(false);
-		ui.actionStop->setEnabled(false);
-		ui.actionReset->setEnabled(false);
+		ui.actionDRSInit->setEnabled(false);
+		ui.actionDRSStart->setEnabled(false);
+		ui.actionDRSStop->setEnabled(false);
+		ui.actionDRSReset->setEnabled(false);
 	}
 }
 
 
+
+void QtDAQ::onVxStartClicked()
+{
+
+}
+
+void QtDAQ::onVxResetClicked()
+{
+
+}
+
+void QtDAQ::onVxStopClicked()
+{
+
+}
+
+void QtDAQ::onVxSoftTriggerClicked()
+{
+
+}
+
+void QtDAQ::onVxLoadConfigFileClicked()
+{
+	//open a file for output
+	QFileDialog fileDialog(this, "Set config file", "", "Vx config (*.txt);;All files (*.*)");
+	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+	fileDialog.restoreState(settings.value("acquisition/vxSaveAcquisitionConfigState").toByteArray());
+	fileDialog.setFileMode(QFileDialog::ExistingFile);
+	QString prevFileDir = settings.value("acquisition/vxPrevAcquisitionDir").toString();
+	QString prevFile = settings.value("acquisition/vxPrevAcquisitionFile").toString();
+	fileDialog.setDirectory(prevFileDir);
+	
+	if (fileDialog.exec())
+	{
+		settings.setValue("acquisition/vxSaveAcquisitionConfigState", fileDialog.saveState());
+		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("acquisition/vxPrevAcquisitionDir", fileInfo.dir().absolutePath());
+		settings.setValue("acquisition/vxPrevAcquisitionFile", fileInfo.fileName());
+
+		QFile file(fileName);
+
+		if (!file.open(QIODevice::ReadOnly | QFile::Text))
+			return;
+		QTextStream stream(&file);
+		QString newConfig = stream.readAll();
+		file.close();
+		
+		vxAcquisitionConfig = newConfig;
+		settings.setValue("acquisition/vxPreviousSettings", vxAcquisitionConfig);
+	}
+}
+
+void QtDAQ::onVxEditConfigFileClicked()
+{
+	auto dialog = new VxAcquisitionConfigDialog(vxAcquisitionConfig);
+	int retDialog = dialog->exec();
+
+	if (retDialog == QDialog::Rejected)
+		return;
+
+	vxAcquisitionConfig = dialog->ui.plainTextEditCode->toPlainText();
+	settings.setValue("acquisition/vxPreviousSettings", vxAcquisitionConfig);
+}
+
+void QtDAQ::onVxLoadPreviousConfigFileClicked()
+{
+
+}
 
 void QtDAQ::onNewProcessedEvents(QVector<EventStatistics*>* stats)
 {
@@ -415,7 +485,7 @@ void QtDAQ::onReadStatisticsFileClicked()
 }
 
 
-void QtDAQ::onInitClicked()
+void QtDAQ::onDRSInitClicked()
 {
 	if (drsAcquisitionThread->isRunning())
 		drsAcquisitionThread->reInit(acquisitionConfig, analysisConfig);
@@ -425,37 +495,37 @@ void QtDAQ::onInitClicked()
 		//start paused
 		drsAcquisitionThread->setPaused(true);
 		drsAcquisitionThread->start();
-		ui.actionStart->setEnabled(true);
+		ui.actionDRSStart->setEnabled(true);
 	}
 }
 
 
 
-void QtDAQ::onStartClicked()
+void QtDAQ::onDRSStartClicked()
 {
 	uiUpdateTimer.start();
 	acquisitionTime.start();
 	numEventsProcessed = 0;
 	drsAcquisitionThread->setPaused(false);
-	ui.actionStop->setEnabled(true);
-	ui.actionReset->setEnabled(true);
-	ui.actionStart->setEnabled(false);
-	ui.actionSoftTrigger->setEnabled(true);
-	ui.actionAutoTrigger->setEnabled(true);
+	ui.actionDRSStop->setEnabled(true);
+	ui.actionDRSReset->setEnabled(true);
+	ui.actionDRSStart->setEnabled(false);
+	ui.actionDRSSoftTrigger->setEnabled(true);
+	ui.actionDRSAutoTrigger->setEnabled(true);
 }
 
 
-void QtDAQ::onStopClicked()
+void QtDAQ::onDRSStopClicked()
 {
 	drsAcquisitionThread->setPaused(true);
-	ui.actionStart->setEnabled(true);
-	ui.actionStop->setEnabled(false);
-	ui.actionReset->setEnabled(false);
-	ui.actionSoftTrigger->setEnabled(false);
-	ui.actionAutoTrigger->setEnabled(false);
+	ui.actionDRSStart->setEnabled(true);
+	ui.actionDRSStop->setEnabled(false);
+	ui.actionDRSReset->setEnabled(false);
+	ui.actionDRSSoftTrigger->setEnabled(false);
+	ui.actionDRSAutoTrigger->setEnabled(false);
 }
 
-void QtDAQ::onResetClicked()
+void QtDAQ::onDRSResetClicked()
 {
 	clearAllPlots();
 	uiUpdateTimer.start();
@@ -463,13 +533,13 @@ void QtDAQ::onResetClicked()
 	numEventsProcessed = 0;
 }
 
-void QtDAQ::onSoftTriggerClicked()
+void QtDAQ::onDRSSoftTriggerClicked()
 {	
 	if (drs && board)
 		board->SoftTrigger();
 }
 
-void QtDAQ::onAutoTriggerToggled(bool triggerOn)
+void QtDAQ::onDRSAutoTriggerToggled(bool triggerOn)
 {
 	if (triggerOn)
 		autoTrigTimer.start();
@@ -478,7 +548,7 @@ void QtDAQ::onAutoTriggerToggled(bool triggerOn)
 }
 
 
-void QtDAQ::onEditAcquisitionConfigClicked()
+void QtDAQ::onDRSEditConfigFileClicked()
 {
 	AcquisitionConfigDialog* dialog = new AcquisitionConfigDialog(acquisitionConfig);
 	connect(dialog, SIGNAL(drsObjectChanged(DRS*, DRSBoard*)), this, SLOT(onDRSObjectChanged(DRS*, DRSBoard*)));
@@ -510,7 +580,7 @@ void QtDAQ::onEditAnalysisConfigClicked()
 	SAFE_DELETE(dialog);
 }
 
-void QtDAQ::onLoadAcquisitionConfigClicked()
+void QtDAQ::onDRSLoadConfigFileClicked()
 {
 	//open a file for output
 	QFileDialog fileDialog(this, "Set config file", "", "Binary config (*.bcfg);;All files (*.*)");
@@ -584,7 +654,7 @@ void QtDAQ::onLoadAnalysisConfigClicked()
 	}
 }
 
-void QtDAQ::onSaveAcquisitionConfigClicked()
+void QtDAQ::onDRSSaveConfigFileClicked()
 {
 	//open a file for output
 	QFileDialog fileDialog(this, "Set output file", "", "Binary config (*.bcfg);;All files (*.*)");

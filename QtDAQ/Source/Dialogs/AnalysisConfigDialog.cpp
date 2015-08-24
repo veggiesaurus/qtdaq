@@ -278,7 +278,6 @@ void AnalysisConfigDialog::codeChanged()
 			underlineError(codeEdit, getCompileErrorLine(try_catch, errorMessage)-1);
 
 		connect(codeEdit, SIGNAL(textChanged()), this, SLOT(codeChanged()), Qt::QueuedConnection);
-
 	}
 	isolate->Dispose();
 }
@@ -294,7 +293,6 @@ void AnalysisConfigDialog::underlineError(QPlainTextEdit* textEdit, int lineNum)
 	highlightFormat.setUnderlineColor(Qt::darkRed);
 	highlightFormat.setUnderlineStyle(QTextCharFormat::WaveUnderline);
 	errorLine.mergeCharFormat(highlightFormat);
-
 }
 
 #pragma endregion

@@ -26,21 +26,23 @@
 #include "AcquisitionConfig.h"
 #include "AnalysisConfig.h"
 
-#include "Dialogs/LinearCutDialog.h"
-#include "Dialogs/LinearCutEditDialog.h"
-#include "Dialogs/CalibrationDialog.h"
-#include "Dialogs/AnalysisConfigDialog.h"
-#include "Dialogs/AcquisitionConfigDialog.h"
+#include "LinearCutDialog.h"
+#include "LinearCutEditDialog.h"
+#include "CalibrationDialog.h"
+#include "AnalysisConfigDialog.h"
+#include "AcquisitionConfigDialog.h"
+#include "VxAcquisitionConfigDialog.h"
 
-#include "Windows/SignalPlotWindow.h"
-#include "Windows/HistogramWindow.h"
-#include "Windows/Histogram2DWindow.h"
-#include "Windows/FoMWindow.h"
-#include "Windows/SortedPairPlotWindow.h"
-#include "Threads/DRSBinaryReaderThread.h"
-#include "Threads/DRSAcquisitionThread.h"
-#include "Threads/VxBinaryReaderThread.h"
-#include "Threads/VxProcessThread.h"
+#include "SignalPlotWindow.h"
+#include "HistogramWindow.h"
+#include "Histogram2DWindow.h"
+#include "FoMWindow.h"
+
+#include "SortedPairPlotWindow.h"
+#include "DRSBinaryReaderThread.h"
+#include "DRSAcquisitionThread.h"
+#include "VxBinaryReaderThread.h"
+#include "VxProcessThread.h"
 
 
 enum DAQStatus
@@ -82,19 +84,28 @@ public:
 	void onReadVxFileClicked();
 	void onReadStatisticsFileClicked();
 	void onReplayCurrentFileClicked();
-	//acquisition
-	void onInitClicked();
-	void onStartClicked();
-	void onStopClicked();
-	void onResetClicked();
-	void onSoftTriggerClicked();
-	void onAutoTriggerToggled(bool);
+	//DRS acquisition
+	void onDRSInitClicked();
+	void onDRSStartClicked();
+	void onDRSStopClicked();
+	void onDRSResetClicked();
+	void onDRSSoftTriggerClicked();
+	void onDRSAutoTriggerToggled(bool);
 	void onSerialInterfaceClicked();
-	//acquisition config slots
-	void onEditAcquisitionConfigClicked();
-	void onLoadAcquisitionConfigClicked();
-	void onSaveAcquisitionConfigClicked();
+	//DRS acquisition config slots
+	void onDRSEditConfigFileClicked();
+	void onDRSLoadConfigFileClicked();
+	void onDRSSaveConfigFileClicked();
 	void onDRSObjectChanged(DRS* s_drs, DRSBoard* s_board);
+	//Vx acquisition
+	void onVxStartClicked();
+	void onVxResetClicked();
+	void onVxStopClicked();
+	void onVxSoftTriggerClicked();
+	//Vx acquisition config slots
+	void onVxLoadConfigFileClicked();
+	void onVxEditConfigFileClicked();
+	void onVxLoadPreviousConfigFileClicked();	
 	//options
 	void onCalibrateClicked();
 	void onEditAnalysisConfigClicked();
@@ -179,6 +190,7 @@ private:
 	Ui::DialogAcquisitionConfig uiDialogAcquisitionConfig;
 	Ui::DialogAnalysisConfig uiDialogAnalysisConfig;
 	AcquisitionConfig* acquisitionConfig;
+	QString vxAcquisitionConfig;
 	AnalysisConfig* analysisConfig;
 	EnergyCalibration calibrationValues[NUM_DIGITIZER_CHANNELS];
 	QVector<SignalPlotWindow*> signalPlots;

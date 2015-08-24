@@ -738,8 +738,8 @@
             </property>
             <property name="font">
              <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
+              <family>Consolas</family>
+              <pointsize>9</pointsize>
               <strikeout>false</strikeout>
               <kerning>false</kerning>
              </font>
@@ -771,8 +771,8 @@
             </property>
             <property name="font">
              <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
+              <family>Consolas</family>
+              <pointsize>9</pointsize>
              </font>
             </property>
             <property name="lineWrapMode">
@@ -816,8 +816,8 @@
             </property>
             <property name="font">
              <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
+              <family>Consolas</family>
+              <pointsize>9</pointsize>
              </font>
             </property>
             <property name="lineWrapMode">
@@ -854,8 +854,8 @@
             </property>
             <property name="font">
              <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
+              <family>Consolas</family>
+              <pointsize>9</pointsize>
              </font>
             </property>
             <property name="lineWrapMode">
@@ -892,8 +892,8 @@
             </property>
             <property name="font">
              <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
+              <family>Consolas</family>
+              <pointsize>9</pointsize>
              </font>
             </property>
             <property name="lineWrapMode">
@@ -930,8 +930,8 @@
             </property>
             <property name="font">
              <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
+              <family>Consolas</family>
+              <pointsize>9</pointsize>
              </font>
             </property>
             <property name="lineWrapMode">
