@@ -36,5 +36,5 @@ void VxAcquisitionThread::setPaused(bool paused)
 
 bool VxAcquisitionThread::setFileOutput(QString filename, bool useCompression)
 {
-
+	return true;
 }
