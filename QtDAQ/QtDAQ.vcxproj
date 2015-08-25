@@ -60,8 +60,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(QWT_ROOT)\include;$(ProjectDir)\include;$(ProjectDir)\include\DRS4;$(ProjectDir)\include\vector;$(ProjectDir)\include\Dialogs;$(ProjectDir)\include\Plots;$(ProjectDir)\include\Threads;$(ProjectDir)\include\Windows;$(ProjectDir)\include\curvefit;C:\v8\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(QWT_ROOT)\lib;C:\v8\build\Release;$(ProjectDir)/Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\CAEN\Digitizers\Library\include;$(QWT_ROOT)\include;$(ProjectDir)\include;$(ProjectDir)\include\DRS4;$(ProjectDir)\include\vector;$(ProjectDir)\include\Dialogs;$(ProjectDir)\include\Plots;$(ProjectDir)\include\Threads;$(ProjectDir)\include\Windows;$(ProjectDir)\include\curvefit;C:\v8\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(QWT_ROOT)\lib;C:\v8\build\Release;$(ProjectDir)/Lib;C:\Program Files\CAEN\Digitizers\Library\lib\x86;$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -512,6 +512,7 @@
     <ClCompile Include="Source\Windows\PlotWindow.cpp" />
     <ClCompile Include="Source\Windows\SignalPlotWindow.cpp" />
     <ClCompile Include="Source\Windows\SortedPairPlotWindow.cpp" />
+    <ClCompile Include="VxAcquisitionConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_dialogAcquisitionConfig.h" />
@@ -544,6 +545,7 @@
     <ClInclude Include="Include\curvefit\lmmin.h" />
     <ClInclude Include="Include\curvefit\lmstruct.h" />
     <ClInclude Include="Include\curvefit\mpfit.h" />
+    <ClInclude Include="VxAcquisitionConfig.h" />
     <CustomBuild Include="Include\Dialogs\ActiveCutsDialog.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing ActiveCutsDialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <CAENDigitizer.h>
 
 #define SAFE_DELETE( ptr ) \
 if (ptr != NULL)      \
@@ -23,11 +24,7 @@ if (ptr != NULL)            \
 #define NUM_DIGITIZER_CHANNELS 4
 #define NUM_DIGITIZER_SAMPLES_DRS 1024
 
-#define MAX_UINT16_CHANNEL_SIZE				64
 #define EVENT_BUFFER_SIZE	1024
-
-#define MAX_X742_CHANNEL_SIZE				9
-#define MAX_X742_GROUP_SIZE					4
 
 #ifdef WIN32
 #ifndef int8_t
@@ -96,26 +93,6 @@ if (ptr != NULL)            \
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 #endif
-
-
-
-typedef struct
-{
-	uint32_t			 EventSize;
-	uint32_t			 BoardId;
-	uint32_t			 Pattern;
-	uint32_t			 ChannelMask;
-	uint32_t			 EventCounter;
-	uint32_t			 TriggerTimeTag;
-} CAEN_DGTZ_EventInfo_t;
-
-
-
-typedef struct
-{
-	uint32_t			ChSize[MAX_UINT16_CHANNEL_SIZE]; // the number of samples stored in DataChannel array  
-	uint16_t			*DataChannel[MAX_UINT16_CHANNEL_SIZE]; // the array of ChSize samples
-} CAEN_DGTZ_UINT16_EVENT_t;
 
 typedef struct
 {
