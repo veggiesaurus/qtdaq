@@ -101,11 +101,12 @@ public:
 	void onVxStartClicked();
 	void onVxResetClicked();
 	void onVxStopClicked();
+	void onVxInitClicked();
 	void onVxSoftTriggerClicked();
 	//Vx acquisition config slots
 	void onVxLoadConfigFileClicked();
 	void onVxEditConfigFileClicked();
-	void onVxLoadPreviousConfigFileClicked();	
+	void onVxSaveConfigFileClicked();	
 	//options
 	void onCalibrateClicked();
 	void onEditAnalysisConfigClicked();

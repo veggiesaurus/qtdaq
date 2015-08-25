@@ -149,7 +149,10 @@ void QtDAQ::onDRSObjectChanged(DRS* s_drs, DRSBoard* s_board)
 	}
 }
 
+void QtDAQ::onVxInitClicked()
+{
 
+}
 
 void QtDAQ::onVxStartClicked()
 {
@@ -165,6 +168,7 @@ void QtDAQ::onVxStopClicked()
 {
 
 }
+
 
 void QtDAQ::onVxSoftTriggerClicked()
 {
@@ -215,9 +219,35 @@ void QtDAQ::onVxEditConfigFileClicked()
 	settings.setValue("acquisition/vxPreviousSettings", vxAcquisitionConfig);
 }
 
-void QtDAQ::onVxLoadPreviousConfigFileClicked()
+void QtDAQ::onVxSaveConfigFileClicked()
 {
+	//open a file for output
+	QFileDialog fileDialog(this, "Set output file", "", "Vx config (*.txt);;All files (*.*)");
+	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+	fileDialog.restoreState(settings.value("acquisition/vxSaveAcquisitionConfigState").toByteArray());
+	fileDialog.setFileMode(QFileDialog::AnyFile);
 
+	QString prevFileDir = settings.value("acquisition/vxPrevAcquisitionDir").toString();
+	QString prevFile = settings.value("acquisition/vxPrevAcquisitionFile").toString();
+	fileDialog.setDirectory(prevFileDir);
+	fileDialog.selectFile(prevFile);
+
+	if (fileDialog.exec())
+	{
+		settings.setValue("acquisition/vxSaveAcquisitionConfigState", fileDialog.saveState());
+		QString fileName = fileDialog.selectedFiles().first();
+		QFileInfo fileInfo(fileName);
+		settings.setValue("acquisition/vxPrevAcquisitionDir", fileInfo.dir().absolutePath());
+		settings.setValue("acquisition/vxPrevAcquisitionFile", fileInfo.fileName());
+
+		QFile file(fileName);
+		if (!file.open(QIODevice::WriteOnly | QFile::Text))
+			return;
+		QTextStream stream(&file);		
+		stream << (vxAcquisitionConfig);
+		stream.flush();
+		file.close();
+	}
 }
 
 void QtDAQ::onNewProcessedEvents(QVector<EventStatistics*>* stats)

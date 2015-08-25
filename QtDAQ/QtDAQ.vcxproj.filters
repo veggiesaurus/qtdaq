@@ -214,9 +214,6 @@
     <ClCompile Include="Source\curvefit\fitting.cpp">
       <Filter>Source Files\curvefit</Filter>
     </ClCompile>
-    <ClCompile Include="QtDAQ.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Dialogs\AcquisitionConfigDialog.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -263,15 +260,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_SignalPlot.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release_debug\moc_QtDAQ.cpp">
-      <Filter>Generated Files\Release_debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_QtDAQ.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_QtDAQ.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release_debug\moc_PolygonalCutEditDialog.cpp">
@@ -427,6 +415,27 @@
     <ClCompile Include="GeneratedFiles\Release\moc_AcquisitionConfigDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Source\QtDAQ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\JSHighlighter.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\VxAcquisitionConfigDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\VxHighlighter.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release_debug\moc_JSHighlighter.cpp">
       <Filter>Generated Files\Release_debug</Filter>
     </ClCompile>
@@ -436,26 +445,23 @@
     <ClCompile Include="GeneratedFiles\Release\moc_JSHighlighter.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="JSHighlighter.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="VxAcquisitionConfigDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxAcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_VxAcquisitionConfigDialog.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxAcquisitionConfigDialog.cpp">
-      <Filter>Generated Files\Release_debug</Filter>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxAcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release_debug\moc_VxHighlighter.cpp">
       <Filter>Generated Files\Release_debug</Filter>
     </ClCompile>
-    <ClCompile Include="VxHighlighter.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_VxHighlighter.cpp">
       <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxHighlighter.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -585,9 +591,6 @@
     <CustomBuild Include="Include\Plots\SignalPlot.h">
       <Filter>Header Files\Plots</Filter>
     </CustomBuild>
-    <CustomBuild Include="QtDAQ.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="Include\DRS4Acquisition.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -597,16 +600,19 @@
     <CustomBuild Include="Include\Dialogs\AcquisitionConfigDialog.h">
       <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="JSHighlighter.h">
-      <Filter>Header Files\Dialogs</Filter>
-    </CustomBuild>
     <CustomBuild Include="Forms\Dialogs\dialogVxAcquisitionConfig.ui">
       <Filter>Form Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="VxAcquisitionConfigDialog.h">
+    <CustomBuild Include="Include\QtDAQ.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\JSHighlighter.h">
       <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="VxHighlighter.h">
+    <CustomBuild Include="Include\Dialogs\VxAcquisitionConfigDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\VxHighlighter.h">
       <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
   </ItemGroup>
