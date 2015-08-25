@@ -1,6 +1,6 @@
-#include "AcquisitionConfig.h"
+#include "DRSAcquisitionConfig.h"
 
-AcquisitionConfig::AcquisitionConfig()
+DRSAcquisitionConfig::DRSAcquisitionConfig()
 {
 	/* Default settings */
 	samplesPerEvent = (1024);
@@ -17,14 +17,14 @@ AcquisitionConfig::AcquisitionConfig()
 	memset (channelSelfTriggerEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
 }
 
-AcquisitionConfig::~AcquisitionConfig()
+DRSAcquisitionConfig::~DRSAcquisitionConfig()
 {
 }
 
 //default single channel config, with a single self-triggered channel (Ch0), bias to accept negative pulses.
-AcquisitionConfig* AcquisitionConfig::DefaultConfig()
+DRSAcquisitionConfig* DRSAcquisitionConfig::DefaultConfig()
 {
-	AcquisitionConfig* defConfig=new AcquisitionConfig();
+	DRSAcquisitionConfig* defConfig=new DRSAcquisitionConfig();
 	defConfig->correctionLevel=3;
 	defConfig->selfTriggeringEnabled=true;
 	defConfig->channelEnabled[0]=true;
@@ -40,7 +40,7 @@ AcquisitionConfig* AcquisitionConfig::DefaultConfig()
 }
 
 //send config to the board
-bool AcquisitionConfig::apply(DRSBoard* board)
+bool DRSAcquisitionConfig::apply(DRSBoard* board)
 {
 	board->SetFrequency(sampleRateMSPS/1000.0, true);
 	//board->SetTranspMode(1);
@@ -60,7 +60,7 @@ bool AcquisitionConfig::apply(DRSBoard* board)
 	//todo: corrections
 }
 
-QDataStream &operator<<(QDataStream &out, const AcquisitionConfig &obj)
+QDataStream &operator<<(QDataStream &out, const DRSAcquisitionConfig &obj)
 {
 	out << ACQUISITION_SAVE_VERSION;
 	out << obj.correctionLevel << obj.samplesPerEvent << obj.sampleRateMSPS << obj.voltageOffset;
@@ -74,7 +74,7 @@ QDataStream &operator<<(QDataStream &out, const AcquisitionConfig &obj)
 	return out;
 }
 
-QDataStream &operator>>(QDataStream &in, AcquisitionConfig &obj)
+QDataStream &operator>>(QDataStream &in, DRSAcquisitionConfig &obj)
 {
 	//read file version
 	quint32 acqFileVersion;

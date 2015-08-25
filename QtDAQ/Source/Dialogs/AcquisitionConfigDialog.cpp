@@ -2,7 +2,7 @@
 
 
 
-AcquisitionConfigDialog::AcquisitionConfigDialog(AcquisitionConfig* s_config, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
+AcquisitionConfigDialog::AcquisitionConfigDialog(DRSAcquisitionConfig* s_config, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
 {
 	ui.setupUi(this);
 	config=s_config;
@@ -112,7 +112,7 @@ void AcquisitionConfigDialog::setDRS(DRS* s_drs)
 /////////////////////////////////////////////////
 // initialises the UI based on a config object
 /////////////////////////////////////////////////
-void AcquisitionConfigDialog::setUIFromConfig(AcquisitionConfig* s_config)
+void AcquisitionConfigDialog::setUIFromConfig(DRSAcquisitionConfig* s_config)
 {
 #pragma region global (global digitizer settings)
 	//////////////////////////////

@@ -1,16 +1,13 @@
 #pragma once
 
-#include "DRS4Acquisition.h"
+#include "AcquisitionDefinitions.h"
 #include <QString>
 #include <QDateTime>
-
-
 
 #ifdef _MSC_VER
 #define NOMINMAX
 #include "windows.h"
 #endif
-
 
 #define SAFE_DELETE( ptr ) \
 if (ptr != NULL)      \
@@ -25,7 +22,6 @@ if (ptr != NULL)            \
     delete[] ptr;           \
     ptr = NULL;             \
 }
-
 
 #define UI_SAVE_VERSION ((quint32)(0x03))
 #define ANALYSIS_SAVE_VERSION ((quint32)(0x01))

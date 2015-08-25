@@ -271,7 +271,7 @@ void VxProcessThread::onNewRawEvents(QVector<EventVx*>* events)
 	for (int i = 0; i < events->size(); i++)
 	{
 		processEvent((*events)[i], sampleNextEvent);
-		freeEvent((*events)[i]);
+		freeVxEvent((*events)[i]);
 	}
 	events->clear();
 	SAFE_DELETE(events);

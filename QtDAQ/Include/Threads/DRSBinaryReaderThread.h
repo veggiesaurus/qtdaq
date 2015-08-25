@@ -5,7 +5,8 @@
 #include <QMutex>
 #include <QVector>
 #include <QtSerialPort\qserialport>
-#include "DRS4Acquisition.h"
+
+#include "AcquisitionDefinitions.h"
 #include "ProcessRoutines.h"
 #include "AnalysisConfig.h"
 #include "vector/vectorclass.h"

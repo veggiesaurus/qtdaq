@@ -23,7 +23,7 @@
 #include "globals.h"
 #include "Cuts.h"
 
-#include "AcquisitionConfig.h"
+#include "DRSAcquisitionConfig.h"
 #include "AnalysisConfig.h"
 
 #include "LinearCutDialog.h"
@@ -190,7 +190,7 @@ private:
 	QMdiArea* mdiAreas[4];
 	Ui::DialogAcquisitionConfig uiDialogAcquisitionConfig;
 	Ui::DialogAnalysisConfig uiDialogAnalysisConfig;
-	AcquisitionConfig* acquisitionConfig;
+	DRSAcquisitionConfig* acquisitionConfig;
 	QString vxAcquisitionConfig;
 	AnalysisConfig* analysisConfig;
 	EnergyCalibration calibrationValues[NUM_DIGITIZER_CHANNELS];

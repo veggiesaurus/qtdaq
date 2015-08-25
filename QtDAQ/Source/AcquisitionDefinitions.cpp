@@ -1,20 +1,4 @@
 #include "AcquisitionDefinitions.h"
-#include "string.h"
-#include "stdio.h"
-
-DataHeader::DataHeader()
-{
-	memset(this, 0, sizeof(DataHeader));
-	time(&dateTime);
-	sprintf(description, "Test output.");
-	sprintf(futureUse, "RSV");
-	sprintf(magicNumber, "UCT001B");
-	MSPS = 4000;
-	numEvents = 2;
-	numSamples = 1024;
-	offsetDC = 1000;
-	peakSaturation = 1;
-}
 
 EventVx* EventVx::eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data)
 {
@@ -52,7 +36,7 @@ EventVx* EventVx::eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_FL
 	return ev;
 }
 
-void freeEvent(EventVx* &ev)
+void freeVxEvent(EventVx* &ev)
 {
 	for (int i = 0; i < MAX_UINT16_CHANNEL_SIZE; i++)
 	{
@@ -64,7 +48,7 @@ void freeEvent(EventVx* &ev)
 	SAFE_DELETE(ev);
 }
 
-void freeEvent(EventVx &ev)
+void freeVxEvent(EventVx &ev)
 {
 	for (int i = 0; i < MAX_UINT16_CHANNEL_SIZE; i++)
 	{
@@ -73,4 +57,19 @@ void freeEvent(EventVx &ev)
 		if (ev.fData.ChSize[i])
 			SAFE_DELETE_ARRAY(ev.fData.DataChannel[i]);
 	}
+}
+
+DataHeader::DataHeader()
+{
+	int x = sizeof(DataHeader);
+	memset(this, 0, sizeof(DataHeader));
+	time(&dateTime);
+	sprintf(description, "Test output.");
+	sprintf(futureUse, "RSV");
+	sprintf(magicNumber, "UCT001B");
+	MSPS = 4000;
+	numEvents = 2;
+	numSamples = 1024;
+	offsetDC = 1000;
+	peakSaturation = 1;
 }

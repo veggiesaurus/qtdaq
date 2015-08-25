@@ -4,10 +4,11 @@
 #include <QTimer>
 #include <QMutex>
 #include <QVector>
-#include "DRS4Acquisition.h"
+
 #include "DRS4/DRS.h"
+#include "AcquisitionDefinitions.h"
 #include "ProcessRoutines.h"
-#include "AcquisitionConfig.h"
+#include "DRSAcquisitionConfig.h"
 #include "AnalysisConfig.h"
 #include "globals.h"
 
@@ -18,8 +19,8 @@ class DRSAcquisitionThread : public QThread
 public:
 	DRSAcquisitionThread(QObject *parent = 0);
 	~DRSAcquisitionThread();
-	bool initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime=33);
-	void reInit(AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig);
+	bool initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, DRSAcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime=33);
+	void reInit(DRSAcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig);
 	void processEvent(EventRawData rawEvent, bool outputSample);
 	void lockConfig();
 	void unlockConfig();
@@ -50,7 +51,7 @@ private:
 	bool acquiring=false;
 	DRS* drs=nullptr;
 	DRSBoard* board=nullptr;
-	AcquisitionConfig* config=nullptr;
+	DRSAcquisitionConfig* config=nullptr;
 	AnalysisConfig* analysisConfig=nullptr;
 	int numEvents=0;
 	EventTimestamp firstEventTimestamp;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <basetsd.h>
-#include <time.h>
 #include <QThread>
 #include <QTimer>
 #include <QMutex>
@@ -11,7 +9,7 @@
 #include <QMessageBox>
 #include <QDebug>
 
-#include "DRS4Acquisition.h"
+#include "AcquisitionDefinitions.h"
 #include "ProcessRoutines.h"
 #include "AnalysisConfig.h"
 #include "V8/V8Wrapper.h"

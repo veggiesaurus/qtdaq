@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include "globals.h"
-#include "DRS4Acquisition.h"
+#include "AcquisitionDefinitions.h"
 
 using namespace v8;
 

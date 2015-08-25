@@ -15,16 +15,16 @@ QtDAQ::QtDAQ(QWidget *parent)
 	projectorMode = ui.actionProjectorMode->isChecked();
 	onProjectorModeToggled(projectorMode);
 
-	acquisitionConfig = new AcquisitionConfig();
-	qRegisterMetaType<AcquisitionConfig>("AcquisitionConfig");
-	qRegisterMetaTypeStreamOperators<AcquisitionConfig>("AcquisitionConfig");
+	acquisitionConfig = new DRSAcquisitionConfig();
+	qRegisterMetaType<DRSAcquisitionConfig>("AcquisitionConfig");
+	qRegisterMetaTypeStreamOperators<DRSAcquisitionConfig>("AcquisitionConfig");
 
 	//restore previous settings
 	QVariant varAcquisition = settings.value("acquisition/previousSettings");
 	if (varAcquisition.isValid())
-		*acquisitionConfig = varAcquisition.value<AcquisitionConfig>();
+		*acquisitionConfig = varAcquisition.value<DRSAcquisitionConfig>();
 	else
-		acquisitionConfig = AcquisitionConfig::DefaultConfig();
+		acquisitionConfig = DRSAcquisitionConfig::DefaultConfig();
 	vxAcquisitionConfig = settings.value("acquisition/vxPreviousSettings").toString();
 
 	analysisConfig = new AnalysisConfig();
@@ -424,12 +424,12 @@ void QtDAQ::readVxFile(QString filename, bool compressedInput)
 	if (rawBuffer1)
 	{
 		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
-			freeEvent(rawBuffer1[i]);
+			freeVxEvent(rawBuffer1[i]);
 	}
 	if (rawBuffer2)
 	{
 		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
-			freeEvent(rawBuffer2[i]);
+			freeVxEvent(rawBuffer2[i]);
 	}
 
 	SAFE_DELETE_ARRAY(rawBuffer1);
@@ -1479,13 +1479,13 @@ void QtDAQ::closeEvent(QCloseEvent*)
 	if (rawBuffer1)
 	{
 		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
-			freeEvent(rawBuffer1[i]);
+			freeVxEvent(rawBuffer1[i]);
 		
 	}
 	if (rawBuffer2)
 	{
 		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
-			freeEvent(rawBuffer2[i]);
+			freeVxEvent(rawBuffer2[i]);
 		
 	}
 

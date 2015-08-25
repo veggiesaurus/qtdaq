@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DRS4Acquisition.h"
+#include "AcquisitionDefinitions.h"
 #include "ui_windowSignalPlot.h"
 #include "ui_dialogSignalPlotConfig.h"
 #include "Windows/PlotWindow.h"

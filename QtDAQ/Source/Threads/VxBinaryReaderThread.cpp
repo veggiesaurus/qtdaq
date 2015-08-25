@@ -1,80 +1,5 @@
 #include "Threads/VxBinaryReaderThread.h"
 
-
-EventVx* EventVx::eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data)
-{
-	EventVx* ev=new EventVx();	
-	memcpy(&(ev->info), &(info), sizeof(CAEN_DGTZ_EventInfo_t));
-	memcpy(ev->data.ChSize, data->ChSize, MAX_UINT16_CHANNEL_SIZE*sizeof(uint16_t));
-
-	for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
-	{
-		int numSamples=data->ChSize[i];
-		if (numSamples)
-		{
-			ev->data.DataChannel[i]=new uint16_t[numSamples];
-			memcpy(ev->data.DataChannel[i], data->DataChannel[i], numSamples*sizeof(uint16_t));
-		}
-	}
-	return ev;
-}
-
-EventVx* EventVx::eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_FLOAT_EVENT_t* fData)
-{
-	EventVx* ev=new EventVx();	
-	memcpy(&(ev->info), &(info), sizeof(CAEN_DGTZ_EventInfo_t));
-	memcpy(ev->fData.ChSize, fData->ChSize, MAX_UINT16_CHANNEL_SIZE*sizeof(uint16_t));
-
-	for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
-	{
-		int numSamples=fData->ChSize[i];
-		if (numSamples)
-		{
-			ev->fData.DataChannel[i]=new float[numSamples];
-			memcpy(ev->fData.DataChannel[i], fData->DataChannel[i], numSamples*sizeof(float));
-		}
-	}
-	return ev;
-}
-
-void freeEvent(EventVx* &ev)
-{
-	for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
-	{
-		if (ev->data.ChSize[i])
-			SAFE_DELETE_ARRAY(ev->data.DataChannel[i]);
-		if (ev->fData.ChSize[i])
-			SAFE_DELETE_ARRAY(ev->fData.DataChannel[i]);
-	}
-	SAFE_DELETE(ev);
-}
-
-void freeEvent(EventVx &ev)
-{
-	for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
-	{
-		if (ev.data.ChSize[i])
-			SAFE_DELETE_ARRAY(ev.data.DataChannel[i]);
-		if (ev.fData.ChSize[i])
-			SAFE_DELETE_ARRAY(ev.fData.DataChannel[i]);
-	}
-}
-
-DataHeader::DataHeader()
-{
-	int x=sizeof(DataHeader);
-	memset(this, 0, sizeof(DataHeader));
-	time(&dateTime);
-	sprintf(description, "Test output.");
-	sprintf(futureUse, "RSV");
-	sprintf(magicNumber, "UCT001B");
-	MSPS=4000;
-	numEvents=2;
-	numSamples=1024;
-	offsetDC=1000;
-	peakSaturation=1;
-}
-
 VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent)
 	: QThread(parent)
 {
@@ -228,7 +153,7 @@ void VxBinaryReaderThread::run()
 		//ev.processed=false;		
 		if (gzread(inputFileCompressed, &ev.info, sizeof(CAEN_DGTZ_EventInfo_t))!=sizeof(CAEN_DGTZ_EventInfo_t))
 		{
-			freeEvent(ev);
+			freeVxEvent(ev);
 			break;
 		}
 		
@@ -246,7 +171,7 @@ void VxBinaryReaderThread::run()
 			//read which groups are present
 			if (gzread(inputFileCompressed, GrPresent, sizeof(uint8_t) * MAX_X742_GROUP_SIZE)!= sizeof(uint8_t) * MAX_X742_GROUP_SIZE)
 			{
-				freeEvent(ev);
+				freeVxEvent(ev);
 				break;
 			}
 			for (int gr=0;gr<MAX_X742_GROUP_SIZE;gr++)
@@ -256,7 +181,7 @@ void VxBinaryReaderThread::run()
 					//if there is a group present, read the channel sizes out
 					if (gzread(inputFileCompressed, ChSize, sizeof(uint32_t) * MAX_X742_CHANNEL_SIZE)!= sizeof(uint32_t) * MAX_X742_CHANNEL_SIZE)
 					{
-						freeEvent(ev);
+						freeVxEvent(ev);
 						break;
 					}
 
@@ -276,7 +201,7 @@ void VxBinaryReaderThread::run()
 							int s=gzread(inputFileCompressed, ev.fData.DataChannel[i], sizeof(float) * ev.fData.ChSize[i]);
 							if (s!=sizeof(float)*ev.fData.ChSize[i])
 							{
-								freeEvent(ev);
+								freeVxEvent(ev);
 								break;
 							}
 						}
@@ -292,13 +217,13 @@ void VxBinaryReaderThread::run()
 
 			if (gzread(inputFileCompressed, &ev.data.ChSize, sizeof(uint32_t) * MAX_UINT16_CHANNEL_SIZE)!= sizeof(uint32_t) * MAX_UINT16_CHANNEL_SIZE)
 			{
-				freeEvent(ev);
+				freeVxEvent(ev);
 				break;
 			}
 			//error handling: bad event
 			if (ev.info.BoardId>100 || ev.info.EventSize>200000)
 			{
-				freeEvent(ev);
+				freeVxEvent(ev);
 				break;
 			}
 			for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
@@ -308,7 +233,7 @@ void VxBinaryReaderThread::run()
 				//error handling: bad event
 				if (ev.data.ChSize[0]>75000)
 				{
-					freeEvent(ev);
+					freeVxEvent(ev);
 					break;
 				}
 
@@ -322,7 +247,7 @@ void VxBinaryReaderThread::run()
 				int s=gzread(inputFileCompressed, ev.data.DataChannel[i], sizeof(uint16_t) * ev.data.ChSize[i]);
 				if (s!=sizeof(uint16_t)*ev.data.ChSize[i])
 				{
-					freeEvent(ev);
+					freeVxEvent(ev);
 					break;
 				}
 			}

@@ -227,6 +227,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VxAcquisitonThread.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_VxBinaryReaderThread.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -339,6 +343,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxAcquisitonThread.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_VxBinaryReaderThread.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -443,6 +451,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxAcquisitonThread.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release_debug\moc_VxBinaryReaderThread.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -456,7 +468,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Source\AcquisitionConfig.cpp" />
+    <ClCompile Include="Source\DRSAcquisitionConfig.cpp" />
+    <ClCompile Include="Source\AcquisitionDefinitions.cpp" />
     <ClCompile Include="Source\AnalysisConfig.cpp" />
     <ClCompile Include="Source\curvefit\fitting.cpp" />
     <ClCompile Include="Source\curvefit\lmcurve.c" />
@@ -488,6 +501,7 @@
     <ClCompile Include="Source\SignalPlot.cpp" />
     <ClCompile Include="Source\Threads\DRSAcquisitionThread.cpp" />
     <ClCompile Include="Source\Threads\DRSBinaryReaderThread.cpp" />
+    <ClCompile Include="Source\Threads\VxAcquisitionThread.cpp" />
     <ClCompile Include="Source\Threads\VxBinaryReaderThread.cpp" />
     <ClCompile Include="Source\Threads\VxProcessThread.cpp" />
     <ClCompile Include="Source\V8\V8Wrapper.cpp" />
@@ -522,7 +536,8 @@
     <ClInclude Include="GeneratedFiles\ui_windowHistogramPlot.h" />
     <ClInclude Include="GeneratedFiles\ui_windowSignalPlot.h" />
     <ClInclude Include="GeneratedFiles\ui_windowSortedPairPlot.h" />
-    <ClInclude Include="Include\AcquisitionConfig.h" />
+    <ClInclude Include="Include\DRSAcquisitionConfig.h" />
+    <ClInclude Include="Include\AcquisitionDefinitions.h" />
     <ClInclude Include="Include\AnalysisConfig.h" />
     <ClInclude Include="Include\curvefit\fitting.h" />
     <ClInclude Include="Include\curvefit\lmcurve.h" />
@@ -642,26 +657,6 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
     <ClInclude Include="Include\Cuts.h" />
-    <CustomBuild Include="Include\DRS4Acquisition.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Message>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">
-      </Command>
-    </CustomBuild>
     <CustomBuild Include="Include\Dialogs\JSHighlighter.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">Moc%27ing JSHighlighter.h...</Message>
@@ -839,6 +834,20 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQWT_DLL -DQT_QML_LIB -DHAVE_USB -DHAVE_LIBUSB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtQml"</Command>
     </CustomBuild>
     <ClInclude Include="Include\strlcpy.h" />
+    <CustomBuild Include="Include\Threads\VxAcquisitonThread.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">Moc%27ing VxAcquisitonThread.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQWT_DLL -DQT_QML_LIB -DHAVE_USB -DHAVE_LIBUSB -D_LARGEFILE64_SOURCE -DZ_LFS64 "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtQml"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing VxAcquisitonThread.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQWT_DLL -DQT_QML_LIB -DHAVE_USB -DHAVE_LIBUSB -D_LARGEFILE64_SOURCE -DZ_LFS64 "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtQml"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing VxAcquisitonThread.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQWT_DLL -DQT_QML_LIB -DHAVE_USB -DHAVE_LIBUSB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtQml"</Command>
+    </CustomBuild>
     <ClInclude Include="Include\V8\V8Wrapper.h" />
     <CustomBuild Include="Include\Windows\FoMWindow.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing FoMWindow.h...</Message>

@@ -1,5 +1,5 @@
 #pragma once
-#include "DRS4Acquisition.h"
+#include "AcquisitionDefinitions.h"
 #include "ui_windowSortedPairPlot.h"
 #include "ui_dialogSortedPairPlotConfig.h"
 #include "Windows/PlotWindow.h"

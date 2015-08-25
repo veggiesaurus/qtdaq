@@ -1,18 +1,13 @@
 #pragma once
 
-#include <basetsd.h>
-#include <time.h>
 #include <QThread>
 #include <QTimer>
 #include <QMutex>
 #include <atomic>
+
 #include "AcquisitionDefinitions.h"
-#include "CAEN/CAENAquisition.h"
 #include "globals.h"
 #include "zlib/zlib.h"
-
-
-
 
 class VxAcquisitionThread : public QThread
 {

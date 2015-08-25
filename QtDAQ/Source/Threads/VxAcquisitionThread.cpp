@@ -1,4 +1,4 @@
-#include "Threads/VxAcquisitionThread.h"
+#include "Threads/VxAcquisitonThread.h"
 
 VxAcquisitionThread::VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent)
 	: QThread(parent)

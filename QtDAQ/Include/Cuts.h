@@ -4,7 +4,7 @@
 #include <QPolygonF>
 #include <QDataStream>
 
-#include "DRS4Acquisition.h"
+#include "AcquisitionDefinitions.h"
 #include "globals.h"
 
 enum Condition

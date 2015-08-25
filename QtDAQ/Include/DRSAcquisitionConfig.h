@@ -2,17 +2,18 @@
 
 #include <QDataStream>
 #include <QVector>
+
 #include "DRS4/DRS.h"
-#include "DRS4Acquisition.h"
+#include "AcquisitionDefinitions.h"
 #include "globals.h"
 
 
-class AcquisitionConfig
+class DRSAcquisitionConfig
 {
 public:
-	AcquisitionConfig();
-	static AcquisitionConfig* DefaultConfig();
-	~AcquisitionConfig();
+	DRSAcquisitionConfig();
+	static DRSAcquisitionConfig* DefaultConfig();
+	~DRSAcquisitionConfig();
 
 	//Synchronisation settings
 	bool requiresReconfig = false;
@@ -37,7 +38,7 @@ public:
 	//send config to the board
 	bool apply(DRSBoard* board);
 };
-Q_DECLARE_METATYPE(AcquisitionConfig)
+Q_DECLARE_METATYPE(DRSAcquisitionConfig)
 
-QDataStream &operator<<(QDataStream &out, const AcquisitionConfig &obj);
-QDataStream &operator>>(QDataStream &in, AcquisitionConfig &obj);
+QDataStream &operator<<(QDataStream &out, const DRSAcquisitionConfig &obj);
+QDataStream &operator>>(QDataStream &in, DRSAcquisitionConfig &obj);

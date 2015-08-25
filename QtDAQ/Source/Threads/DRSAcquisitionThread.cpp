@@ -4,10 +4,10 @@ DRSAcquisitionThread::DRSAcquisitionThread(QObject *parent)
 	: QThread(parent)
 {
 	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
-	tempValArray=new float[NUM_DIGITIZER_SAMPLES];
-	tempFilteredValArray=new float[NUM_DIGITIZER_SAMPLES];
-	memset(tempValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES);
-	memset(tempFilteredValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES);
+	tempValArray=new float[NUM_DIGITIZER_SAMPLES_DRS];
+	tempFilteredValArray=new float[NUM_DIGITIZER_SAMPLES_DRS];
+	memset(tempValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES_DRS);
+	memset(tempFilteredValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES_DRS);
 	processedEventsMutex.lock();
 	processedEvents=new QVector<EventStatistics*>;
 	processedEvents->setSharable(true);
@@ -35,7 +35,7 @@ DRSAcquisitionThread::~DRSAcquisitionThread()
 }
 
 
-bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime)
+bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, DRSAcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime)
 {
 	drsObjectMutex.lock();
 	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
@@ -63,7 +63,7 @@ bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_boar
 	return true;
 }
 
-void DRSAcquisitionThread::reInit(AcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig)
+void DRSAcquisitionThread::reInit(DRSAcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig)
 {
 	configMutex.lock();
 	config = s_config;
@@ -75,7 +75,7 @@ void DRSAcquisitionThread::run()
 {	
 	numEvents=0;
 	EventRawData rawData;
-	rawData.tValues=new float[NUM_DIGITIZER_SAMPLES];
+	rawData.tValues=new float[NUM_DIGITIZER_SAMPLES_DRS];
 	int firstChannel=8, lastChannel=0;
 	//find which is the first channel to read out, and which is the last
 	//(only read out channels that are required, to improve throughput)
@@ -86,14 +86,14 @@ void DRSAcquisitionThread::run()
 		{
 			firstChannel=std::min(firstChannel, i);
 			lastChannel=std::max(lastChannel, i);
-			rawData.fValues[i]=new unsigned short[NUM_DIGITIZER_SAMPLES];
+			rawData.fValues[i]=new unsigned short[NUM_DIGITIZER_SAMPLES_DRS];
 		}
 		else
 			rawData.fValues[i]=NULL;
 	}
 	configMutex.unlock();
 
-	float* tmpSamples=new float[NUM_DIGITIZER_SAMPLES];
+	float* tmpSamples=new float[NUM_DIGITIZER_SAMPLES_DRS];
 	//todo: error handling if no channels selected
 
 	if (firstChannel>lastChannel)
@@ -154,10 +154,10 @@ void DRSAcquisitionThread::run()
 			if (config->channelEnabled[i])
 			{
 				if (!rawData.fValues[i])
-					rawData.fValues[i] = new unsigned short[NUM_DIGITIZER_SAMPLES];
+					rawData.fValues[i] = new unsigned short[NUM_DIGITIZER_SAMPLES_DRS];
 				//DRS4 offset (ch1 is in index 0, ch2 is in index 2, etc)
 				board->GetWave(0, i*2,tmpSamples);
-				for (int j=0;j<NUM_DIGITIZER_SAMPLES;j++)
+				for (int j=0;j<NUM_DIGITIZER_SAMPLES_DRS;j++)
 					rawData.fValues[i][j]=(unsigned short)((tmpSamples[j]+512)*65536/1024.0);
 			}
 			else if (rawData.fValues[i])
@@ -234,7 +234,7 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 	stats->serial=*rawEvent.serial;	
 	bool processSuccess=true;
 
-	int sampleRateMSPS = (int)round((NUM_DIGITIZER_SAMPLES - 1)*1000.0f / (rawEvent.tValues[NUM_DIGITIZER_SAMPLES - 1] - rawEvent.tValues[0]));
+	int sampleRateMSPS = (int)round((NUM_DIGITIZER_SAMPLES_DRS - 1)*1000.0f / (rawEvent.tValues[NUM_DIGITIZER_SAMPLES_DRS - 1] - rawEvent.tValues[0]));
 
 	EventSampleData* sample;
 	if (outputSample)
@@ -243,8 +243,8 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 		//set null pointers for channel initially
 		memset(sample, 0, sizeof(EventSampleData));
 		memset(sample->fValues, 0, NUM_DIGITIZER_CHANNELS*sizeof(float*));
-		sample->tValues=new float[NUM_DIGITIZER_SAMPLES];
-		processSuccess&=clone(rawEvent.tValues, NUM_DIGITIZER_SAMPLES, sample->tValues);
+		sample->tValues=new float[NUM_DIGITIZER_SAMPLES_DRS];
+		processSuccess&=clone(rawEvent.tValues, NUM_DIGITIZER_SAMPLES_DRS, sample->tValues);
 	}
 	
 	for (int ch=0;ch<NUM_DIGITIZER_CHANNELS;ch++)
@@ -260,19 +260,19 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 			Vec8us vFVal;
 			Vec4f vValArray;
 			Vec4f constRescale=1.0/64.0;
-			for (int i=0;i<NUM_DIGITIZER_SAMPLES/4;i++,ldPtr+=4,stPtr+=4)
+			for (int i=0;i<NUM_DIGITIZER_SAMPLES_DRS/4;i++,ldPtr+=4,stPtr+=4)
 			{				
 				vFVal.load(ldPtr);
 				(to_float(extend_low(vFVal))*constRescale).store(stPtr);				
 			}
 #else
-			for (int i=0;i<NUM_DIGITIZER_SAMPLES;i++)
+			for (int i=0;i<NUM_DIGITIZER_SAMPLES_DRS;i++)
 				tempValArray[i]=((float)rawEvent.fValues[ch][i])/64.0f;	
 #endif
 			
-			processSuccess&=clone(tempValArray, NUM_DIGITIZER_SAMPLES, tempFilteredValArray);
+			processSuccess&=clone(tempValArray, NUM_DIGITIZER_SAMPLES_DRS, tempFilteredValArray);
 			if (analysisConfig->preCFDFilter)
-				processSuccess&=lowPassFilter(tempValArray, NUM_DIGITIZER_SAMPLES,analysisConfig->preCFDFactor);
+				processSuccess&=lowPassFilter(tempValArray, NUM_DIGITIZER_SAMPLES_DRS,analysisConfig->preCFDFactor);
 			float CFDThreshold=512.0f;
 			processSuccess&=findBaseline(tempValArray, 0, analysisConfig->baselineSampleRange, analysisConfig->baselineSampleSize, stats->channelStatistics[ch].baseline);
 			if (abs(analysisConfig->digitalGain - 1.00f)>0.01f)
@@ -283,22 +283,22 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 				Vec4f vValArray;
 				Vec4f vBaseline = stats->channelStatistics[ch].baseline;
 				Vec4f vDigitalGain = analysisConfig->digitalGain;
-				for (int i = 0; i<NUM_DIGITIZER_SAMPLES / 4; i++, stPtr += 4)
+				for (int i = 0; i<NUM_DIGITIZER_SAMPLES_DRS / 4; i++, stPtr += 4)
 				{
 					vValArray.load(stPtr);
 					vValArray = vBaseline + vDigitalGain*(vValArray - vBaseline);
 					vValArray.store(stPtr);
 				}
 #else
-				for (int i=0;i<NUM_DIGITIZER_SAMPLES;i++)
+				for (int i=0;i<NUM_DIGITIZER_SAMPLES_DRS;i++)
 				{
 					tempValArray[i]=stats->channelStatistics[ch].baseline+analysisConfig->digitalGain*(tempValArray[i]-stats->channelStatistics[ch].baseline);
 				}
 #endif
 			}
-			processSuccess &= cfdSampleOptimized(tempValArray, stats->channelStatistics[ch].baseline, NUM_DIGITIZER_SAMPLES, analysisConfig->CFDFraction, analysisConfig->CFDLength, analysisConfig->CFDOffset, CFDThreshold, 1.f, tempFilteredValArray);
+			processSuccess &= cfdSampleOptimized(tempValArray, stats->channelStatistics[ch].baseline, NUM_DIGITIZER_SAMPLES_DRS, analysisConfig->CFDFraction, analysisConfig->CFDLength, analysisConfig->CFDOffset, CFDThreshold, 1.f, tempFilteredValArray);
 			if (analysisConfig->postCFDFilter)
-				processSuccess &= lowPassFilter(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, analysisConfig->postCFDFactor);
+				processSuccess &= lowPassFilter(tempFilteredValArray, NUM_DIGITIZER_SAMPLES_DRS, analysisConfig->postCFDFactor);
 
 
 
@@ -306,16 +306,16 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 			int positionOfCFDMin, positionOfCFDMax;
 			float minCFDValue, maxCFDValue;
 
-			processSuccess &= findMinMaxValue(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, 0, NUM_DIGITIZER_SAMPLES, minCFDValue, positionOfCFDMin, maxCFDValue, positionOfCFDMax);
+			processSuccess &= findMinMaxValue(tempFilteredValArray, NUM_DIGITIZER_SAMPLES_DRS, 0, NUM_DIGITIZER_SAMPLES_DRS, minCFDValue, positionOfCFDMin, maxCFDValue, positionOfCFDMax);
 
-			processSuccess &= findIntersection(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, positionOfCFDMin, positionOfCFDMax, 2, CFDThreshold, false, positionOfThresholdCrossing);
+			processSuccess &= findIntersection(tempFilteredValArray, NUM_DIGITIZER_SAMPLES_DRS, positionOfCFDMin, positionOfCFDMax, 2, CFDThreshold, false, positionOfThresholdCrossing);
 			float crossingPositionInterpolated;
 			float cfdIndex = 0;
 			if (positionOfThresholdCrossing >= positionOfCFDMin)
 			{
 				float slope, offset;
 				//linear fit over 4 points of slope
-				processSuccess &= linearFit(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, positionOfThresholdCrossing - 2, positionOfThresholdCrossing + 1, slope, offset);
+				processSuccess &= linearFit(tempFilteredValArray, NUM_DIGITIZER_SAMPLES_DRS, positionOfThresholdCrossing - 2, positionOfThresholdCrossing + 1, slope, offset);
 				cfdIndex = (CFDThreshold - offset) / slope;
 				int indexLow = (int)(cfdIndex);
 				float d = cfdIndex - indexLow;
@@ -337,16 +337,16 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 			else
 				stats->channelStatistics[ch].timeOfCFDCrossing = -1000;
 
-			processSuccess &= findMinMaxValue(tempValArray, NUM_DIGITIZER_SAMPLES, 0, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].minValue, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].maxValue, stats->channelStatistics[ch].indexOfMax);
+			processSuccess &= findMinMaxValue(tempValArray, NUM_DIGITIZER_SAMPLES_DRS, 0, NUM_DIGITIZER_SAMPLES_DRS, stats->channelStatistics[ch].minValue, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].maxValue, stats->channelStatistics[ch].indexOfMax);
 
-			if (stats->channelStatistics[ch].indexOfMin>0 && stats->channelStatistics[ch].indexOfMin<NUM_DIGITIZER_SAMPLES)
+			if (stats->channelStatistics[ch].indexOfMin>0 && stats->channelStatistics[ch].indexOfMin<NUM_DIGITIZER_SAMPLES_DRS)
 				stats->channelStatistics[ch].timeOfMin = rawEvent.tValues[stats->channelStatistics[ch].indexOfMin];
 
-			if (stats->channelStatistics[ch].indexOfMax>0 && stats->channelStatistics[ch].indexOfMax<NUM_DIGITIZER_SAMPLES)
+			if (stats->channelStatistics[ch].indexOfMax>0 && stats->channelStatistics[ch].indexOfMax<NUM_DIGITIZER_SAMPLES_DRS)
 				stats->channelStatistics[ch].timeOfMax = rawEvent.tValues[stats->channelStatistics[ch].indexOfMax];
 
-			processSuccess &= findHalfRise(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].baseline, stats->channelStatistics[ch].indexOfHalfRise);
-			if (stats->channelStatistics[ch].indexOfHalfRise>0 && stats->channelStatistics[ch].indexOfHalfRise<NUM_DIGITIZER_SAMPLES)
+			processSuccess &= findHalfRise(tempValArray, NUM_DIGITIZER_SAMPLES_DRS, stats->channelStatistics[ch].indexOfMin, stats->channelStatistics[ch].baseline, stats->channelStatistics[ch].indexOfHalfRise);
+			if (stats->channelStatistics[ch].indexOfHalfRise>0 && stats->channelStatistics[ch].indexOfHalfRise<NUM_DIGITIZER_SAMPLES_DRS)
 				stats->channelStatistics[ch].timeOfHalfRise = rawEvent.tValues[stats->channelStatistics[ch].indexOfHalfRise];
 
 
@@ -368,28 +368,28 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 			}
 
 			//processSuccess&=calculateIntegrals(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, timeOffset+startOffset, timeOffset+shortGateOffset, timeOffset+longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
-			processSuccess &= calculateIntegralsCorrected(tempValArray, NUM_DIGITIZER_SAMPLES, stats->channelStatistics[ch].baseline, cfdIndex + startOffset, cfdIndex + shortGateOffset, cfdIndex + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
+			processSuccess &= calculateIntegralsCorrected(tempValArray, NUM_DIGITIZER_SAMPLES_DRS, stats->channelStatistics[ch].baseline, cfdIndex + startOffset, cfdIndex + shortGateOffset, cfdIndex + longGateOffset, stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral);
 			processSuccess &= calculatePSD(stats->channelStatistics[ch].shortGateIntegral, stats->channelStatistics[ch].longGateIntegral, stats->channelStatistics[ch].PSD);
 
 			stats->channelStatistics[ch].secondsFromFirstEvent = getSecondsFromFirstEvent(firstEventTimestamp, *rawEvent.timestamp);
 
 			if (outputSample)
 			{
-				sample->numSamples = NUM_DIGITIZER_SAMPLES;
+				sample->numSamples = NUM_DIGITIZER_SAMPLES_DRS;
 				sample->MSPS = sampleRateMSPS;
 				if (!sample->tValues)
 				{
-					sample->tValues = new float[NUM_DIGITIZER_SAMPLES];
-					for (size_t i = 0; i < NUM_DIGITIZER_SAMPLES; i++)
+					sample->tValues = new float[NUM_DIGITIZER_SAMPLES_DRS];
+					for (size_t i = 0; i < NUM_DIGITIZER_SAMPLES_DRS; i++)
 						sample->tValues[i] = rawEvent.tValues[i] - rawEvent.tValues[0];
 					//processSuccess &= clone(rawEvent.tValues, NUM_DIGITIZER_SAMPLES, sample->tValues);
 				}
-				sample->fValues[ch] = new float[NUM_DIGITIZER_SAMPLES];
+				sample->fValues[ch] = new float[NUM_DIGITIZER_SAMPLES_DRS];
 				//processSuccess&=clone(tempFilteredValArray, numSamples, sample->fValues[ch]);
 				if (analysisConfig->displayCFDSignal)
-					processSuccess &= clone(tempFilteredValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
+					processSuccess &= clone(tempFilteredValArray, NUM_DIGITIZER_SAMPLES_DRS, sample->fValues[ch]);
 				else
-					processSuccess &= clone(tempValArray, NUM_DIGITIZER_SAMPLES, sample->fValues[ch]);
+					processSuccess &= clone(tempValArray, NUM_DIGITIZER_SAMPLES_DRS, sample->fValues[ch]);
 
 				sample->baseline = stats->channelStatistics[ch].baseline;
 				sample->indexStart = timeOffset + startOffset;

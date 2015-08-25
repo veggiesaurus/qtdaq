@@ -1,8 +1,9 @@
 #pragma once
-#include "DRS4Acquisition.h"
-#include "vector/vectorclass.h"
 #include <string>
 #include <algorithm>
+
+#include "AcquisitionDefinitions.h"
+#include "vector/vectorclass.h"
 
 
 //helpers
