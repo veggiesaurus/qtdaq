@@ -469,17 +469,17 @@
     <ClCompile Include="Source\Threads\VxAcquisitionThread.cpp">
       <Filter>Source Files\Threads</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxAcquisitonThread.cpp">
-      <Filter>Generated Files\Release_debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_VxAcquisitonThread.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_VxAcquisitonThread.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="VxAcquisitionConfig.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxAcquisitionThread.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VxAcquisitionThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxAcquisitionThread.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -630,7 +630,7 @@
     <CustomBuild Include="Include\Dialogs\VxHighlighter.h">
       <Filter>Header Files\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="Include\Threads\VxAcquisitonThread.h">
+    <CustomBuild Include="Include\Threads\VxAcquisitionThread.h">
       <Filter>Header Files\Threads</Filter>
     </CustomBuild>
   </ItemGroup>

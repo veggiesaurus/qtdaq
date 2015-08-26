@@ -16,8 +16,9 @@ class VxAcquisitionThread : public QThread
 public:
 	VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
 	~VxAcquisitionThread();
-	bool initVxAcquisitionThread(VxAcquisitionConfig* config, int s_runIndex, int updateTime = 125);
+	CAENErrorCode initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int updateTime = 125);
 	bool setFileOutput(QString filename, bool useCompression = true);
+	bool reInit(VxAcquisitionConfig* s_config);
 signals:
 	void newRawEvents(QVector<EventVx*>*);
 	void aquisitionError(CAEN_DGTZ_ErrorCode errorCode);
@@ -25,21 +26,44 @@ signals:
 private:
 	void run();
 
+	CAENErrorCode InitDigitizer();
+	CAENErrorCode ProgramDigitizer();
+	void CloseDigitizer();
+	CAENErrorCode AllocateEventStorage();
+
+	CAEN_DGTZ_ErrorCode GetMoreBoardInfo();
+	CAEN_DGTZ_ErrorCode WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);
+
+
 	public slots:
 	void onUpdateTimerTimeout();
 	void setPaused(bool paused);
-
+	void stopAcquisition();
 private:
-	int eventIndex;
+	VxAcquisitionConfig* config = nullptr;
+	int handle = -1; 
+	CAEN_DGTZ_BoardInfo_t* boardInfo = nullptr;
+	CAEN_DGTZ_EventInfo_t eventInfo;
+	uint32_t allocatedSize;
+	uint32_t bufferSize;
+	uint32_t numEvents;
+	char* buffer = nullptr;
+
+	CAEN_DGTZ_UINT16_EVENT_t* event16 = NULL;
+	char* eventPtr = nullptr;
+	uint32_t previousNumSamples = 0;
+	CAENStatus digitizerStatus = STATUS_CLOSED;
+
+	int eventIndex = 0;
 	DataHeader header;
 
 	QString filename;
-	int numEventsAcquired;
+	int numEventsAcquired = 0;
 	QTimer updateTimer;
 	bool isAcquiring;
 	bool requiresPause;
 	QMutex pauseMutex;
-
+	uint32_t numEventsCaptured =0;
 
 	QMutex* rawMutexes[2];
 	EventVx* rawBuffers[2];

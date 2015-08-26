@@ -12,6 +12,10 @@
 
 #define MAX_GW  1000        /* max. number of generic write commads */
 
+#define VME_INTERRUPT_LEVEL      1
+#define VME_INTERRUPT_STATUS_ID  0xAAAA
+#define INTERRUPT_MODE           CAEN_DGTZ_IRQ_MODE_ROAK
+#define INTERRUPT_TIMEOUT        200  // ms
 
 
 struct VxParseError
@@ -37,7 +41,7 @@ struct VxAcquisitionConfig
 	int Nbit;
 	float Ts;
 	int NumEvents;
-	int RecordLength;
+	uint32_t RecordLength;
 	int PostTrigger;
 	int InterruptNumEvents;
 	bool TestPattern;

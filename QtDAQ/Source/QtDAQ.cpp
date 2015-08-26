@@ -154,12 +154,92 @@ void QtDAQ::onDRSObjectChanged(DRS* s_drs, DRSBoard* s_board)
 
 void QtDAQ::onVxInitClicked()
 {
+	if (rawBuffer1Mutex && !finishedReading)
+	{
+		rawBuffer1Mutex->lock();
+		rawBuffer2Mutex->lock();
+	}
 
+	if (vxAcquisitionThread)
+	{
+		vxAcquisitionThread->stopAcquisition();
+		vxAcquisitionThread->disconnect();
+		vxAcquisitionThread->exit();
+		vxAcquisitionThread->wait(500);
+		vxAcquisitionThread->terminate();
+		SAFE_DELETE(vxAcquisitionThread);
+	}
+
+	if (vxProcessThread)
+	{
+		vxProcessThread->disconnect();
+		vxProcessThread->exit();
+		vxProcessThread->wait(100);
+		vxProcessThread->terminate();
+		SAFE_DELETE(vxProcessThread);
+	}
+
+	SAFE_DELETE(rawBuffer1Mutex);
+	SAFE_DELETE(rawBuffer2Mutex);
+	rawBuffer1Mutex = new QMutex();
+	rawBuffer2Mutex = new QMutex();
+	if (rawBuffer1)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeVxEvent(rawBuffer1[i]);
+	}
+	if (rawBuffer2)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeVxEvent(rawBuffer2[i]);
+	}
+
+	SAFE_DELETE_ARRAY(rawBuffer1);
+	SAFE_DELETE_ARRAY(rawBuffer2);
+	rawBuffer1 = new EventVx[EVENT_BUFFER_SIZE];
+	rawBuffer2 = new EventVx[EVENT_BUFFER_SIZE];
+	memset(rawBuffer1, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
+	memset(rawBuffer2, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
+
+	vxProcessThread = new VxProcessThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+	connect(this, SIGNAL(resumeProcessing()), vxProcessThread, SLOT(onResumeProcessing()), Qt::QueuedConnection);
+	connect(vxProcessThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
+	connect(vxProcessThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
+	vxProcessThread->initVxProcessThread(analysisConfig);
+	//if (!temperatureLogFilename.isEmpty())
+	//		vxProcessThread->loadTemperatureLog(temperatureLogFilename);
+
+
+	vxAcquisitionThread = new VxAcquisitionThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+
+	runIndex++;
+	CAENErrorCode errorCode = vxAcquisitionThread->initVxAcquisitionThread(vxConfig, runIndex);
+	if (errorCode == ERR_NONE)
+	{
+		vxAcquisitionThread->setPaused(true);
+		vxAcquisitionThread->start();
+		vxProcessThread->start();
+		ui.actionVxStart->setEnabled(true);
+		if (statusBar())
+			statusBar()->showMessage("Successfully opened digitizer for acquisition.");
+	}
+	else
+	{
+		if (statusBar())
+			statusBar()->showMessage("Failed to init digitizer.");
+	}
 }
 
 void QtDAQ::onVxStartClicked()
 {
-
+	uiUpdateTimer.start();
+	acquisitionTime.start();
+	numEventsProcessed = 0;
+	vxAcquisitionThread->setPaused(false);
+	ui.actionVxStop->setEnabled(true);
+	ui.actionVxReset->setEnabled(true);
+	ui.actionVxStart->setEnabled(false);
+	ui.actionVxSoftTrigger->setEnabled(true);
 }
 
 void QtDAQ::onVxResetClicked()

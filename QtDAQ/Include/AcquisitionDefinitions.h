@@ -94,6 +94,92 @@ if (ptr != NULL)            \
 #endif
 #endif
 
+
+#pragma region enums
+enum CAENStatus
+{
+	STATUS_CLOSED = 0,
+	STATUS_INITIALISED = 1,
+	STATUS_PROGRAMMED = 2,
+	STATUS_RUNNING = 4,
+	STATUS_READY = 8,
+	STATUS_ERROR = 16,
+};
+
+inline CAENStatus operator|(CAENStatus a, CAENStatus b)
+{
+	return static_cast<CAENStatus>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline CAENStatus operator |=(CAENStatus& a, const CAENStatus& b)
+{
+	a = static_cast<CAENStatus>(static_cast<int>(a) | static_cast<int>(b)); return a;
+}
+
+inline CAENStatus operator&(CAENStatus a, CAENStatus b)
+{
+	return static_cast<CAENStatus>(static_cast<int>(a)& static_cast<int>(b));
+}
+
+inline CAENStatus operator &=(CAENStatus& a, const CAENStatus& b)
+{
+	a = static_cast<CAENStatus>(static_cast<int>(a)& static_cast<int>(b)); return a;
+}
+
+inline CAENStatus operator ~(const CAENStatus& a)
+{
+	return static_cast<CAENStatus>(~static_cast<int>(a));
+}
+
+inline CAEN_DGTZ_ErrorCode operator|(CAEN_DGTZ_ErrorCode a, CAEN_DGTZ_ErrorCode b)
+{
+	return static_cast<CAEN_DGTZ_ErrorCode>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline CAEN_DGTZ_ErrorCode operator |=(CAEN_DGTZ_ErrorCode& a, const CAEN_DGTZ_ErrorCode& b)
+{
+	a = static_cast<CAEN_DGTZ_ErrorCode>(static_cast<int>(a) | static_cast<int>(b)); return a;
+}
+
+inline CAEN_DGTZ_ErrorCode operator&(CAEN_DGTZ_ErrorCode a, CAEN_DGTZ_ErrorCode b)
+{
+	return static_cast<CAEN_DGTZ_ErrorCode>(static_cast<int>(a)& static_cast<int>(b));
+}
+
+inline CAEN_DGTZ_ErrorCode operator &=(CAEN_DGTZ_ErrorCode& a, const CAEN_DGTZ_ErrorCode& b)
+{
+	a = static_cast<CAEN_DGTZ_ErrorCode>(static_cast<int>(a)& static_cast<int>(b)); return a;
+}
+
+inline CAEN_DGTZ_ErrorCode operator ~(const CAEN_DGTZ_ErrorCode& a)
+{
+	return static_cast<CAEN_DGTZ_ErrorCode>(~static_cast<int>(a));
+}
+
+enum CAENErrorCode {
+	ERR_NONE = 0,
+	ERR_CONF_FILE_NOT_FOUND,
+	ERR_CONF_FILE_INVALID,
+	ERR_DGZ_OPEN,
+	ERR_BOARD_INFO_READ,
+	ERR_INVALID_BOARD_TYPE,
+	ERR_DGZ_PROGRAM,
+	ERR_MALLOC,
+	ERR_RESTART,
+	ERR_INTERRUPT,
+	ERR_READOUT,
+	ERR_EVENT_BUILD,
+	ERR_HISTO_MALLOC,
+	ERR_UNHANDLED_BOARD,
+	ERR_OUTFILE_WRITE,
+	ERR_UNKNOWN,
+	ERR_DUMMY_LAST,
+};
+
+
+#pragma endregion 
+
+
 typedef struct
 {
 	uint32_t			ChSize[MAX_UINT16_CHANNEL_SIZE]; // the number of samples stored in DataChannel array  

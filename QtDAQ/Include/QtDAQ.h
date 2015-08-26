@@ -26,23 +26,24 @@
 #include "DRSAcquisitionConfig.h"
 #include "AnalysisConfig.h"
 
-#include "LinearCutDialog.h"
-#include "LinearCutEditDialog.h"
-#include "CalibrationDialog.h"
-#include "AnalysisConfigDialog.h"
-#include "AcquisitionConfigDialog.h"
-#include "VxAcquisitionConfigDialog.h"
+#include "Dialogs/LinearCutDialog.h"
+#include "Dialogs/LinearCutEditDialog.h"
+#include "Dialogs/CalibrationDialog.h"
+#include "Dialogs/AnalysisConfigDialog.h"
+#include "Dialogs/AcquisitionConfigDialog.h"
+#include "Dialogs/VxAcquisitionConfigDialog.h"
 
-#include "SignalPlotWindow.h"
-#include "HistogramWindow.h"
-#include "Histogram2DWindow.h"
-#include "FoMWindow.h"
+#include "Windows/SignalPlotWindow.h"
+#include "Windows/HistogramWindow.h"
+#include "Windows/Histogram2DWindow.h"
+#include "Windows/FoMWindow.h"
+#include "Windows/SortedPairPlotWindow.h"
 
-#include "SortedPairPlotWindow.h"
-#include "DRSBinaryReaderThread.h"
-#include "DRSAcquisitionThread.h"
-#include "VxBinaryReaderThread.h"
-#include "VxProcessThread.h"
+#include "Threads/DRSBinaryReaderThread.h"
+#include "Threads/DRSAcquisitionThread.h"
+#include "Threads/VxBinaryReaderThread.h"
+#include "Threads/VxAcquisitionThread.h"
+#include "Threads/VxProcessThread.h"
 
 
 enum DAQStatus
@@ -204,6 +205,7 @@ private:
 	QVector<PolygonalCut> polygonalCuts;
 	DRSBinaryReaderThread* drsReaderThread = nullptr;
 	VxBinaryReaderThread* vxReaderThread = nullptr;
+	VxAcquisitionThread* vxAcquisitionThread = nullptr;
 	VxProcessThread* vxProcessThread = nullptr;
 	DRSAcquisitionThread* drsAcquisitionThread = nullptr;
 	int numEventsProcessed = 0, prevNumEventsProcessed = 0;
