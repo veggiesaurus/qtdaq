@@ -37,13 +37,36 @@ CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* 
 		return errInitDigitizer;
 	}
 	digitizerStatus |= STATUS_INITIALISED;
+
+	CAENErrorCode errProgramDigitizer = ProgramDigitizer();
+	if (errProgramDigitizer)
+	{
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+		return errInitDigitizer;
+	}
+	digitizerStatus |= STATUS_PROGRAMMED;
 	runIndex = s_runIndex;
+
+	auto retAllocate = CAEN_DGTZ_AllocateEvent(handle, (void**)&event16);
+	if (retAllocate)
+	{
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+		return ERR_MALLOC;
+	}
+	retAllocate = CAEN_DGTZ_MallocReadoutBuffer(handle, &buffer, &allocatedSize); /* WARNING: This malloc must be done after the digitizer programming */
+	if (retAllocate) {
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+		return ERR_MALLOC;
+	}
 	return ERR_NONE;
 }
 
 void VxAcquisitionThread::run()
 {
-	
+	CAEN_DGTZ_SWStartAcquisition(handle);
 }
 
 void VxAcquisitionThread::onUpdateTimerTimeout()
@@ -225,6 +248,7 @@ CAEN_DGTZ_ErrorCode VxAcquisitionThread::GetMoreBoardInfo()
 
 void VxAcquisitionThread::CloseDigitizer()
 {
+	CAEN_DGTZ_SWStopAcquisition(handle);
 	if (event16)
 		CAEN_DGTZ_FreeEvent(handle, (void**)&event16);
 	CAEN_DGTZ_FreeReadoutBuffer(&buffer);
