@@ -11,7 +11,7 @@ VxAcquisitionThread::~VxAcquisitionThread()
 
 }
 
-bool VxAcquisitionThread::initVxAcquisitionThread(QString config, int s_runIndex, int updateTime)
+bool VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* config, int s_runIndex, int updateTime)
 {	
 	runIndex = s_runIndex;
 	return true;

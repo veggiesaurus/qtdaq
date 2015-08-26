@@ -4,11 +4,11 @@
 #include <QTimer>
 #include <QMutex>
 #include <atomic>
-
-#include "AcquisitionDefinitions.h"
-#include <CAENDigitizer.h>
-#include "globals.h"
 #include "zlib/zlib.h"
+#include <CAENDigitizer.h>
+#include "AcquisitionDefinitions.h"
+#include "VxAcquisitionConfig.h"
+#include "globals.h"
 
 class VxAcquisitionThread : public QThread
 {
@@ -16,7 +16,7 @@ class VxAcquisitionThread : public QThread
 public:
 	VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
 	~VxAcquisitionThread();
-	bool initVxAcquisitionThread(QString config, int s_runIndex, int updateTime = 125);
+	bool initVxAcquisitionThread(VxAcquisitionConfig* config, int s_runIndex, int updateTime = 125);
 	bool setFileOutput(QString filename, bool useCompression = true);
 signals:
 	void newRawEvents(QVector<EventVx*>*);

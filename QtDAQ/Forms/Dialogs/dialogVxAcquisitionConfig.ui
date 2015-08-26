@@ -25,9 +25,11 @@
        <kerning>true</kerning>
       </font>
      </property>
+     <property name="lineWrapMode">
+      <enum>QPlainTextEdit::NoWrap</enum>
+     </property>
      <property name="plainText">
-      <string>testing 1234
-</string>
+      <string/>
      </property>
     </widget>
    </item>

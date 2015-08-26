@@ -191,7 +191,8 @@ private:
 	Ui::DialogAcquisitionConfig uiDialogAcquisitionConfig;
 	Ui::DialogAnalysisConfig uiDialogAnalysisConfig;
 	DRSAcquisitionConfig* acquisitionConfig;
-	QString vxAcquisitionConfig;
+	QString vxAcquisitionConfigString;
+	VxAcquisitionConfig* vxConfig;
 	AnalysisConfig* analysisConfig;
 	EnergyCalibration calibrationValues[NUM_DIGITIZER_CHANNELS];
 	QVector<SignalPlotWindow*> signalPlots;

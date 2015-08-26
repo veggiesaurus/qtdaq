@@ -25,7 +25,10 @@ QtDAQ::QtDAQ(QWidget *parent)
 		*acquisitionConfig = varAcquisition.value<DRSAcquisitionConfig>();
 	else
 		acquisitionConfig = DRSAcquisitionConfig::DefaultConfig();
-	vxAcquisitionConfig = settings.value("acquisition/vxPreviousSettings").toString();
+	vxAcquisitionConfigString = settings.value("acquisition/vxPreviousSettings").toString();
+	
+	vxConfig = VxAcquisitionConfig::parseConfigString(vxAcquisitionConfigString);
+	ui.actionVxInit->setEnabled(vxConfig);
 
 	analysisConfig = new AnalysisConfig();
 	qRegisterMetaType<AnalysisConfig>("AnalysisConfig");
@@ -202,21 +205,30 @@ void QtDAQ::onVxLoadConfigFileClicked()
 		QString newConfig = stream.readAll();
 		file.close();
 		
-		vxAcquisitionConfig = newConfig;
-		settings.setValue("acquisition/vxPreviousSettings", vxAcquisitionConfig);
+		vxAcquisitionConfigString = newConfig;
+		settings.setValue("acquisition/vxPreviousSettings", vxAcquisitionConfigString);
+
+		vxConfig = VxAcquisitionConfig::parseConfigString(vxAcquisitionConfigString);
+		ui.actionVxInit->setEnabled(vxConfig);
+
+		if (!vxConfig)
+			QMessageBox::critical(this, "Error in config file", "The config file contains errors. Fix the errors in the editor window before continuing");
 	}
 }
 
 void QtDAQ::onVxEditConfigFileClicked()
 {
-	auto dialog = new VxAcquisitionConfigDialog(vxAcquisitionConfig);
+	auto dialog = new VxAcquisitionConfigDialog(vxAcquisitionConfigString);
 	int retDialog = dialog->exec();
 
 	if (retDialog == QDialog::Rejected)
 		return;
 
-	vxAcquisitionConfig = dialog->ui.plainTextEditCode->toPlainText();
-	settings.setValue("acquisition/vxPreviousSettings", vxAcquisitionConfig);
+	vxAcquisitionConfigString = dialog->ui.plainTextEditCode->toPlainText();
+	settings.setValue("acquisition/vxPreviousSettings", vxAcquisitionConfigString);
+
+	vxConfig = VxAcquisitionConfig::parseConfigString(vxAcquisitionConfigString);
+	ui.actionVxInit->setEnabled(vxConfig);
 }
 
 void QtDAQ::onVxSaveConfigFileClicked()
@@ -244,7 +256,7 @@ void QtDAQ::onVxSaveConfigFileClicked()
 		if (!file.open(QIODevice::WriteOnly | QFile::Text))
 			return;
 		QTextStream stream(&file);		
-		stream << (vxAcquisitionConfig);
+		stream << (vxAcquisitionConfigString);
 		stream.flush();
 		file.close();
 	}

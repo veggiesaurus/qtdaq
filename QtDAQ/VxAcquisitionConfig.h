@@ -60,4 +60,5 @@ struct VxAcquisitionConfig
 	uint32_t GWmask[MAX_GW];
 	VxAcquisitionConfig();
 	static VxAcquisitionConfig* parseConfigString(QString configString, QVector<VxParseError>& parseErrors);
+	static VxAcquisitionConfig* parseConfigString(QString configString);
 };
