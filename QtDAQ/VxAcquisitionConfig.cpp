@@ -39,7 +39,7 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 	QStringList lines = configString.split('\n');
 	int lineNum = 0;
 	int channelNum = -1;
-	for each (auto line in lines)
+	for(auto line:lines)
 	{
 		lineNum++;
 		if (line.trimmed().startsWith('#'))
@@ -189,12 +189,17 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 		else if (QRegularExpression("ENABLE_INPUT", QRegularExpression::CaseInsensitiveOption).match(line).hasMatch())
 		{
 			auto matchEnableInputPattern = QRegularExpression("ENABLE_INPUT\\s+(YES|NO)", QRegularExpression::CaseInsensitiveOption).match(line);
-			if (matchEnableInputPattern.hasMatch() && channelNum >= 0)
+			if (matchEnableInputPattern.hasMatch())
 			{
-				if (matchEnableInputPattern.captured(1).contains("YES", Qt::CaseInsensitive))
-					config->EnableMask |= (1 << channelNum);
+				if (channelNum >= 0)
+				{
+					if (matchEnableInputPattern.captured(1).contains("YES", Qt::CaseInsensitive))
+						config->EnableMask |= (1 << channelNum);
+					else
+						config->EnableMask &= ~(1 << channelNum);
+				}
 				else
-					config->EnableMask &= ~(1 << channelNum);
+					config->EnableMask = (matchEnableInputPattern.captured(1).contains("YES", Qt::CaseInsensitive)) ? 0xFF : 0x00;				
 			}
 			else
 				parseErrors.push_back({ VxParseError::CRITICAL, lineNum, "Invalid ENABLE_INPUT command, or invalid channel number. Format is 'ENABLE_INPUT YES|NO'" });
@@ -202,11 +207,17 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 		else if (QRegularExpression("DC_OFFSET", QRegularExpression::CaseInsensitiveOption).match(line).hasMatch() && !QRegularExpression("GRP_CH_DC_OFFSET", QRegularExpression::CaseInsensitiveOption).match(line).hasMatch())
 		{
 			auto matchDcOffsetPattern = QRegularExpression("DC_OFFSET\\s+(-+)?([0-9]*\\.[0-9]+|[0-9]+)", QRegularExpression::CaseInsensitiveOption).match(line);
-			if (matchDcOffsetPattern.hasMatch() && channelNum >= 0)
+			if (matchDcOffsetPattern.hasMatch())
 			{
 				float floatVal = (matchDcOffsetPattern.captured(1) + matchDcOffsetPattern.captured(2)).toFloat();
 				if (floatVal >= -50.0f && floatVal <= 50.0f)
-					config->DCoffset[channelNum] = floatVal;
+				{
+					if (channelNum >= 0)
+						config->DCoffset[channelNum] = floatVal;
+					else
+						for (auto i = 0; i < MAX_SET; i++)
+							config->DCoffset[i] = floatVal;
+				}
 				else
 					parseErrors.push_back({ VxParseError::WARNING, lineNum, "Invalid DC_OFFSET command, or invalid channel number. DC_OFFSET must be between -50.0 and 50.0" });
 
@@ -217,14 +228,19 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 		else if (QRegularExpression("TRIGGER_THRESHOLD", QRegularExpression::CaseInsensitiveOption).match(line).hasMatch())
 		{
 			auto matchTriggerThresholdPattern = QRegularExpression("TRIGGER_THRESHOLD\\s+(\\d+)", QRegularExpression::CaseInsensitiveOption).match(line);
-			if (matchTriggerThresholdPattern.hasMatch() && channelNum >= 0)
+			if (matchTriggerThresholdPattern.hasMatch())
 			{
 				int triggerThreshold = matchTriggerThresholdPattern.captured(1).toInt();
-				config->Threshold[channelNum] = 512;
-				if (triggerThreshold >= 0 && triggerThreshold <= 4095)
-					config->Threshold[channelNum] = triggerThreshold;
-				else
+				if (triggerThreshold < 0 || triggerThreshold > 4095)
+				{
 					parseErrors.push_back({ VxParseError::WARNING, lineNum, "TRIGGER_THRESHOLD must be between 0 and 4095. Defaulting to 512" });
+					triggerThreshold = 512;
+				}
+				if (channelNum >= 0)
+					config->Threshold[channelNum] = 512;
+				else
+					for (auto i = 0; i < MAX_SET; i++)
+						config->Threshold[i] = triggerThreshold;
 			}
 			else
 				parseErrors.push_back({ VxParseError::CRITICAL, lineNum, "Invalid TRIGGER_THRESHOLD command. Format is 'TRIGGER_THRESHOLD #N', where #N is the trigger threshold in ADC counts" });
@@ -232,8 +248,15 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 		else if (QRegularExpression("CHANNEL_TRIGGER", QRegularExpression::CaseInsensitiveOption).match(line).hasMatch())
 		{
 			auto matchChannelTriggerPattern = QRegularExpression("CHANNEL_TRIGGER\\s+(DISABLED|ACQUISITION_ONLY|ACQUISITION_AND_TRGOUT)", QRegularExpression::CaseInsensitiveOption).match(line);
-			if (matchChannelTriggerPattern.hasMatch() && channelNum >= 0)
-				config->ChannelTriggerMode[channelNum] = (matchChannelTriggerPattern.captured(1).contains("ACQUISITION_ONLY", Qt::CaseInsensitive)) ? CAEN_DGTZ_TRGMODE_ACQ_ONLY : ((matchChannelTriggerPattern.captured(0).contains("ACQUISITION_AND_TRGOUT", Qt::CaseInsensitive)) ? CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT : CAEN_DGTZ_TRGMODE_DISABLED);
+			if (matchChannelTriggerPattern.hasMatch())
+			{
+				CAEN_DGTZ_TriggerMode_t triggerMode = (matchChannelTriggerPattern.captured(1).contains("ACQUISITION_ONLY", Qt::CaseInsensitive)) ? CAEN_DGTZ_TRGMODE_ACQ_ONLY : ((matchChannelTriggerPattern.captured(0).contains("ACQUISITION_AND_TRGOUT", Qt::CaseInsensitive)) ? CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT : CAEN_DGTZ_TRGMODE_DISABLED);
+				if (channelNum >= 0)
+					config->ChannelTriggerMode[channelNum] = triggerMode;
+				else
+					for (auto i = 0; i < MAX_SET; i++)
+						config->ChannelTriggerMode[i] = triggerMode;
+			}
 			else
 				parseErrors.push_back({ VxParseError::CRITICAL, lineNum, "Invalid CHANNEL_TRIGGER command. Format is 'CHANNEL_TRIGGER DISABLED|ACQUISITION_ONLY|ACQUISITION_AND_TRGOUT'" });
 		}
@@ -249,6 +272,7 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 			return nullptr;
 		}
 	}
+
 	return config;
 
 	/*
