@@ -111,7 +111,7 @@ CAENErrorCode VxAcquisitionThread::InitDigitizer()
 
 CAENErrorCode VxAcquisitionThread::ProgramDigitizer()
 {
-	CAEN_DGTZ_ErrorCode retCode;
+	CAEN_DGTZ_ErrorCode retCode = CAEN_DGTZ_Success;
 	retCode |= CAEN_DGTZ_Reset(handle);
 	if (retCode)
 		return CAENErrorCode::ERR_RESTART;
