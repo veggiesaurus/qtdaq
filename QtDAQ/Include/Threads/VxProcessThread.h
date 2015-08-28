@@ -75,7 +75,7 @@ private:
 	float* tempValArray;
 	float* tempFilteredValArray;
 	float* tempMedianArray;
-    QVector<EventStatistics*>* processedEvents;
+    QVector<EventStatistics*>* processedEvents;	
 	QTimer updateTimer;
 	bool sampleNextEvent;
 	AnalysisConfig* analysisConfig;
@@ -109,6 +109,7 @@ private:
 
 	QMutex processedEventsMutex;
 	QMutex v8Mutex;
+	QMutex processingMutex;
 	bool v8RecompileRequired = false;
 
 	//temperature stored in array (per 5 seconds)

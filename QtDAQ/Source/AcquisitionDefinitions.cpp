@@ -36,6 +36,30 @@ EventVx* EventVx::eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_FL
 	return ev;
 }
 
+void EventVx::loadFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data)
+{
+	this->info = info;
+	uint32_t prevChSize[MAX_UINT16_CHANNEL_SIZE];
+	memcpy(prevChSize, this->data.ChSize, MAX_UINT16_CHANNEL_SIZE*sizeof(uint16_t));
+	memcpy(&(this->info), &(info), sizeof(CAEN_DGTZ_EventInfo_t));
+	memcpy(this->data.ChSize, data->ChSize, MAX_UINT16_CHANNEL_SIZE*sizeof(uint16_t));
+
+
+	for (int i = 0; i < MAX_UINT16_CHANNEL_SIZE; i++)
+	{	
+		int numSamples = data->ChSize[i];		
+		if (numSamples)
+		{
+			if (numSamples != prevChSize[i])
+			{
+				SAFE_DELETE_ARRAY(this->data.DataChannel[i]);
+				this->data.DataChannel[i] = new uint16_t[numSamples];
+			}
+			memcpy(this->data.DataChannel[i], data->DataChannel[i], numSamples*sizeof(uint16_t));
+		}
+	}
+}
+
 void freeVxEvent(EventVx* &ev)
 {
 	for (int i = 0; i < MAX_UINT16_CHANNEL_SIZE; i++)
@@ -57,6 +81,7 @@ void freeVxEvent(EventVx &ev)
 		if (ev.fData.ChSize[i])
 			SAFE_DELETE_ARRAY(ev.fData.DataChannel[i]);
 	}
+	memset(&ev, 0, sizeof(EventVx));
 }
 
 DataHeader::DataHeader()

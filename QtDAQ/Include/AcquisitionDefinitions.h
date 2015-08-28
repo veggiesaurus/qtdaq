@@ -196,6 +196,7 @@ struct EventVx
 	CAEN_DGTZ_FLOAT_EVENT_t fData;
 	static EventVx* eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data);
 	static EventVx* eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_FLOAT_EVENT_t* fData);
+	void loadFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data);
 };
 
 void freeVxEvent(EventVx* &ev);

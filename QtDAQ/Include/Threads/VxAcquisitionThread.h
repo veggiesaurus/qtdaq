@@ -28,17 +28,17 @@ private:
 
 	CAENErrorCode InitDigitizer();
 	CAENErrorCode ProgramDigitizer();
-	void CloseDigitizer();
+	void CloseDigitizer(bool finalClose = false);
 	CAENErrorCode AllocateEventStorage();
 
 	CAEN_DGTZ_ErrorCode GetMoreBoardInfo();
 	CAEN_DGTZ_ErrorCode WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);
 
 
-	public slots:
+public slots:
 	void onUpdateTimerTimeout();
 	void setPaused(bool paused);
-	void stopAcquisition();
+	void stopAcquisition(bool forceExit);
 private:
 	VxAcquisitionConfig* config = nullptr;
 	int handle = -1; 
@@ -63,6 +63,7 @@ private:
 	bool isAcquiring;
 	bool requiresPause;
 	QMutex pauseMutex;
+	QMutex digitizerMutex;
 	uint32_t numEventsCaptured =0;
 
 	QMutex* rawMutexes[2];
@@ -71,6 +72,7 @@ private:
 	int currentBufferPosition;
 
 	//run tracking
+
 	QMutex runIndexMutex;
 	std::atomic<int> runIndex;
 };

@@ -35,6 +35,7 @@ VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2
 
 VxProcessThread::~VxProcessThread()
 {
+	processingMutex.lock();
 	if (file)
 	{
 		file->close();
@@ -55,6 +56,7 @@ VxProcessThread::~VxProcessThread()
 	SAFE_DELETE(tempFilteredValArray);
 	SAFE_DELETE(tempValArray);
 	SAFE_DELETE(tempMedianArray);
+	processingMutex.unlock();
 
 }
 
@@ -309,6 +311,7 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	else
 		v8Mutex.unlock();
 
+	processingMutex.lock();
 	if (analysisConfig->bPreAnalysisV8)
 		runV8CodePreAnalysis();
 	EventStatistics* stats = new EventStatistics();
@@ -462,6 +465,8 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	processedEvents->push_back(stats);
 	processedEventsMutex.unlock();
 	//delete stats;
+	processingMutex.unlock();
+
 }
 
 bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch, EventStatistics* stats, float GSPS, EventSampleData* sample, float cfdOverrideTime)

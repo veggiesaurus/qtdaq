@@ -400,4 +400,6 @@ SignalPlot::~SignalPlot()
 	SAFE_DELETE_ARRAY(tempT);
 	SAFE_DELETE_ARRAY(tempV);
 	SAFE_DELETE_ARRAY(tempV2);
+	SAFE_DELETE_ARRAY(vAverage);
+	SAFE_DELETE_ARRAY(vShifted);
 }

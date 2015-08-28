@@ -15,16 +15,20 @@ QtDAQ::QtDAQ(QWidget *parent)
 	projectorMode = ui.actionProjectorMode->isChecked();
 	onProjectorModeToggled(projectorMode);
 
-	acquisitionConfig = new DRSAcquisitionConfig();
 	qRegisterMetaType<DRSAcquisitionConfig>("AcquisitionConfig");
 	qRegisterMetaTypeStreamOperators<DRSAcquisitionConfig>("AcquisitionConfig");
 
 	//restore previous settings
 	QVariant varAcquisition = settings.value("acquisition/previousSettings");
 	if (varAcquisition.isValid())
+	{
+		acquisitionConfig = new DRSAcquisitionConfig();
 		*acquisitionConfig = varAcquisition.value<DRSAcquisitionConfig>();
+	}
 	else
+	{
 		acquisitionConfig = DRSAcquisitionConfig::DefaultConfig();
+	}
 	vxAcquisitionConfigString = settings.value("acquisition/vxPreviousSettings").toString();
 	
 	vxConfig = VxAcquisitionConfig::parseConfigString(vxAcquisitionConfigString);
@@ -99,7 +103,6 @@ QtDAQ::QtDAQ(QWidget *parent)
 
 QtDAQ::~QtDAQ()
 {
-	
 } 
 
 void QtDAQ::onUiUpdateTimerTimeout()
@@ -162,7 +165,7 @@ void QtDAQ::onVxInitClicked()
 
 	if (vxAcquisitionThread)
 	{
-		vxAcquisitionThread->stopAcquisition();
+		vxAcquisitionThread->stopAcquisition(true);
 		vxAcquisitionThread->disconnect();
 		vxAcquisitionThread->exit();
 		vxAcquisitionThread->wait(500);
@@ -235,7 +238,8 @@ void QtDAQ::onVxStartClicked()
 	uiUpdateTimer.start();
 	acquisitionTime.start();
 	numEventsProcessed = 0;
-	vxAcquisitionThread->setPaused(false);
+	if (vxAcquisitionThread)
+		vxAcquisitionThread->setPaused(false);
 	ui.actionVxStop->setEnabled(true);
 	ui.actionVxReset->setEnabled(true);
 	ui.actionVxStart->setEnabled(false);
@@ -249,7 +253,12 @@ void QtDAQ::onVxResetClicked()
 
 void QtDAQ::onVxStopClicked()
 {
-
+	if (vxAcquisitionThread)
+		vxAcquisitionThread->setPaused(true);
+	ui.actionVxStop->setEnabled(false);
+	ui.actionVxReset->setEnabled(false);
+	ui.actionVxStart->setEnabled(true);
+	ui.actionVxSoftTrigger->setEnabled(false);
 }
 
 
@@ -1562,25 +1571,23 @@ void QtDAQ::onRenamePageClicked()
 
 void QtDAQ::closeEvent(QCloseEvent*)
 {
+	if (vxAcquisitionThread)
+	{
+		vxAcquisitionThread->stopAcquisition(true);
+		vxAcquisitionThread->disconnect();
+		vxAcquisitionThread->exit();
+		vxAcquisitionThread->wait(100);
+		vxAcquisitionThread->terminate();
+		SAFE_DELETE(vxAcquisitionThread);
+	}
+
+
 	if (rawBuffer1Mutex && !finishedReading)
 	{
 		rawBuffer1Mutex->lock();
 		rawBuffer2Mutex->lock();
 	}
-
-	if (rawBuffer1)
-	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
-			freeVxEvent(rawBuffer1[i]);
-		
-	}
-	if (rawBuffer2)
-	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
-			freeVxEvent(rawBuffer2[i]);
-		
-	}
-
+	
 	if (drsReaderThread)
 	{
 		if (!finishedReading)
@@ -1610,6 +1617,7 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		SAFE_DELETE(vxReaderThread);
 	}
 
+
 	if (vxProcessThread)
 	{
 		vxProcessThread->disconnect();
@@ -1619,14 +1627,29 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		SAFE_DELETE(vxProcessThread);
 	}
 
-	SAFE_DELETE_ARRAY(rawBuffer1)
-	SAFE_DELETE(rawBuffer1Mutex);
-	SAFE_DELETE_ARRAY(rawBuffer2)
-	SAFE_DELETE(rawBuffer2Mutex);
+	
+	if (rawBuffer1)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeVxEvent(rawBuffer1[i]);
+	}
+	if (rawBuffer2)
+	{
+		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+			freeVxEvent(rawBuffer2[i]);
+	}
+	
+	SAFE_DELETE_ARRAY(rawBuffer1);
+	//if (rawBuffer1Mutex)
+	//	rawBuffer1Mutex->unlock();
+	SAFE_DELETE_ARRAY(rawBuffer2);
+	//if (rawBuffer2Mutex)
+	//	rawBuffer2Mutex->unlock();
 	//SAFE_DELETE(board);
 	SAFE_DELETE(drs);
 	SAFE_DELETE(acquisitionConfig);
 	SAFE_DELETE(analysisConfig);
+	SAFE_DELETE(vxConfig);
 }
 
 void QtDAQ::onProjectorModeToggled(bool checked)

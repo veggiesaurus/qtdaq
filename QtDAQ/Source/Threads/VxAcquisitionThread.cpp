@@ -3,7 +3,12 @@
 VxAcquisitionThread::VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent)
 	: QThread(parent)
 {
+	requiresPause = false;
 
+	rawBuffers[0] = s_rawBuffer1;
+	rawBuffers[1] = s_rawBuffer2;
+	rawMutexes[0] = s_rawBuffer1Mutex;
+	rawMutexes[1] = s_rawBuffer2Mutex;
 }
 
 VxAcquisitionThread::~VxAcquisitionThread()
@@ -61,12 +66,133 @@ CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* 
 		digitizerStatus = STATUS_CLOSED;
 		return ERR_MALLOC;
 	}
+	digitizerStatus |= STATUS_READY;
+
+	numEventsAcquired = 0;
+	updateTimer.stop();
+	updateTimer.disconnect();
+
+	//start reading into buffer0, but need to lock and unlock buffer1 as well to make sure it's free
+	rawMutexes[0]->lock();
+	rawMutexes[1]->lock();
+	for (int i = 0; i < EVENT_BUFFER_SIZE; i++)
+	{
+		rawBuffers[0][i].processed = false;
+		rawBuffers[1][i].processed = false;
+	}
+	rawMutexes[1]->unlock();
+	currentBufferIndex = 0;
+	currentBufferPosition = 0;
+
 	return ERR_NONE;
 }
 
 void VxAcquisitionThread::run()
-{
-	CAEN_DGTZ_SWStartAcquisition(handle);
+{	
+	while (digitizerStatus & STATUS_READY)
+	{
+		//pausing
+		pauseMutex.lock();
+		if (requiresPause)
+		{
+			pauseMutex.unlock();
+			if (digitizerStatus & STATUS_RUNNING)
+			{
+				digitizerMutex.lock();
+				auto retStop = CAEN_DGTZ_SWStopAcquisition(handle);
+				digitizerStatus &= ~STATUS_RUNNING;
+				if (retStop)
+				{
+					CloseDigitizer();
+					digitizerStatus = STATUS_ERROR;
+					return;
+				}
+				digitizerMutex.unlock();
+			}
+			msleep(100);
+			continue;
+		}
+		else		
+			pauseMutex.unlock();
+
+		digitizerMutex.lock();
+		if (!(digitizerStatus & STATUS_RUNNING) && digitizerStatus & STATUS_READY)
+		{
+			auto retStart = CAEN_DGTZ_SWStartAcquisition(handle);
+			if (retStart)
+			{
+				CloseDigitizer();
+				digitizerStatus = STATUS_ERROR;
+				return;
+			}
+			digitizerStatus |= STATUS_RUNNING;
+		}
+		
+		/* Read data from the board */
+		auto ret = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &bufferSize);
+		if (ret) {
+
+			CloseDigitizer();
+			digitizerStatus = STATUS_ERROR;
+			return;
+		}
+		numEvents = 0;
+		if (bufferSize != 0) 
+		{
+			ret = CAEN_DGTZ_GetNumEvents(handle, buffer, bufferSize, &numEvents);
+			if (ret) {
+				CloseDigitizer();
+				digitizerStatus = STATUS_ERROR;
+				return;
+			}
+		}
+		else 
+		{
+			uint32_t lstatus;
+			ret = CAEN_DGTZ_ReadRegister(handle, CAEN_DGTZ_ACQ_STATUS_ADD, &lstatus);
+			if (lstatus & (0x1 << 19)) {
+				CloseDigitizer();
+				digitizerStatus = STATUS_ERROR;
+				return;
+			}
+		}
+
+		for (int i = 0; i < numEvents; i++) 
+		{
+
+			/* Get one event from the readout buffer */
+			ret = CAEN_DGTZ_GetEventInfo(handle, buffer, bufferSize, i, &eventInfo, &eventPtr);
+			if (ret) 
+			{
+				CloseDigitizer();
+				digitizerStatus = STATUS_ERROR;
+				return;
+			}
+			/* decode the event */
+			ret = CAEN_DGTZ_DecodeEvent(handle, eventPtr, (void**)&event16);
+			if (ret)
+			{
+				CloseDigitizer();
+				digitizerStatus = STATUS_ERROR;
+				return;
+			}
+			//release and swap buffers when position overflows
+			if (currentBufferPosition >= EVENT_BUFFER_SIZE)
+			{
+				rawMutexes[currentBufferIndex]->unlock();
+				//swap
+				currentBufferIndex = 1 - currentBufferIndex;
+				rawMutexes[currentBufferIndex]->lock();
+				currentBufferPosition = 0;
+			}
+			//freeVxEvent(rawBuffers[currentBufferIndex][currentBufferPosition]);
+			rawBuffers[currentBufferIndex][currentBufferPosition].loadFromInfoAndData(eventInfo, event16);
+			rawBuffers[currentBufferIndex][currentBufferPosition].processed = false;
+			currentBufferPosition++;
+		}
+		digitizerMutex.unlock();
+	}
+
 }
 
 void VxAcquisitionThread::onUpdateTimerTimeout()
@@ -81,9 +207,10 @@ void VxAcquisitionThread::setPaused(bool paused)
 	pauseMutex.unlock();
 }
 
-void VxAcquisitionThread::stopAcquisition()
+void VxAcquisitionThread::stopAcquisition(bool forcedExit)
 {
-
+	digitizerMutex.lock();	
+	CloseDigitizer(forcedExit);
 }
 
 bool VxAcquisitionThread::setFileOutput(QString filename, bool useCompression)
@@ -95,27 +222,39 @@ CAENErrorCode VxAcquisitionThread::InitDigitizer()
 {
 	bool isVMEDevice = config->BaseAddress;
 	CAEN_DGTZ_ErrorCode retCode;
+	digitizerMutex.lock();
 	retCode = CAEN_DGTZ_OpenDigitizer(config->LinkType, config->LinkNum, config->ConetNode, config->BaseAddress, &handle);
 	if (retCode)
+	{
+		digitizerMutex.unlock();
 		return ERR_DGZ_OPEN;
-
+	}
 	retCode = CAEN_DGTZ_GetInfo(handle, boardInfo);
 	if (retCode)
+	{
+		digitizerMutex.unlock();
 		return ERR_BOARD_INFO_READ;
-
+	}
 	retCode = GetMoreBoardInfo();
 	if (retCode)
+	{
+		digitizerMutex.unlock();
 		return ERR_INVALID_BOARD_TYPE;
+	}
+	digitizerMutex.unlock();
 	return ERR_NONE;
 }
 
 CAENErrorCode VxAcquisitionThread::ProgramDigitizer()
 {
 	CAEN_DGTZ_ErrorCode retCode = CAEN_DGTZ_Success;
+	digitizerMutex.lock();
 	retCode |= CAEN_DGTZ_Reset(handle);
 	if (retCode)
-		return CAENErrorCode::ERR_RESTART;
-
+	{
+		digitizerMutex.unlock();
+		return ERR_RESTART;
+	}
 	// Set the waveform test bit for debugging
 	if (config->TestPattern)
 		retCode |= CAEN_DGTZ_WriteRegister(handle, CAEN_DGTZ_BROAD_CH_CONFIGBIT_SET_ADD, 1 << 3);	
@@ -129,7 +268,10 @@ CAENErrorCode VxAcquisitionThread::ProgramDigitizer()
 	{
 		// Interrupt handling
 		if (CAEN_DGTZ_SetInterruptConfig(handle, CAEN_DGTZ_ENABLE, VME_INTERRUPT_LEVEL, VME_INTERRUPT_STATUS_ID, config->InterruptNumEvents, INTERRUPT_MODE) != CAEN_DGTZ_Success) 
+		{
+			digitizerMutex.unlock();
 			return ERR_INTERRUPT;
+		}
 	}
 	retCode |= CAEN_DGTZ_SetMaxNumEventsBLT(handle, config->NumEvents);
 	retCode |= CAEN_DGTZ_SetAcquisitionMode(handle, CAEN_DGTZ_SW_CONTROLLED);
@@ -184,9 +326,11 @@ CAENErrorCode VxAcquisitionThread::ProgramDigitizer()
 
 	if (retCode)
 	{
-		qDebug() << "Warning: errors found during the programming of the digitizer.\nSome settings may not be executed";
-		return CAENErrorCode::ERR_DGZ_PROGRAM;
+		qDebug() << "Warning: errors found during the programming of the digitizer.\nSome settings may not be executed";	
+		digitizerMutex.unlock();
+		return ERR_DGZ_PROGRAM;
 	}
+	digitizerMutex.unlock();
 	return ERR_NONE;
 }
 
@@ -246,11 +390,15 @@ CAEN_DGTZ_ErrorCode VxAcquisitionThread::GetMoreBoardInfo()
 	return CAEN_DGTZ_Success;
 }
 
-void VxAcquisitionThread::CloseDigitizer()
+void VxAcquisitionThread::CloseDigitizer(bool finalClose)
 {
+	digitizerStatus = STATUS_CLOSED;
 	CAEN_DGTZ_SWStopAcquisition(handle);
 	if (event16)
 		CAEN_DGTZ_FreeEvent(handle, (void**)&event16);
-	CAEN_DGTZ_FreeReadoutBuffer(&buffer);
+	if (!finalClose)
+		CAEN_DGTZ_FreeReadoutBuffer(&buffer);
 	CAEN_DGTZ_CloseDigitizer(handle);
+	SAFE_DELETE(boardInfo);
+	digitizerMutex.unlock();
 }

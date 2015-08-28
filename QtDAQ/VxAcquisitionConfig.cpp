@@ -50,7 +50,9 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 			auto matchSectionPattern = QRegularExpression("\\[(COMMON|\\d+)\\]", QRegularExpression::CaseInsensitiveOption).match(line);
 			if (matchSectionPattern.hasMatch())
 			{
-				int newChannelNum = matchSectionPattern.captured(0).contains("COMMON", Qt::CaseInsensitive) ? -1 : matchSectionPattern.captured(0).toInt();
+				QString capture = matchSectionPattern.captured(0).remove("[");
+				capture = capture.remove("]");
+				int newChannelNum = capture.contains("COMMON", Qt::CaseInsensitive) ? -1 : capture.toInt();
 				if (newChannelNum >= -1 && newChannelNum <= MAX_SET)
 					channelNum = newChannelNum;
 				else
@@ -237,7 +239,7 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 					triggerThreshold = 512;
 				}
 				if (channelNum >= 0)
-					config->Threshold[channelNum] = 512;
+					config->Threshold[channelNum] = triggerThreshold;
 				else
 					for (auto i = 0; i < MAX_SET; i++)
 						config->Threshold[i] = triggerThreshold;

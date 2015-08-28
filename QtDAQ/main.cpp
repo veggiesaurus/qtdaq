@@ -1,4 +1,4 @@
-//#define VALGRIND
+#define VALGRIND
 
 #ifdef VALGRIND
 #include <vld.h> 
