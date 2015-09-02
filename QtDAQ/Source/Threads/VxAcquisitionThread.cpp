@@ -134,6 +134,7 @@ void VxAcquisitionThread::run()
 
 			CloseDigitizer();
 			digitizerStatus = STATUS_ERROR;
+			digitizerMutex.unlock();
 			return;
 		}
 		numEvents = 0;
@@ -143,6 +144,7 @@ void VxAcquisitionThread::run()
 			if (ret) {
 				CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
+				digitizerMutex.unlock();
 				return;
 			}
 		}
@@ -153,6 +155,7 @@ void VxAcquisitionThread::run()
 			if (lstatus & (0x1 << 19)) {
 				CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
+				digitizerMutex.unlock();
 				return;
 			}
 		}
@@ -166,6 +169,7 @@ void VxAcquisitionThread::run()
 			{
 				CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
+				digitizerMutex.unlock();
 				return;
 			}
 			/* decode the event */
@@ -174,6 +178,7 @@ void VxAcquisitionThread::run()
 			{
 				CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
+				digitizerMutex.unlock();
 				return;
 			}
 			//release and swap buffers when position overflows
@@ -211,6 +216,7 @@ void VxAcquisitionThread::stopAcquisition(bool forcedExit)
 {
 	digitizerMutex.lock();	
 	CloseDigitizer(forcedExit);
+	digitizerMutex.unlock();
 }
 
 bool VxAcquisitionThread::setFileOutput(QString filename, bool useCompression)
@@ -393,12 +399,15 @@ CAEN_DGTZ_ErrorCode VxAcquisitionThread::GetMoreBoardInfo()
 void VxAcquisitionThread::CloseDigitizer(bool finalClose)
 {
 	digitizerStatus = STATUS_CLOSED;
-	CAEN_DGTZ_SWStopAcquisition(handle);
-	if (event16)
-		CAEN_DGTZ_FreeEvent(handle, (void**)&event16);
-	if (!finalClose)
+	if (handle >= 0)
+	{	
+		CAEN_DGTZ_SWStopAcquisition(handle);
+		if (event16)
+			CAEN_DGTZ_FreeEvent(handle, (void**)&event16);
+	}
+	if (!finalClose && buffer)
 		CAEN_DGTZ_FreeReadoutBuffer(&buffer);
-	CAEN_DGTZ_CloseDigitizer(handle);
+	if (handle >= 0)
+		CAEN_DGTZ_CloseDigitizer(handle);
 	SAFE_DELETE(boardInfo);
-	digitizerMutex.unlock();
 }

@@ -208,18 +208,19 @@ void SignalPlot::setData(float* t, float* V, float* V2, int s_numSamples, float 
 
 	if (V)
 	{
-		int shiftIndex=(s_offsetTime-initOffset)/sampleTime;
-		shiftSample(V, numSamples,shiftIndex);
-		for (int i=0;i<numSamples;i++)
+		if (abs(s_offsetTime) < 1024.0)
 		{
-			vAverage[i]=(vAverage[i]*numAveragedEvents)+vShifted[i];
-			vAverage[i]/=numAveragedEvents+1;
-			vAverage[i]=fmax(0.0, vAverage[i]);
-			vAverage[i]=fmin(1024.0, vAverage[i]);
+			int shiftIndex = (s_offsetTime - initOffset) / sampleTime;
+			shiftSample(V, numSamples, shiftIndex);		
+			for (int i = 0; i < numSamples; i++)
+			{
+				vAverage[i] = (vAverage[i] * numAveragedEvents) + vShifted[i];
+				vAverage[i] /= numAveragedEvents + 1;
+				vAverage[i] = fmax(0.0, vAverage[i]);
+				vAverage[i] = fmin(1024.0, vAverage[i]);
+			}
+			numAveragedEvents++;
 		}
-		numAveragedEvents++;
-
-
 	}	
 
     //TODO: sensible axis ticks

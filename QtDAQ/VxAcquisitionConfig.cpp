@@ -215,10 +215,10 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 				if (floatVal >= -50.0f && floatVal <= 50.0f)
 				{
 					if (channelNum >= 0)
-						config->DCoffset[channelNum] = floatVal;
+						config->DCoffset[channelNum] = (int)((floatVal + 50) * 65535 / 100);
 					else
 						for (auto i = 0; i < MAX_SET; i++)
-							config->DCoffset[i] = floatVal;
+							config->DCoffset[i] = (int)((floatVal + 50) * 65535 / 100);;
 				}
 				else
 					parseErrors.push_back({ VxParseError::WARNING, lineNum, "Invalid DC_OFFSET command, or invalid channel number. DC_OFFSET must be between -50.0 and 50.0" });
