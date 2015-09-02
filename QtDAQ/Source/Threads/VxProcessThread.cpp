@@ -106,6 +106,9 @@ void VxProcessThread::onResumeProcessing()
 		rawMutexes[currentBufferIndex]->lock();
 		for (int i = 0; i < EVENT_BUFFER_SIZE; i++)
 		{
+			//break when encountering first processed event
+			if (rawBuffers[currentBufferIndex][i].processed)
+				break;
 			processEvent(&(rawBuffers[currentBufferIndex][i]), sampleNextEvent);
 		}
 		rawMutexes[currentBufferIndex]->unlock();

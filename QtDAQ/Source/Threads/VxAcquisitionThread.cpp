@@ -69,8 +69,6 @@ CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* 
 	digitizerStatus |= STATUS_READY;
 
 	numEventsAcquired = 0;
-	updateTimer.stop();
-	updateTimer.disconnect();
 
 	//start reading into buffer0, but need to lock and unlock buffer1 as well to make sure it's free
 	rawMutexes[0]->lock();
@@ -83,6 +81,7 @@ CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* 
 	rawMutexes[1]->unlock();
 	currentBufferIndex = 0;
 	currentBufferPosition = 0;
+	timeSinceLastBufferSwap.start();
 
 	return ERR_NONE;
 }
@@ -114,6 +113,10 @@ void VxAcquisitionThread::run()
 		}
 		else		
 			pauseMutex.unlock();
+
+
+		if (timeSinceLastBufferSwap.elapsed() > BUFFER_SWAP_TIME)
+			swapBuffers();
 
 		digitizerMutex.lock();
 		if (!(digitizerStatus & STATUS_RUNNING) && digitizerStatus & STATUS_READY)
@@ -183,13 +186,8 @@ void VxAcquisitionThread::run()
 			}
 			//release and swap buffers when position overflows
 			if (currentBufferPosition >= EVENT_BUFFER_SIZE)
-			{
-				rawMutexes[currentBufferIndex]->unlock();
-				//swap
-				currentBufferIndex = 1 - currentBufferIndex;
-				rawMutexes[currentBufferIndex]->lock();
-				currentBufferPosition = 0;
-			}
+				swapBuffers();
+
 			//freeVxEvent(rawBuffers[currentBufferIndex][currentBufferPosition]);
 			rawBuffers[currentBufferIndex][currentBufferPosition].loadFromInfoAndData(eventInfo, event16);
 			rawBuffers[currentBufferIndex][currentBufferPosition].processed = false;
@@ -200,9 +198,14 @@ void VxAcquisitionThread::run()
 
 }
 
-void VxAcquisitionThread::onUpdateTimerTimeout()
+void VxAcquisitionThread::swapBuffers()
 {
-
+	rawMutexes[currentBufferIndex]->unlock();
+	//swap
+	currentBufferIndex = 1 - currentBufferIndex;
+	rawMutexes[currentBufferIndex]->lock();
+	currentBufferPosition = 0;
+	timeSinceLastBufferSwap.restart();
 }
 
 void VxAcquisitionThread::setPaused(bool paused)

@@ -27,6 +27,7 @@ public:
 
 private:
     void run();
+	void swapBuffers();
 	qint64 getFileSize(QString filename);
  
 public slots:

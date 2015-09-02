@@ -132,13 +132,8 @@ void VxBinaryReaderThread::run()
 
 		//release and swap buffers when position overflows
 		if (currentBufferPosition>=EVENT_BUFFER_SIZE)
-		{
-			rawMutexes[currentBufferIndex]->unlock();
-			//swap
-			currentBufferIndex=1-currentBufferIndex;
-			rawMutexes[currentBufferIndex]->lock();
-			currentBufferPosition=0;			
-		}
+			swapBuffers();
+
 		qint64 byteCount = gzoffset64(inputFileCompressed);
 		//overflow!
 		if (byteCount < 0)
@@ -300,4 +295,13 @@ qint64 VxBinaryReaderThread::getFileSize(QString filename)
 	qint64 fileSize = f.size();
 	f.close();
 	return fileSize;
+}
+
+void VxBinaryReaderThread::swapBuffers()
+{
+	rawMutexes[currentBufferIndex]->unlock();
+	//swap
+	currentBufferIndex = 1 - currentBufferIndex;
+	rawMutexes[currentBufferIndex]->lock();
+	currentBufferPosition = 0;
 }

@@ -10,6 +10,8 @@
 #include "VxAcquisitionConfig.h"
 #include "globals.h"
 
+#define BUFFER_SWAP_TIME 250
+
 class VxAcquisitionThread : public QThread
 {
 	Q_OBJECT
@@ -25,7 +27,7 @@ signals:
 
 private:
 	void run();
-
+	void swapBuffers();
 	CAENErrorCode InitDigitizer();
 	CAENErrorCode ProgramDigitizer();
 	void CloseDigitizer(bool finalClose = false);
@@ -36,7 +38,6 @@ private:
 
 
 public slots:
-	void onUpdateTimerTimeout();
 	void setPaused(bool paused);
 	void stopAcquisition(bool forceExit);
 private:
@@ -59,7 +60,6 @@ private:
 
 	QString filename;
 	int numEventsAcquired = 0;
-	QTimer updateTimer;
 	bool isAcquiring;
 	bool requiresPause;
 	QMutex pauseMutex;
@@ -70,7 +70,7 @@ private:
 	EventVx* rawBuffers[2];
 	int currentBufferIndex;
 	int currentBufferPosition;
-
+	QTime timeSinceLastBufferSwap;
 	//run tracking
 
 	QMutex runIndexMutex;
