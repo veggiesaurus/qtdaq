@@ -28,6 +28,7 @@ signals:
 private:
 	void run();
 	void swapBuffers();
+	CAENErrorCode ResetDigitizer();
 	CAENErrorCode InitDigitizer();
 	CAENErrorCode ProgramDigitizer();
 	void CloseDigitizer(bool finalClose = false);

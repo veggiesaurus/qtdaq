@@ -115,9 +115,7 @@ void VxAcquisitionThread::run()
 			pauseMutex.unlock();
 
 
-		if (timeSinceLastBufferSwap.elapsed() > BUFFER_SWAP_TIME)
-			swapBuffers();
-
+	
 		digitizerMutex.lock();
 		if (!(digitizerStatus & STATUS_RUNNING) && digitizerStatus & STATUS_READY)
 		{
@@ -128,9 +126,12 @@ void VxAcquisitionThread::run()
 				digitizerStatus = STATUS_ERROR;
 				return;
 			}
+			timeSinceLastBufferSwap.restart();
 			digitizerStatus |= STATUS_RUNNING;
 		}
-		
+		//if (timeSinceLastBufferSwap.elapsed() > BUFFER_SWAP_TIME)
+			//swapBuffers();
+
 		/* Read data from the board */
 		auto ret = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &bufferSize);
 		if (ret) {
@@ -179,10 +180,8 @@ void VxAcquisitionThread::run()
 			ret = CAEN_DGTZ_DecodeEvent(handle, eventPtr, (void**)&event16);
 			if (ret)
 			{
-				CloseDigitizer();
-				digitizerStatus = STATUS_ERROR;
-				digitizerMutex.unlock();
-				return;
+				ResetDigitizer();
+				break;
 			}
 			//release and swap buffers when position overflows
 			if (currentBufferPosition >= EVENT_BUFFER_SIZE)
@@ -206,6 +205,56 @@ void VxAcquisitionThread::swapBuffers()
 	rawMutexes[currentBufferIndex]->lock();
 	currentBufferPosition = 0;
 	timeSinceLastBufferSwap.restart();
+}
+
+CAENErrorCode VxAcquisitionThread::ResetDigitizer()
+{
+	if (digitizerStatus&STATUS_INITIALISED)
+	{
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+	}
+	digitizerMutex.unlock();
+	SAFE_DELETE(boardInfo);
+	SAFE_DELETE(event16);
+	SAFE_DELETE(buffer);
+	boardInfo = new CAEN_DGTZ_BoardInfo_t();
+
+	//init the digitizer
+	CAENErrorCode errInitDigitizer = InitDigitizer();
+	if (errInitDigitizer)
+	{
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+		return errInitDigitizer;
+	}
+	digitizerStatus |= STATUS_INITIALISED;
+
+	CAENErrorCode errProgramDigitizer = ProgramDigitizer();
+	if (errProgramDigitizer)
+	{
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+		return errInitDigitizer;
+	}
+	digitizerStatus |= STATUS_PROGRAMMED;
+
+	auto retAllocate = CAEN_DGTZ_AllocateEvent(handle, (void**)&event16);
+	if (retAllocate)
+	{
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+		return ERR_MALLOC;
+	}
+	retAllocate = CAEN_DGTZ_MallocReadoutBuffer(handle, &buffer, &allocatedSize); /* WARNING: This malloc must be done after the digitizer programming */
+	if (retAllocate) {
+		CloseDigitizer();
+		digitizerStatus = STATUS_CLOSED;
+		return ERR_MALLOC;
+	}
+	digitizerStatus |= STATUS_READY;
+	digitizerMutex.lock();
+	return ERR_NONE;
 }
 
 void VxAcquisitionThread::setPaused(bool paused)
