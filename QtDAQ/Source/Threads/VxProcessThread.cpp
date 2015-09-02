@@ -1,6 +1,6 @@
 #include "Threads/VxProcessThread.h"
 
-VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent)
+VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength, QObject *parent)
 	: QThread(parent)
 {
 	eventSize = 0;
@@ -30,7 +30,7 @@ VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2
 	rawBuffers[1] = s_rawBuffer2;
 	rawMutexes[0] = s_rawBuffer1Mutex;
 	rawMutexes[1] = s_rawBuffer2Mutex;
-
+	bufferLength = s_bufferLength;
 }
 
 VxProcessThread::~VxProcessThread()
@@ -104,7 +104,7 @@ void VxProcessThread::onResumeProcessing()
 	while (true)
 	{
 		rawMutexes[currentBufferIndex]->lock();
-		for (int i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (int i = 0; i < bufferLength; i++)
 		{
 			//break when encountering first processed event
 			if (rawBuffers[currentBufferIndex][i].processed)
@@ -137,7 +137,7 @@ void VxProcessThread::run()
 	while (true)
 	{
 		rawMutexes[currentBufferIndex]->lock();
-		for (int i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (int i = 0; i < bufferLength; i++)
 		{
 			EventVx& ev = rawBuffers[currentBufferIndex][i];
 			if (ev.processed)

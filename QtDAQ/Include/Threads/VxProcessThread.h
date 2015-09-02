@@ -22,7 +22,7 @@ class VxProcessThread : public QThread
 {
 	 Q_OBJECT
 public:
-	VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
+	VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	~VxProcessThread();
 	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=125);
 	void restartProcessThread();
@@ -114,5 +114,5 @@ private:
 
 	//temperature stored in array (per 5 seconds)
 	QVector<float> temperatureArray;
-
+	int bufferLength;
 };

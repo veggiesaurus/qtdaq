@@ -1,6 +1,6 @@
 #include "Threads/VxAcquisitionThread.h"
 
-VxAcquisitionThread::VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent)
+VxAcquisitionThread::VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength, QObject *parent)
 	: QThread(parent)
 {
 	requiresPause = false;
@@ -9,6 +9,7 @@ VxAcquisitionThread::VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_ra
 	rawBuffers[1] = s_rawBuffer2;
 	rawMutexes[0] = s_rawBuffer1Mutex;
 	rawMutexes[1] = s_rawBuffer2Mutex;
+	bufferLength = s_bufferLength;
 }
 
 VxAcquisitionThread::~VxAcquisitionThread()
@@ -73,7 +74,7 @@ CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* 
 	//start reading into buffer0, but need to lock and unlock buffer1 as well to make sure it's free
 	rawMutexes[0]->lock();
 	rawMutexes[1]->lock();
-	for (int i = 0; i < EVENT_BUFFER_SIZE; i++)
+	for (int i = 0; i < bufferLength; i++)
 	{
 		rawBuffers[0][i].processed = false;
 		rawBuffers[1][i].processed = false;
@@ -184,7 +185,7 @@ void VxAcquisitionThread::run()
 				break;
 			}
 			//release and swap buffers when position overflows
-			if (currentBufferPosition >= EVENT_BUFFER_SIZE)
+			if (currentBufferPosition >= bufferLength)
 				swapBuffers();
 
 			//freeVxEvent(rawBuffers[currentBufferIndex][currentBufferPosition]);

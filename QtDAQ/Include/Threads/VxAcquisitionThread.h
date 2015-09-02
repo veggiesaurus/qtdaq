@@ -16,7 +16,7 @@ class VxAcquisitionThread : public QThread
 {
 	Q_OBJECT
 public:
-	VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
+	VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	~VxAcquisitionThread();
 	CAENErrorCode initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int updateTime = 125);
 	bool setFileOutput(QString filename, bool useCompression = true);
@@ -69,6 +69,7 @@ private:
 
 	QMutex* rawMutexes[2];
 	EventVx* rawBuffers[2];
+	int bufferLength;
 	int currentBufferIndex;
 	int currentBufferPosition;
 	QTime timeSinceLastBufferSwap;

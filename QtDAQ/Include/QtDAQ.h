@@ -235,6 +235,7 @@ private:
 	EventVx* rawBuffer1;
 	QMutex* rawBuffer2Mutex;
 	EventVx* rawBuffer2;
+	int bufferLength;
 	//processed events
 
 	//run tracking

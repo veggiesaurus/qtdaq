@@ -46,12 +46,13 @@ QtDAQ::QtDAQ(QWidget *parent)
 
 	//buffers and mutexes
 	//raw
+	bufferLength = 1024;
 	rawBuffer1Mutex = 0;
 	rawBuffer2Mutex = 0;
-	rawBuffer1 = new EventVx[EVENT_BUFFER_SIZE];
-	rawBuffer2 = new EventVx[EVENT_BUFFER_SIZE];
-	memset(rawBuffer1, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
-	memset(rawBuffer2, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
+	rawBuffer1 = new EventVx[bufferLength];
+	rawBuffer2 = new EventVx[bufferLength];
+	memset(rawBuffer1, 0, sizeof(EventVx)*bufferLength);
+	memset(rawBuffer2, 0, sizeof(EventVx)*bufferLength);
 
 
 	drsReaderThread = new DRSBinaryReaderThread(this);
@@ -188,23 +189,25 @@ void QtDAQ::onVxInitClicked()
 	rawBuffer2Mutex = new QMutex();
 	if (rawBuffer1)
 	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (size_t i = 0; i < bufferLength; i++)
 			freeVxEvent(rawBuffer1[i]);
 	}
 	if (rawBuffer2)
 	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (size_t i = 0; i < bufferLength; i++)
 			freeVxEvent(rawBuffer2[i]);
 	}
 
 	SAFE_DELETE_ARRAY(rawBuffer1);
 	SAFE_DELETE_ARRAY(rawBuffer2);
-	rawBuffer1 = new EventVx[EVENT_BUFFER_SIZE];
-	rawBuffer2 = new EventVx[EVENT_BUFFER_SIZE];
-	memset(rawBuffer1, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
-	memset(rawBuffer2, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
+	//for acq, small buffer length needed
+	bufferLength = 4;
+	rawBuffer1 = new EventVx[bufferLength];
+	rawBuffer2 = new EventVx[bufferLength];
+	memset(rawBuffer1, 0, sizeof(EventVx)*bufferLength);
+	memset(rawBuffer2, 0, sizeof(EventVx)*bufferLength);
 
-	vxProcessThread = new VxProcessThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+	vxProcessThread = new VxProcessThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, bufferLength, this);
 	connect(this, SIGNAL(resumeProcessing()), vxProcessThread, SLOT(onResumeProcessing()), Qt::QueuedConnection);
 	connect(vxProcessThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
 	connect(vxProcessThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
@@ -213,7 +216,7 @@ void QtDAQ::onVxInitClicked()
 	//		vxProcessThread->loadTemperatureLog(temperatureLogFilename);
 
 
-	vxAcquisitionThread = new VxAcquisitionThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+	vxAcquisitionThread = new VxAcquisitionThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, bufferLength, this);
 
 	runIndex++;
 	CAENErrorCode errorCode = vxAcquisitionThread->initVxAcquisitionThread(vxConfig, runIndex);
@@ -524,24 +527,26 @@ void QtDAQ::readVxFile(QString filename, bool compressedInput)
 	rawBuffer2Mutex = new QMutex();
 	if (rawBuffer1)
 	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (size_t i = 0; i < bufferLength; i++)
 			freeVxEvent(rawBuffer1[i]);
 	}
 	if (rawBuffer2)
 	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (size_t i = 0; i < bufferLength; i++)
 			freeVxEvent(rawBuffer2[i]);
 	}
 
 	SAFE_DELETE_ARRAY(rawBuffer1);
 	SAFE_DELETE_ARRAY(rawBuffer2);
-	rawBuffer1 = new EventVx[EVENT_BUFFER_SIZE];
-	rawBuffer2 = new EventVx[EVENT_BUFFER_SIZE];
-	memset(rawBuffer1, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
-	memset(rawBuffer2, 0, sizeof(EventVx)*EVENT_BUFFER_SIZE);
+	//for serial file reading, large buffer is needed
+	bufferLength = 1024;
+	rawBuffer1 = new EventVx[bufferLength];
+	rawBuffer2 = new EventVx[bufferLength];
+	memset(rawBuffer1, 0, sizeof(EventVx)*bufferLength);
+	memset(rawBuffer2, 0, sizeof(EventVx)*bufferLength);
 	//TODO: clean buffers if needed
 
-	vxProcessThread = new VxProcessThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+	vxProcessThread = new VxProcessThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, bufferLength, this);
 	connect(this, SIGNAL(resumeProcessing()), vxProcessThread, SLOT(onResumeProcessing()), Qt::QueuedConnection);
 	connect(vxProcessThread, SIGNAL(newProcessedEvents(QVector<EventStatistics*>*)), this, SLOT(onNewProcessedEvents(QVector<EventStatistics*>*)), Qt::QueuedConnection);
 	connect(vxProcessThread, SIGNAL(newEventSample(EventSampleData*)), this, SLOT(onNewEventSample(EventSampleData*)), Qt::QueuedConnection);
@@ -550,7 +555,7 @@ void QtDAQ::readVxFile(QString filename, bool compressedInput)
 		vxProcessThread->loadTemperatureLog(temperatureLogFilename);
 
 
-	vxReaderThread = new VxBinaryReaderThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, this);
+	vxReaderThread = new VxBinaryReaderThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, bufferLength, this);
 	connect(vxReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
 	connect(vxReaderThread, SIGNAL(filePercentUpdate(float)), this, SLOT(onFilePercentUpdated(float)));
 
@@ -1630,12 +1635,12 @@ void QtDAQ::closeEvent(QCloseEvent*)
 	
 	if (rawBuffer1)
 	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (size_t i = 0; i < bufferLength; i++)
 			freeVxEvent(rawBuffer1[i]);
 	}
 	if (rawBuffer2)
 	{
-		for (size_t i = 0; i < EVENT_BUFFER_SIZE; i++)
+		for (size_t i = 0; i < bufferLength; i++)
 			freeVxEvent(rawBuffer2[i]);
 	}
 	

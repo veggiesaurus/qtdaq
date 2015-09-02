@@ -24,7 +24,6 @@ if (ptr != NULL)            \
 #define NUM_DIGITIZER_CHANNELS 4
 #define NUM_DIGITIZER_SAMPLES_DRS 1024
 
-#define EVENT_BUFFER_SIZE	8
 
 #ifdef WIN32
 #ifndef int8_t

@@ -16,7 +16,7 @@ class VxBinaryReaderThread : public QThread
 {
 	 Q_OBJECT
 public:
-	 VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, QObject *parent = 0);
+	VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	 ~VxBinaryReaderThread();
 	 bool initVxBinaryReaderThread(QString filename, bool isCompressedInput, int s_runIndex, int updateTime = 250);
 	bool isReading();
@@ -57,6 +57,7 @@ private:
 	EventVx* rawBuffers[2];
 	int currentBufferIndex;
 	int currentBufferPosition;
+	int bufferLength;
 
 	//vx1742 switches
 	bool vx1742Mode;
