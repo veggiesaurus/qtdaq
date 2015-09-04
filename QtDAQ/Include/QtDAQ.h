@@ -1,26 +1,14 @@
 #pragma once
 #include <QtWidgets/QMainWindow>
-#include <QMdiSubWindow>
-#include <QShortcut>
-#include <QFileDialog>
-#include <QDir>
 #include <QVector>
-#include <QString>
 #include <QTime>
 #include <QSettings>
 #include <QtSerialPort\QSerialPort>
-#include <QtSerialPort\QSerialPortInfo>
-#include <QInputDialog>
 #include <QtWinExtras/QWinTaskbarProgress>
-#include <QtWinExtras/QWinTaskbarButton>
 
 #include "ui_qtdaq.h"
 #include "ui_dialogAcquisitionConfig.h"
-#include "ui_windowHistogramPlot.h"
-#include "ui_window2DHistogramPlot.h"
-#include "ui_windowSignalPlot.h"
 
-#include "globals.h"
 #include "Cuts.h"
 
 #include "DRSAcquisitionConfig.h"

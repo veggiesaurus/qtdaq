@@ -1,3 +1,13 @@
+#include <QSettings>
+#include <QVector>
+#include <QPointF>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_grid.h>
+
+#include <qwt_plot_renderer.h>
+#include <qwt_scale_widget.h>
+#include "globals.h"
 #include "Histogram2DPlot.h"
 
 ColorMap::ColorMap(): QwtLinearColorMap(Qt::white, Qt::darkRed)

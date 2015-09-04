@@ -4,13 +4,10 @@
 #include <QTimer>
 #include <QMutex>
 #include <QVector>
-#include <QtSerialPort\qserialport>
 
 #include "AcquisitionDefinitions.h"
-#include "ProcessRoutines.h"
 #include "AnalysisConfig.h"
-#include "vector/vectorclass.h"
-#include "globals.h"
+
 
 //"EHDR" chars -> 1380206661 int
 #define MAGIC_NUMBER_EVENT_HEADER 1380206661

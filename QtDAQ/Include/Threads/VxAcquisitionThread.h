@@ -1,14 +1,13 @@
 #pragma once
 
 #include <QThread>
-#include <QTimer>
+#include <QTime>
 #include <QMutex>
 #include <atomic>
-#include "zlib/zlib.h"
 #include <CAENDigitizer.h>
+#include "zlib/zlib.h"
 #include "AcquisitionDefinitions.h"
 #include "VxAcquisitionConfig.h"
-#include "globals.h"
 
 #define BUFFER_SWAP_TIME 250
 

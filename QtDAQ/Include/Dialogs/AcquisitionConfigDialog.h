@@ -2,12 +2,10 @@
 
 #include <QDialog>
 #include <QCheckBox>
-#include <QMessageBox>
 
 #include "ui_dialogAcquisitionConfig.h"
 #include "DRSAcquisitionConfig.h"
 #include "DRS4/DRS.h"
-#include "globals.h"
 
 class AcquisitionConfigDialog : public QDialog
 {

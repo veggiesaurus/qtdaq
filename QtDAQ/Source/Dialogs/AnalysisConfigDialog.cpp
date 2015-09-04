@@ -1,6 +1,5 @@
+#include <QCheckBox>
 #include "Dialogs/AnalysisConfigDialog.h"
-
-
 
 AnalysisConfigDialog::AnalysisConfigDialog (AnalysisConfig* s_config, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
 {

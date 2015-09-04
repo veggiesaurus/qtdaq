@@ -3,7 +3,6 @@
 #include "ui_windowSortedPairPlot.h"
 #include "ui_dialogSortedPairPlotConfig.h"
 #include "Windows/PlotWindow.h"
-#include "Plots/SortedPairPlot.h"
 
 class SortedPairPlotWindow : public PlotWindow
 {

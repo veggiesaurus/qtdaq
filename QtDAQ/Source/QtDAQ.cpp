@@ -1,3 +1,17 @@
+#include <QShortcut>
+#include <QDir>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QMdiSubWindow>
+#include <QtSerialPort\QSerialPortInfo>
+#include <QInputDialog>
+#include <QtWinExtras/QWinTaskbarButton>
+
+#include "ui_windowHistogramPlot.h"
+#include "ui_window2DHistogramPlot.h"
+#include "ui_windowSignalPlot.h"
+#include "globals.h"
+
 #include "QtDAQ.h"
 
 

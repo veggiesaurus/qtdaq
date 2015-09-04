@@ -1,8 +1,6 @@
 #pragma once
 
 #include <basetsd.h>
-#include <string.h>
-#include <stdio.h>
 #include <time.h>
 #include <CAENDigitizer.h>
 

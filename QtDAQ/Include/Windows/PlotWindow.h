@@ -3,17 +3,8 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QVector>
-#include <QImageWriter>
-#include <QFileDialog>
 #include <QSettings>
-#include <QInputDialog>
-#include <qwt.h>
 #include <qwt_plot.h>
-#include <qwt_plot_picker.h>
-#include <qwt_picker_machine.h>
-#include <qwt_plot_grid.h>
-#include <qwt_plot_renderer.h>
-#include "globals.h"
 #include "Cuts.h"
 #include "ui_DialogActiveCuts.h"
 #include "Dialogs/ActiveCutsDialog.h"

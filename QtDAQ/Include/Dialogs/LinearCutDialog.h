@@ -2,9 +2,6 @@
 
 #include <QDialog>
 #include "ui_dialogLinearCut.h"
-#include "globals.h"
-#include "Cuts.h"
-
 
 class LinearCutDialog : public QDialog
 {

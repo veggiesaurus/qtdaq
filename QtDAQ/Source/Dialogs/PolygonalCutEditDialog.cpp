@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "Dialogs/PolygonalCutEditDialog.h"
 
 PolygonalCutEditDialog::PolygonalCutEditDialog (QVector<PolygonalCut>& s_polyCuts, bool s_isRemoveDialog, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f), cuts(s_polyCuts), isRemoveDialog(s_isRemoveDialog)

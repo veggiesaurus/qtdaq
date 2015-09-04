@@ -1,12 +1,8 @@
 #pragma once
 
-#include <QPoint>
-//#include <qgl.h>
 #include "ui_windowHistogramPlot.h"
 #include "ui_dialogHistogramConfig.h"
-#include "curvefit/fitting.h"
 #include "Windows/PlotWindow.h"
-#include "Plots/HistogramPlot.h"
 #include "Dialogs/LinearCutDialog.h"
 
 

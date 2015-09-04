@@ -1,3 +1,5 @@
+#include <QVector>
+#include "globals.h"
 #include "DRSAcquisitionConfig.h"
 
 DRSAcquisitionConfig::DRSAcquisitionConfig()

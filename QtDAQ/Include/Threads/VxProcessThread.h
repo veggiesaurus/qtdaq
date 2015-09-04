@@ -6,14 +6,11 @@
 #include <QVector>
 #include <QTextStream>
 #include <QFile>
-#include <QMessageBox>
-#include <QDebug>
 
 #include "AcquisitionDefinitions.h"
 #include "ProcessRoutines.h"
 #include "AnalysisConfig.h"
 #include "V8/V8Wrapper.h"
-#include "Threads/VxBinaryReaderThread.h"
 
 
 using namespace v8;

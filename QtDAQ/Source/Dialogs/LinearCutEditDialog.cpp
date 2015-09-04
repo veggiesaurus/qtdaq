@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "Dialogs/LinearCutEditDialog.h"
 
 LinearCutEditDialog::LinearCutEditDialog (QVector<LinearCut>& s_cuts, bool s_isRemoveDialog, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f), cuts(s_cuts), isRemoveDialog(s_isRemoveDialog)

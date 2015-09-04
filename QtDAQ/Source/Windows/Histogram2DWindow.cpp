@@ -1,3 +1,6 @@
+#include <QPoint>
+#include <QFileDialog>
+#include "Plots/Histogram2DPlot.h"
 #include "Histogram2DWindow.h"
 
 

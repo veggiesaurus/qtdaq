@@ -1,18 +1,8 @@
 #pragma once
 
-
-#include <qwt.h>
 #include <qwt_plot.h>
-#include <qwt_plot_canvas.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
-#include <qwt_plot_magnifier.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_picker.h>
-#include <qwt_scale_engine.h>
-
-#include <QSettings>
-
 #include "globals.h"
 
 class SignalPlot: public QwtPlot

@@ -1,3 +1,6 @@
+#include "ProcessRoutines.h"
+#include "vector/vectorclass.h"
+#include "globals.h"
 #include "Threads/DRSBinaryReaderThread.h"
 
 DRSBinaryReaderThread::DRSBinaryReaderThread(QObject *parent)

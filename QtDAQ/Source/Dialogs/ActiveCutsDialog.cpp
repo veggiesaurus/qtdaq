@@ -1,3 +1,4 @@
+#include "globals.h"
 #include "Dialogs/ActiveCutsDialog.h"
 
 ActiveCutsDialog::ActiveCutsDialog (QVector<LinearCut>& cuts, QVector<PolygonalCut>& polygonalCuts, QVector<Condition>conditions, QVector<Condition>polygonalConditions, QWidget * parent, Qt::WindowFlags)

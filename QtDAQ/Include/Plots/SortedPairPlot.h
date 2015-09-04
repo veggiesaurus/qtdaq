@@ -1,14 +1,7 @@
 #pragma once
 
 #include <qwt_plot.h>
-#include <qwt_plot_magnifier.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_picker.h>
 #include <qwt_plot_curve.h>
-#include <qwt_symbol.h>
-
-class QwtPlotCurve;
-class QwtSymbol;
 
 class SortedPairPlot : public QwtPlot
 {

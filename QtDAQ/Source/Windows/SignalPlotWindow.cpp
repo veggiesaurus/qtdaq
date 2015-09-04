@@ -1,3 +1,6 @@
+#include <QTextStream>
+#include <QFileDialog>
+#include "Plots/SignalPlot.h"
 #include "Windows/SignalPlotWindow.h"
 
 SignalPlotWindow::SignalPlotWindow(QWidget * parent, int s_chPrimary, int s_chSecondary, int s_refreshDelay, bool s_autoscale, bool s_averageWaveform): PlotWindow(parent, s_chPrimary),

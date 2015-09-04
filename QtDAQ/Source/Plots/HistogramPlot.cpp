@@ -1,3 +1,10 @@
+#include <qwt_series_data.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
+#include <qwt_plot_renderer.h>
+#include <qwt_plot_grid.h>
+#include "globals.h"
 #include "Plots/HistogramPlot.h"
 
 

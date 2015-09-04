@@ -1,3 +1,10 @@
+#include <QSettings>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_magnifier.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_picker.h>
+#include <qwt_scale_engine.h>
+
 #include "Plots/signalplot.h"
 
 

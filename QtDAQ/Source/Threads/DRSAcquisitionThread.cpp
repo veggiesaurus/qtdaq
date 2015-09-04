@@ -1,4 +1,7 @@
+#include "globals.h"
+#include "ProcessRoutines.h"
 #include "Threads/DRSAcquisitionThread.h"
+#include "vector/vectorclass.h"
 
 DRSAcquisitionThread::DRSAcquisitionThread(QObject *parent)
 	: QThread(parent)

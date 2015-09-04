@@ -1,3 +1,5 @@
+#include <string.h>
+#include <stdio.h>
 #include "AcquisitionDefinitions.h"
 
 EventVx* EventVx::eventFromInfoAndData(CAEN_DGTZ_EventInfo_t& info, CAEN_DGTZ_UINT16_EVENT_t* data)

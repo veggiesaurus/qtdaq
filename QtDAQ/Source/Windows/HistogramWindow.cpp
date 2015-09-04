@@ -1,3 +1,7 @@
+#include <QPoint>
+#include <QFileDialog>
+#include "curvefit/fitting.h"
+#include "Plots/HistogramPlot.h"
 #include "HistogramWindow.h"
 
 

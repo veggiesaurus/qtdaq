@@ -2,9 +2,7 @@
 
 #include <QDialog>
 #include "ui_dialogPolygonalCutEdit.h"
-#include "globals.h"
 #include "Cuts.h"
-
 
 class PolygonalCutEditDialog : public QDialog
 {

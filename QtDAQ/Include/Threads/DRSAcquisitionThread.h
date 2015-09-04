@@ -7,10 +7,8 @@
 
 #include "DRS4/DRS.h"
 #include "AcquisitionDefinitions.h"
-#include "ProcessRoutines.h"
 #include "DRSAcquisitionConfig.h"
 #include "AnalysisConfig.h"
-#include "globals.h"
 
 
 class DRSAcquisitionThread : public QThread

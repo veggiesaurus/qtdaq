@@ -1,10 +1,8 @@
 #pragma once
 
-#include <time.h>
 #include <QThread>
 #include <QTimer>
 #include <QVector>
-#include <QFile>
 #include <QMutex>
 #include <atomic>
 #include "AcquisitionDefinitions.h"

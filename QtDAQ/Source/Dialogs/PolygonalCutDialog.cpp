@@ -1,7 +1,5 @@
+#include "globals.h"
 #include "Dialogs/PolygonalCutDialog.h"
-
-
-
 
 PolygonalCutDialog::PolygonalCutDialog (int channel, HistogramParameter parameterX, HistogramParameter parameterY, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
 {

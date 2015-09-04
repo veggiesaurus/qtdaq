@@ -4,7 +4,6 @@
 #include "ui_windowSignalPlot.h"
 #include "ui_dialogSignalPlotConfig.h"
 #include "Windows/PlotWindow.h"
-#include "Plots/SignalPlot.h"
 
 #define UI_SAVE_VERSION_SIGPLOT ((quint32)(0x04))
 

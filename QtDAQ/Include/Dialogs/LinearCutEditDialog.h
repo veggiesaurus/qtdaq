@@ -3,9 +3,7 @@
 #include <QDialog>
 #include <QVector>
 #include "ui_dialogLinearCutEdit.h"
-#include "globals.h"
 #include "Cuts.h"
-
 
 class LinearCutEditDialog : public QDialog
 {

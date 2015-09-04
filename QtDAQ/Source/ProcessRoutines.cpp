@@ -1,3 +1,6 @@
+#include <string>
+#include <algorithm>
+#include "vector/vectorclass.h"
 #include "ProcessRoutines.h"
 //Applies a low pass filter to the data (inline), based in input alpha parameter
 bool lowPassFilter(float* inputData, int inputNumSamples, float inputAlpha)

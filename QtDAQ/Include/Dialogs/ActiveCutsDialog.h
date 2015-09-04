@@ -4,7 +4,6 @@
 #include <QVector>
 #include <QComboBox>
 #include "ui_dialogActiveCuts.h"
-#include "globals.h"
 #include "Cuts.h"
 
 class ActiveCutsDialog : public QDialog

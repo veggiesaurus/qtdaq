@@ -1,11 +1,9 @@
 #pragma once
 
 #include <QDataStream>
-#include <QVector>
 
 #include "DRS4/DRS.h"
 #include "AcquisitionDefinitions.h"
-#include "globals.h"
 
 
 class DRSAcquisitionConfig

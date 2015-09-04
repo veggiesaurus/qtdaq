@@ -1,16 +1,10 @@
 #pragma once
 
-#include <QPoint>
-//#include <qgl.h>
 #include <qwt_plot_marker.h>
 #include <qwt_plot_curve.h>
-#include <qwt_plot_picker.h>
-#include <qwt_plot_grid.h>
-#include <qwt_picker_machine.h>
 #include "ui_windowFoMPlot.h"
 #include "ui_dialogHistogram2DConfig.h"
 #include "Windows/PlotWindow.h"
-#include "Plots/CalibratedPlot.h"
 #include "curvefit/fitting.h"
 
 class FoMWindow : public PlotWindow

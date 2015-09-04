@@ -1,3 +1,4 @@
+#include "Plots/SortedPairPlot.h"
 #include "Windows/SortedPairPlotWindow.h"
 
 SortedPairPlotWindow::SortedPairPlotWindow(QWidget * parent, int s_chPrimary, int s_chSecondary, HistogramParameter s_parameter, int s_refreshDelay, bool s_autoscale): PlotWindow(parent, s_chPrimary), 

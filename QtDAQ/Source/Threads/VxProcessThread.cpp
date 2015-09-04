@@ -1,3 +1,5 @@
+#include <QMessageBox>
+#include <QDebug>
 #include "Threads/VxProcessThread.h"
 
 VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength, QObject *parent)

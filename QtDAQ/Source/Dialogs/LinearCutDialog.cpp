@@ -1,7 +1,5 @@
+#include "globals.h"
 #include "Dialogs/LinearCutDialog.h"
-
-
-
 
 LinearCutDialog::LinearCutDialog (QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
 {

@@ -1,11 +1,8 @@
 #pragma once
-
-#include <QPoint>
-//#include <qgl.h>
+#include <QFile>
 #include "ui_window2DHistogramPlot.h"
 #include "ui_dialogHistogram2DConfig.h"
 #include "Windows/PlotWindow.h"
-#include "Plots/Histogram2DPlot.h"
 #include "Dialogs/LinearCutDialog.h"
 #include "Dialogs/PolygonalCutDialog.h"
 

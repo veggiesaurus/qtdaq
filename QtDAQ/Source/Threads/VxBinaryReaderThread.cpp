@@ -1,3 +1,5 @@
+#include <QFile>
+#include <time.h>
 #include "Threads/VxBinaryReaderThread.h"
 
 VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength, QObject *parent)

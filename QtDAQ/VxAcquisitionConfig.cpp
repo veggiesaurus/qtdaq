@@ -1,3 +1,6 @@
+#include <QStringList>
+#include <QRegularExpression>
+#include <QDebug>
 #include "VxAcquisitionConfig.h"
 
 VxAcquisitionConfig::VxAcquisitionConfig()

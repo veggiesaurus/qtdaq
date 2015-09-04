@@ -1,3 +1,7 @@
+#include <QMessageBox>
+#include <QDebug>
+#include "globals.h"
+#include "VxAcquisitionConfig.h"
 #include "VxAcquisitionConfigDialog.h"
 
 VxAcquisitionConfigDialog::VxAcquisitionConfigDialog(QString s_config, QWidget * parent, Qt::WindowFlags f) : config(s_config)

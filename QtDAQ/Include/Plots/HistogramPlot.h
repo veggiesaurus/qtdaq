@@ -1,18 +1,11 @@
 #pragma once
 
-#include <qwt.h>
 #include <qwt_plot.h>
 #include <qwt_plot_histogram.h>
-#include <qwt_series_data.h>
-#include <qwt_plot_canvas.h>
-#include <qwt_plot_curve.h>
-#include <qwt_plot_picker.h>
-#include <qwt_picker_machine.h>
-#include <qwt_plot_renderer.h>
-#include <qwt_plot_grid.h>
 #include <qwt_scale_engine.h>
+#include <qwt_plot_curve.h>
+
 #include "Plots/CalibratedPlot.h"
-#include "globals.h"
 
 class Histogram: public QwtPlotHistogram
 {
@@ -20,7 +13,6 @@ public:
     Histogram(const QString &, const QColor &);
     void setColor(const QColor &);
     void setValues(uint numValues, const double *, double minValue, double maxValue);
-	
 };
 
 

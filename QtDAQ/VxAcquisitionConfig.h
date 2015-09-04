@@ -2,10 +2,6 @@
 
 #include "AcquisitionDefinitions.h"
 #include <CAENDigitizer.h>
-#include <QString>
-#include <QStringList>
-#include <QRegularExpression>
-#include <QDebug>
 
 #define MAX_CH  64          /* max. number of channels */
 #define MAX_SET 16           /* max. number of independent settings */

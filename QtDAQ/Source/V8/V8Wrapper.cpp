@@ -1,3 +1,6 @@
+#include <QDebug>
+#include <QMessageBox>
+#include "globals.h"
 #include "V8/V8Wrapper.h"
 
 GET_SET_DEFINITION_FLOAT(SampleStatistics, timeOfFlight);

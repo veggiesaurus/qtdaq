@@ -1,12 +1,9 @@
 #pragma once
 
-
 #include <QDialog>
-#include <QCheckBox>
 #include "ui_dialogAnalysisConfig.h"
 #include "AnalysisConfig.h"
 #include "JSHighlighter.h"
-#include "DRS4/DRS.h"
 #include "../V8/V8Wrapper.h"
 
 class AnalysisConfigDialog : public QDialog

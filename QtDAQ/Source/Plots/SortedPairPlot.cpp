@@ -1,3 +1,7 @@
+#include <qwt_plot_magnifier.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_picker.h>
+#include <qwt_symbol.h>
 #include "Plots/SortedPairPlot.h"
 
 SortedPairPlot::SortedPairPlot( QWidget *parent ):

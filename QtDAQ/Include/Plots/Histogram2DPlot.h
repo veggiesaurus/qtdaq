@@ -3,22 +3,13 @@
 #include <qwt_plot.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_matrix_raster_data.h>
-#include <qwt_plot_canvas.h>
-#include <qwt_plot_curve.h>
 #include <qwt_color_map.h>
-#include <qwt_plot_marker.h>
-#include <qwt_plot_grid.h>
 #include <qwt_plot_picker.h>
 #include <qwt_picker_machine.h>
-#include <qwt_plot_renderer.h>
-#include <qwt_scale_widget.h>
+#include <qwt_plot_marker.h>
 #include <qwt_plot_shapeitem.h>
-
-#include <QSettings>
-#include <QVector>
-#include <QPointF>
 #include "Plots/CalibratedPlot.h"
-#include "globals.h"
+
 
 class RasterData: public QwtMatrixRasterData
 {

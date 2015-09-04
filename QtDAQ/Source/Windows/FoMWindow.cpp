@@ -1,3 +1,9 @@
+#include <QPoint>
+#include <QFileDialog>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_picker.h>
+#include <qwt_picker_machine.h>
+#include "Plots/CalibratedPlot.h"
 #include "Windows/FoMWindow.h"
 
 

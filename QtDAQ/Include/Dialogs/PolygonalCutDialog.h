@@ -2,7 +2,6 @@
 
 #include <QDialog>
 #include "ui_dialogPolygonalCut.h"
-#include "globals.h"
 #include "Cuts.h"
 
 

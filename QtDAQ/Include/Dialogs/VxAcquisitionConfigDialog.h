@@ -1,12 +1,8 @@
 #pragma once
 
 #include <QDialog>
-#include <QMessageBox>
-#include <QDebug>
 #include "ui_dialogVxAcquisitionConfig.h"
-#include "globals.h"
 #include "VxHighlighter.h"
-#include "VxAcquisitionConfig.h"
 
 class VxAcquisitionConfigDialog : public QDialog
 {

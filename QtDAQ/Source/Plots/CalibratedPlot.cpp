@@ -1,3 +1,8 @@
+#include <QSettings>
+#include <qwt_plot_canvas.h>
+#include <qwt_picker_machine.h>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_renderer.h>
 #include "Plots/CalibratedPlot.h"
 
 CalibratedPlot::CalibratedPlot(QWidget *parent):

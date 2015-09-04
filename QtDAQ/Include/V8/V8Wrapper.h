@@ -1,8 +1,5 @@
 #pragma once
 #include <v8.h>
-#include <QDebug>
-#include <QMessageBox>
-#include "globals.h"
 #include "AcquisitionDefinitions.h"
 
 using namespace v8;

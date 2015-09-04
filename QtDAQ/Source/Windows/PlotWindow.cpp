@@ -1,3 +1,9 @@
+#include <QImageWriter>
+#include <QFileDialog>
+#include <QSettings>
+#include <QInputDialog>
+#include <qwt_plot_renderer.h>
+#include "globals.h"
 #include "Windows/PlotWindow.h"
 
 PlotWindow::PlotWindow(QWidget* parent, int s_chPrimary):QMainWindow(parent),
