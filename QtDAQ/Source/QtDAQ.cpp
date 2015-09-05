@@ -215,7 +215,7 @@ void QtDAQ::onVxInitClicked()
 	SAFE_DELETE_ARRAY(rawBuffer1);
 	SAFE_DELETE_ARRAY(rawBuffer2);
 	//for acq, small buffer length needed
-	bufferLength = 1;
+	bufferLength = 16;
 	rawBuffer1 = new EventVx[bufferLength];
 	rawBuffer2 = new EventVx[bufferLength];
 	memset(rawBuffer1, 0, sizeof(EventVx)*bufferLength);

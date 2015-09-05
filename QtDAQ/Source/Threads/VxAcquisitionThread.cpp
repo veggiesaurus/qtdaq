@@ -193,6 +193,7 @@ void VxAcquisitionThread::run()
 			//freeVxEvent(rawBuffers[currentBufferIndex][currentBufferPosition]);
 			rawBuffers[currentBufferIndex][currentBufferPosition].loadFromInfoAndData(eventInfo, event16);
 			rawBuffers[currentBufferIndex][currentBufferPosition].processed = false;
+			rawBuffers[currentBufferIndex][currentBufferPosition].runIndex = runIndex;
 			currentBufferPosition++;
 		}
 		digitizerMutex.unlock();
