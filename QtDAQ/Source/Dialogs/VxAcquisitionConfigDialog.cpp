@@ -36,7 +36,7 @@ void VxAcquisitionConfigDialog::configChanged()
 
 	QVector<VxParseError> parseErrors;
 	VxAcquisitionConfig* updatedConfig = VxAcquisitionConfig::parseConfigString(ui.plainTextEditCode->toPlainText(), parseErrors);
-	for each (auto parseError in parseErrors)
+    for (auto parseError: parseErrors)
 	{
 		switch (parseError.errorType)
 		{

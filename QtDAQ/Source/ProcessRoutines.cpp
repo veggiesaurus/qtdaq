@@ -1,4 +1,4 @@
-#include <string>
+#include <string.h>
 #include <algorithm>
 #include "vector/vectorclass.h"
 #include "ProcessRoutines.h"

@@ -3,10 +3,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QMdiSubWindow>
-#include <QtSerialPort\QSerialPortInfo>
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
 #include <QInputDialog>
+#ifdef WIN32
 #include <QtWinExtras/QWinTaskbarButton>
-
+#endif
 #include "ui_windowHistogramPlot.h"
 #include "ui_window2DHistogramPlot.h"
 #include "ui_windowSignalPlot.h"
@@ -107,13 +109,14 @@ QtDAQ::QtDAQ(QWidget *parent)
 	autoTrigTimer.setInterval(17);
 	connect(&autoTrigTimer, &QTimer::timeout, this, &QtDAQ::onDRSSoftTriggerClicked);	
 
+#ifdef WIN32
 	//progress taskbar
 	QWinTaskbarButton *button = new QWinTaskbarButton(this);	
-	button->setWindow(windowHandle());
-	//button->setOverlayIcon(QIcon(":/loading.png"));
+	button->setWindow(windowHandle());	
 	progressTaskbar = button->progress();
 	progressTaskbar->setVisible(true);
 	progressTaskbar->setValue(0);
+#endif
 }
 
 QtDAQ::~QtDAQ()
@@ -1433,8 +1436,8 @@ void QtDAQ::onExitClicked()
 
 void QtDAQ::onSerialInterfaceClicked()
 {
-	bool ok;
-	QList<QSerialPortInfo> list = QSerialPortInfo::availablePorts();
+	bool ok;    
+    auto list = QSerialPortInfo::availablePorts();
 	if (list.isEmpty())
 	{
 		QMessageBox::critical(this, "Port enumeration failed", "Unable to find any available serial ports.");
@@ -1694,8 +1697,9 @@ void QtDAQ::onProjectorModeToggled(bool checked)
 
 void QtDAQ::onFilePercentUpdated(float filePercent)
 {
-	
+#ifdef WIN32
 	progressTaskbar->setValue((int)(round(filePercent * 100))%100);
+#endif
 	this->filePercent = filePercent;
 }
 

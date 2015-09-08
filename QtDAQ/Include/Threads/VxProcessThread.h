@@ -21,7 +21,7 @@ class VxProcessThread : public QThread
 public:
 	VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	~VxProcessThread();
-	bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=50);
+    bool initVxProcessThread(AnalysisConfig* s_analysisConfig, int updateTime=100);
 	void restartProcessThread();
 	void resetTriggerTimerAndV8();
 	void loadTemperatureLog(QString filename);
@@ -94,7 +94,7 @@ private:
 	Persistent<Object> eventStatsObject;
 	Persistent<Object> allChannelsStatsObject[NUM_DIGITIZER_CHANNELS];
 	Persistent<Context> persContext;
-	Persistent<Script> scriptInitial, scriptFinished, scriptPre, scriptPostChannel, scriptPostEvent, scriptDef;
+    Persistent<Script> scriptInitial, scriptFinished, scriptPre, scriptPostChannel, scriptPostEvent, scriptDef;
 
 	//buffers
 	//raw

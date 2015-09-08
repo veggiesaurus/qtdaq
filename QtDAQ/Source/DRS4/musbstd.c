@@ -5,7 +5,7 @@
 
   Contents:     Midas USB access
 
-  $Id: musbstd.c 4408 2008-12-11 10:46:30Z ritt@PSI.CH $
+  $Id: musbstd.c 5344 2012-11-27 11:27:14Z ritt $
 
 \********************************************************************/
 
@@ -61,6 +61,12 @@ DEFINE_GUID(GUID_CLASS_MSCB_BULK, 0xcbeb3fb1, 0xae9f, 0x471c, 0x90, 0x16, 0x9b, 
 #include <usb.h>
 #endif
 
+#ifdef HAVE_LIBUSB10
+#include <errno.h>
+#include <libusb-1.0/libusb.h>
+#endif
+
+#if !defined(HAVE_LIBUSB) && !defined(HAVE_LIBUSB10)
 #ifdef OS_DARWIN
 
 IOReturn darwin_configure_device(MUSB_INTERFACE* musb)
@@ -134,6 +140,8 @@ IOReturn darwin_configure_device(MUSB_INTERFACE* musb)
     
 #endif
 
+#endif
+
 int musb_open(MUSB_INTERFACE **musb_interface, int vendor, int product, int instance, int configuration, int usbinterface)
 {
 #if defined(HAVE_LIBUSB)
@@ -145,6 +153,7 @@ int musb_open(MUSB_INTERFACE **musb_interface, int vendor, int product, int inst
    usb_init();
    usb_find_busses();
    usb_find_devices();
+   usb_set_debug(3);
    
    for (bus = usb_get_busses(); bus; bus = bus->next)
       for (dev = bus->devices; dev; dev = dev->next)
@@ -200,6 +209,77 @@ int musb_open(MUSB_INTERFACE **musb_interface, int vendor, int product, int inst
    
    return MUSB_NOT_FOUND;
    
+#elif defined(HAVE_LIBUSB10)
+   
+   static int first_call = 1;
+
+   libusb_device **dev_list;
+   libusb_device_handle *dev;
+   struct libusb_device_descriptor desc;
+   
+   int status, i, n;
+   int count = 0;
+   
+   if (first_call) {
+      first_call = 0;
+      libusb_init(NULL);
+      // libusb_set_debug(NULL, 3);
+   }
+      
+   n = libusb_get_device_list(NULL, &dev_list);
+   
+   for (i=0 ; i<n ; i++) {
+      status = libusb_get_device_descriptor(dev_list[i], &desc);
+      if (desc.idVendor == vendor && desc.idProduct == product) {
+         if (count == instance) {
+            status = libusb_open(dev_list[i], &dev);
+            if (status < 0) {
+               fprintf(stderr, "musb_open: libusb_open() error %d\n", status);
+               return MUSB_ACCESS_ERROR;
+            }
+
+            status = libusb_set_configuration(dev, configuration);
+            if (status < 0) {
+               fprintf(stderr, "musb_open: usb_set_configuration() error %d\n", status);
+               fprintf(stderr,
+                       "musb_open: Found USB device 0x%04x:0x%04x instance %d, but cannot initialize it: please check permissions on \"/proc/bus/usb/%d/%d\" and \"/dev/bus/usb/%d/%d\"\n",
+                       vendor, product, instance, libusb_get_bus_number(dev_list[i]), libusb_get_device_address(dev_list[i]), libusb_get_bus_number(dev_list[i]), libusb_get_device_address(dev_list[i]));
+               return MUSB_ACCESS_ERROR;
+            }
+            
+            /* see if we have write access */
+            status = libusb_claim_interface(dev, usbinterface);
+            if (status < 0) {
+               fprintf(stderr, "musb_open: libusb_claim_interface() error %d\n", status);
+               
+#ifdef _MSC_VER
+               fprintf(stderr,
+                       "musb_open: Found USB device 0x%04x:0x%04x instance %d, but cannot initialize it:\nDevice is probably used by another program\n",
+                       vendor, product, instance);
+#else
+               fprintf(stderr,
+                       "musb_open: Found USB device 0x%04x:0x%04x instance %d, but cannot initialize it: please check permissions on \"/proc/bus/usb/%d/%d\"\n",
+                       vendor, product, instance, libusb_get_bus_number(dev_list[i]), libusb_get_device_address(dev_list[i]));
+#endif
+               
+               return MUSB_ACCESS_ERROR;
+            }
+
+            *musb_interface = (MUSB_INTERFACE*)calloc(1, sizeof(MUSB_INTERFACE));
+            (*musb_interface)->dev = dev;
+            (*musb_interface)->usb_configuration = configuration;
+            (*musb_interface)->usb_interface     = usbinterface;
+            return MUSB_SUCCESS;
+
+         }
+         count++;
+      }
+   }
+   
+   libusb_free_device_list(dev_list, 1);
+   
+   return MUSB_NOT_FOUND;
+     
 #elif defined(OS_DARWIN)
    
    kern_return_t status;
@@ -389,6 +469,19 @@ int musb_close(MUSB_INTERFACE *musb_interface)
    if (status < 0)
       fprintf(stderr, "musb_close: usb_close() error %d\n", status);
    
+#elif defined(HAVE_LIBUSB10)   
+
+   int status;
+   status = libusb_release_interface(musb_interface->dev, musb_interface->usb_interface);
+   if (status < 0)
+      fprintf(stderr, "musb_close: libusb_release_interface() error %d\n", status);
+   
+#ifdef OS_LINUX   // linux wants a reset, otherwise the device cannot be accessed next time
+   musb_reset(musb_interface);
+#endif
+   
+   libusb_close(musb_interface->dev);
+
 #elif defined(OS_DARWIN)
 
    IOReturn status;
@@ -434,6 +527,11 @@ int musb_write(MUSB_INTERFACE *musb_interface, int endpoint, const void *buf, in
    if (n_written != count) {
       fprintf(stderr, "musb_write: requested %d, wrote %d, errno %d (%s)\n", count, n_written, errno, strerror(errno));
    }
+#elif defined(HAVE_LIBUSB10)
+   int status = libusb_bulk_transfer(musb_interface->dev, endpoint, (unsigned char*)buf, count, &n_written, timeout);
+   if (n_written != count) {
+      fprintf(stderr, "musb_write: requested %d, wrote %d, errno %d (%s)\n", count, n_written, status, strerror(status));
+   }
 #elif defined(OS_DARWIN)
    IOReturn status;
    IOUSBInterfaceInterface182 **interface = (IOUSBInterfaceInterface182 **)musb_interface->interface;
@@ -465,6 +563,15 @@ int musb_read(MUSB_INTERFACE *musb_interface, int endpoint, void *buf, int count
    }
    */
 
+#elif defined(HAVE_LIBUSB10)
+   
+   libusb_bulk_transfer(musb_interface->dev, endpoint | 0x80, (unsigned char*)buf, count, &n_read, timeout);
+   /* errors should be handled in upper layer ....
+    if (n_read <= 0) {
+    fprintf(stderr, "musb_read: requested %d, read %d, errno %d (%s)\n", count, n_read, status, strerror(status));
+    }
+    */
+   
 #elif defined(OS_DARWIN)
 
    UInt32 xcount = count;
@@ -526,6 +633,13 @@ int musb_reset(MUSB_INTERFACE *musb_interface)
    if (status < 0)
       fprintf(stderr, "musb_reset: usb_reset() status %d\n", status);
 
+#elif defined(HAVE_LIBUSB10)
+   
+   int status;
+   status = libusb_reset_device(musb_interface->dev);
+   if (status < 0)
+      fprintf(stderr, "musb_reset: usb_reset() status %d\n", status);
+   
 #elif defined(OS_DARWIN)
 
    IOReturn status;
@@ -566,6 +680,21 @@ int musb_reset(MUSB_INTERFACE *musb_interface)
 
 #endif
    return 0;
+}
+
+int musb_get_device(MUSB_INTERFACE *usb_interface)
+{
+#ifdef HAVE_LIBUSB
+   struct usb_device_descriptor d;
+   usb_get_descriptor(usb_interface->dev, USB_DT_DEVICE, 0, &d, sizeof(d));
+   return d.bcdDevice;
+#elif HAVE_LIBUSB10
+   struct libusb_device_descriptor d;
+   libusb_get_descriptor(usb_interface->dev, LIBUSB_DT_DEVICE, 0, (unsigned char *)&d, sizeof(d));
+   return d.bcdDevice;
+#else
+   return 0;
+#endif
 }
 
 /* end */

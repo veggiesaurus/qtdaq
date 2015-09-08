@@ -5,7 +5,7 @@
 
   Contents:     Midas USB access
 
-  $Id: musbstd.h 4998 2011-03-03 08:19:56Z ritt $
+  $Id: musbstd.h 5344 2012-11-27 11:27:14Z ritt $
 
 \********************************************************************/
 
@@ -23,8 +23,19 @@ typedef struct {
    int usb_type;
 } MUSB_INTERFACE;
 
+#elif defined(HAVE_LIBUSB10)
+
+#include <libusb-1.0/libusb.h>
+
+typedef struct {
+   libusb_device_handle *dev;
+   int usb_configuration;
+   int usb_interface;
+   int usb_type;
+} MUSB_INTERFACE;
+
 #elif defined(_MSC_VER)
-#define NOMINMAX
+
 #include <windows.h>
 
 typedef struct {
@@ -75,6 +86,7 @@ int EXPRT musb_write(MUSB_INTERFACE *musb_interface,int endpoint,const void *buf
 int EXPRT musb_read(MUSB_INTERFACE *musb_interface,int endpoint,void *buf,int count,int timeout_ms);
 int EXPRT musb_reset(MUSB_INTERFACE *musb_interface);
 int EXPRT musb_set_altinterface(MUSB_INTERFACE *musb_interface, int index);
+int EXPRT musb_get_device(MUSB_INTERFACE *musb_interface);
 
 #ifdef __cplusplus
 }

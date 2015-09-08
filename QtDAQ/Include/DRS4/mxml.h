@@ -5,7 +5,7 @@
 
    Contents:     Header file for mxml.c
 
-   $Id: mxml.h 68 2011-06-10 23:19:38Z ritt $
+   $Id: mxml.h 73 2012-02-10 14:54:14Z ritt $
 
 \********************************************************************/
 
@@ -93,6 +93,7 @@ char *mxml_close_buffer(MXML_WRITER *writer);
 int mxml_close_file(MXML_WRITER *writer);
 
 int mxml_get_number_of_children(PMXML_NODE pnode);
+PMXML_NODE mxml_get_parent(PMXML_NODE pnode);
 PMXML_NODE mxml_subnode(PMXML_NODE pnode, int idx);
 PMXML_NODE mxml_find_node(PMXML_NODE tree, const char *xml_path);
 int mxml_find_nodes(PMXML_NODE tree, const char *xml_path, PMXML_NODE **nodelist);
@@ -123,9 +124,9 @@ int mxml_delete_node(PMXML_NODE pnode);
 int mxml_delete_attribute(PMXML_NODE, const char *attrib_name);
 
 PMXML_NODE mxml_create_root_node(void);
-PMXML_NODE mxml_parse_file(const char *file_name, char *error, int error_size);
-PMXML_NODE mxml_parse_buffer(const char *buffer, char *error, int error_size);
-int mxml_parse_entity(char **buf, const char* file_name, char *error, int error_size);
+PMXML_NODE mxml_parse_file(const char *file_name, char *error, int error_size, int *error_line);
+PMXML_NODE mxml_parse_buffer(const char *buffer, char *error, int error_size, int *error_line);
+int mxml_parse_entity(char **buf, const char* file_name, char *error, int error_size, int *error_line);
 int mxml_write_tree(const char *file_name, PMXML_NODE tree);
 void mxml_debug_tree(PMXML_NODE tree, int level);
 void mxml_free_tree(PMXML_NODE tree);

@@ -1,7 +1,7 @@
 /********************************************************************
   DRS.h, S.Ritt, M. Schneebeli - PSI
 
-  $Id: DRS.h 17750 2011-05-31 11:42:51Z ritt $
+  $Id: DRS.h 18410 2011-09-14 11:50:52Z ritt $
 
 ********************************************************************/
 #ifndef DRS_H
@@ -31,6 +31,9 @@
 #ifndef NULL
 #define NULL 0
 #endif
+
+int drs_kbhit();
+unsigned int millitime();
 
 /* transport mode */
 #define TR_VME   1

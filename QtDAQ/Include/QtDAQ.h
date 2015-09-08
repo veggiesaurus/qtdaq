@@ -3,9 +3,10 @@
 #include <QVector>
 #include <QTime>
 #include <QSettings>
-#include <QtSerialPort\QSerialPort>
+#include <QtSerialPort/QSerialPort>
+#ifdef WIN32
 #include <QtWinExtras/QWinTaskbarProgress>
-
+#endif
 #include "ui_qtdaq.h"
 #include "ui_dialogAcquisitionConfig.h"
 
@@ -233,7 +234,9 @@ private:
 	bool projectorMode = true;
 
 	//progress in taskbar
+#ifdef WIN32
 	QWinTaskbarProgress* progressTaskbar = nullptr;
+#endif
 	float filePercent = 0;
 
 	//temperature

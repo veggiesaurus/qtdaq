@@ -7,7 +7,7 @@
 #include <atomic>
 #include "AcquisitionDefinitions.h"
 #include "AnalysisConfig.h"
-#include "zlib/zlib.h"
+#include <zlib.h>
 
 
 class VxBinaryReaderThread : public QThread

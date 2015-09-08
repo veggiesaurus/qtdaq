@@ -5,9 +5,13 @@
 
   Contents:     Library functions for DRS mezzanine and USB boards
 
-  $Id: DRS.cpp 18184 2011-07-26 11:19:53Z ritt $
+  $Id: DRS.cpp 20424 2012-11-27 11:34:31Z ritt $
 
 \********************************************************************/
+
+#ifdef USE_DRS_MUTEX 
+#include "wx/wx.h"    // must be before <windows.h>
+#endif
 
 #include <stdio.h>
 #include <math.h>
@@ -18,10 +22,10 @@
 #include <algorithm>
 #include <sys/stat.h>
 #include "strlcpy.h"
+#include "DRS.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4996)
-#define NOMINMAX
 #   include <windows.h>
 #   include <direct.h>
 #else
@@ -38,6 +42,7 @@ inline void Sleep(useconds_t x)
 #define drs_kbhit() kbhit()
 #else
 #include <sys/ioctl.h>
+
 int drs_kbhit()
 {
    int n;
@@ -142,7 +147,6 @@ unsigned char static *usb2_buffer = NULL;
 /*------------------------------------------------------------------*/
 
 #ifdef USE_DRS_MUTEX
-#include "wx/wx.h" 
 static wxMutex *s_drsMutex = NULL; // used for wxWidgets multi-threaded programs
 #endif
 
@@ -325,9 +329,7 @@ DRS::DRS()
       if (musb_open(&usb_interface, 0x04B4, 0x1175, index, 1, 0) == MUSB_SUCCESS) {
 
          /* check ID */
-         struct usb_device_descriptor d;
-         usb_get_descriptor(usb_interface->dev, USB_DT_DEVICE, 0, &d, sizeof(d));
-         if (d.bcdDevice != 1) {
+         if (musb_get_device(usb_interface) != 1) {
             /* no DRS evaluation board found */
             musb_close(usb_interface);
          } else {
@@ -2519,7 +2521,7 @@ int DRSBoard::SetFrequency(double demand, bool wait)
          return 0;
 
       if (fBoardType == 6) {
-         for (i=1 ; i<10 ; i++) {
+         for (i=1 ; i<100 ; i++) {
             ConfigureLMK(demand, true, fTcalFreq, fTcalPhase);
             Sleep(10);
             if (IsLMKLocked())
@@ -3293,8 +3295,8 @@ int DRSBoard::DecodeWave(unsigned char *waveforms, unsigned int chipIndex, unsig
          if (channel != 4)
            channel = 3-channel;
       }
-   } else
-      channel = channel;
+   } /* else
+      channel = channel; */
 
    // Read channel
    if (fTransport == TR_USB) {
@@ -4475,7 +4477,7 @@ DRSBoard::TimeData * DRSBoard::GetTimeCalibration(unsigned int chipIndex, bool r
          continue;
       sprintf(fileName, "%s/board%d/TimeCalib_board%d_chip%d_%dMHz.xml", fCalibDirectory, fBoardSerialNumber,
               fBoardSerialNumber, chipIndex, i);
-      rootNode = mxml_parse_file(fileName, error, sizeof(error));
+      rootNode = mxml_parse_file(fileName, error, sizeof(error), NULL);
       if (rootNode == NULL)
          continue;
 

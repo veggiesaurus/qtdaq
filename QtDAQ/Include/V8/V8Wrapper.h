@@ -1,9 +1,20 @@
 #pragma once
-#include <v8.h>
+#include <include/v8.h>
+#include <include/libplatform/libplatform.h>
 #include "AcquisitionDefinitions.h"
 
 using namespace v8;
 
+
+class ArrayBufferAllocator : public v8::ArrayBuffer::Allocator {
+ public:
+  virtual void* Allocate(size_t length) {
+    void* data = AllocateUninitialized(length);
+    return data == NULL ? data : memset(data, 0, length);
+  }
+  virtual void* AllocateUninitialized(size_t length) { return malloc(length); }
+  virtual void Free(void* data, size_t) { free(data); }
+};
 #define GET_SET_DECLARATION(className, varName) \
 	void get_##className##varName (Local<String>property,const PropertyCallbackInfo<Value> &info); \
 	void set_##className##varName (Local<String>property,Local<Value> value, const PropertyCallbackInfo<void> &info); 

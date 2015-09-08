@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <atomic>
 #include <CAENDigitizer.h>
-#include "zlib/zlib.h"
+#include <zlib.h>
 #include "AcquisitionDefinitions.h"
 #include "VxAcquisitionConfig.h"
 

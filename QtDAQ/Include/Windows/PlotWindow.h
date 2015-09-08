@@ -6,7 +6,7 @@
 #include <QSettings>
 #include <qwt_plot.h>
 #include "Cuts.h"
-#include "ui_DialogActiveCuts.h"
+#include "ui_dialogActiveCuts.h"
 #include "Dialogs/ActiveCutsDialog.h"
 #include "Dialogs/PolygonalCutEditDialog.h"
 #include "Dialogs/LinearCutEditDialog.h"

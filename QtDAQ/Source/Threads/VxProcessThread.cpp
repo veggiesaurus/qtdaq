@@ -22,12 +22,7 @@ VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2
 	processedEvents = new QVector < EventStatistics* > ;
 	processedEvents->setSharable(true);
 
-	//v8
-	v8Mutex.lock();
-	isolate = Isolate::GetCurrent();
-	v8Mutex.unlock();
-
-	//buffers
+    //buffers
 	rawBuffers[0] = s_rawBuffer1;
 	rawBuffers[1] = s_rawBuffer2;
 	rawMutexes[0] = s_rawBuffer1Mutex;
@@ -72,9 +67,7 @@ bool VxProcessThread::initVxProcessThread(AnalysisConfig* s_analysisConfig, int 
 	processedEvents->clear();
 	eventSize = 0;
 	analysisConfig = s_analysisConfig;
-	compileV8();
 
-	resetTriggerTimerAndV8();
 	updateTimer.stop();
 
 	updateTimer.setInterval(updateTime);
@@ -125,13 +118,15 @@ void VxProcessThread::resetTriggerTimerAndV8()
 	eventCounter = 0;
 
 	if (analysisConfig->bInitialV8)
-	{
-		runV8CodeInitial();
-	}
+        runV8CodeInitial();
 }
 
 void VxProcessThread::run()
 {
+    compileV8();
+
+    resetTriggerTimerAndV8();
+
 	currentBufferIndex = 0;
 	currentBufferPosition = 0;
 	int eventCounter = 0;
@@ -317,8 +312,9 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 		v8Mutex.unlock();
 
 	processingMutex.lock();
-	if (analysisConfig->bPreAnalysisV8)
-		runV8CodePreAnalysis();
+	if (analysisConfig->bPreAnalysisV8)        
+        //runV8CodeInitial();
+        runV8CodePreAnalysis();
 	EventStatistics* stats = new EventStatistics();
 	stats->timestamp.millisecond = rawEvent->info.TriggerTimeTag;
 	stats->runIndex = rawEvent->runIndex;
@@ -731,135 +727,209 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 
 void VxProcessThread::compileV8()
 {
-	v8Mutex.lock();
-	bool hasException = false;
+    //v8
+    v8Mutex.lock();
 
-	Isolate::Scope isolate_scope(isolate);
-	HandleScope handle_scope(isolate);
+    V8::InitializeICU();
+    //plat = platform::CreateDefaultPlatform();
+    //V8::InitializePlatform(plat);
+    V8::Initialize();
 
-	Local<ObjectTemplate> global = ObjectTemplate::New();
-	//functions
-	
-	global->Set(isolate, "printMessage", FunctionTemplate::New(isolate, printMessage));
-	global->Set(isolate, "setCustomParameterName", FunctionTemplate::New(isolate, setCustomParameterName));
-	global->Set(isolate, "printSampleToStream", FunctionTemplate::New(isolate, printSampleToStream, External::New(isolate, this)));
-	global->Set(isolate, "printUncorrectedSampleToStream", FunctionTemplate::New(isolate, printUncorrectedSampleToStream, External::New(isolate, this)));
-	global->Set(isolate, "readFilterFile", FunctionTemplate::New(isolate, readFilterFile, External::New(isolate, this)));
-	global->Set(isolate, "openFileStream", FunctionTemplate::New(isolate, openFileStream, External::New(isolate, this)));
-	global->Set(isolate, "closeStream", FunctionTemplate::New(isolate, closeStream, External::New(isolate, this)));
-	global->Set(isolate, "openBinaryFileStream", FunctionTemplate::New(isolate, openBinaryFileStream, External::New(isolate, this)));
-	global->Set(isolate, "setDownsampleFactor", FunctionTemplate::New(isolate, setDownsampleFactor, External::New(isolate, this)));
+    ArrayBufferAllocator allocator;
+    Isolate::CreateParams create_params;
+    create_params.array_buffer_allocator = &allocator;
+    bool hasException = false;
+    isolate = Isolate::New(create_params);
+    {
+        Isolate::Scope isolate_scope(isolate);
+        HandleScope handle_scope(isolate);
 
-	Handle<Context> context = Context::New(isolate, NULL, global);
-	persContext.Reset(isolate, context);
-	globalTemplate.Reset(isolate, global);
-	Context::Scope context_scope(context);
+        Local<ObjectTemplate> global = ObjectTemplate::New();
+        //functions
 
-	v8::TryCatch try_catch;
-	try_catch.SetVerbose(true);
-	
-	Handle<String> sourceInitial = String::NewFromUtf8(isolate, analysisConfig->customCodeInitial.toStdString().c_str());
-	Handle<Script> handleScriptInitial = Script::Compile(sourceInitial);
-	if (handleScriptInitial.IsEmpty())
-		checkV8Exceptions(try_catch, "Initialization");
-	scriptInitial.Reset(isolate, handleScriptInitial);
+        global->Set(isolate, "printMessage", FunctionTemplate::New(isolate, printMessage));
+        global->Set(isolate, "setCustomParameterName", FunctionTemplate::New(isolate, setCustomParameterName));
+        global->Set(isolate, "printSampleToStream", FunctionTemplate::New(isolate, printSampleToStream, External::New(isolate, this)));
+        global->Set(isolate, "printUncorrectedSampleToStream", FunctionTemplate::New(isolate, printUncorrectedSampleToStream, External::New(isolate, this)));
+        global->Set(isolate, "readFilterFile", FunctionTemplate::New(isolate, readFilterFile, External::New(isolate, this)));
+        global->Set(isolate, "openFileStream", FunctionTemplate::New(isolate, openFileStream, External::New(isolate, this)));
+        global->Set(isolate, "closeStream", FunctionTemplate::New(isolate, closeStream, External::New(isolate, this)));
+        global->Set(isolate, "openBinaryFileStream", FunctionTemplate::New(isolate, openBinaryFileStream, External::New(isolate, this)));
+        global->Set(isolate, "setDownsampleFactor", FunctionTemplate::New(isolate, setDownsampleFactor, External::New(isolate, this)));
 
-	Handle<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str());
-	Handle<Script> handleScriptPre = Script::Compile(sourcePre);
-	if (handleScriptPre.IsEmpty())
-		checkV8Exceptions(try_catch, "Pre-analysis");
-	scriptPre.Reset(isolate, handleScriptPre);
+        globalTemplate.Reset(isolate, global);
 
-	Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str());
-	Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
-	if (handleScriptPostChannel.IsEmpty())
-		checkV8Exceptions(try_catch, "Post-analysis (per channel)");
-	hasException = try_catch.HasCaught();
-	scriptPostChannel.Reset(isolate, handleScriptPostChannel);
+        Local<Context> context = Context::New(isolate, NULL, global);
+        persContext.Reset(isolate, context);
 
-	//allow v8 code to access each channel stats via an array (channels 0-3)
-	QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + analysisConfig->customCodePostEvent;
-	Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str());
-	Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
-	if (handleScriptPostEvent.IsEmpty())
-		checkV8Exceptions(try_catch, "Post-analysis (per event)");
-	scriptPostEvent.Reset(isolate, handleScriptPostEvent);
+        Context::Scope context_scope(context);
 
-	Handle<String> sourceDef = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str());
-	Handle<Script> handleScriptDef = Script::Compile(sourceDef);
-	if (handleScriptDef.IsEmpty())
-		checkV8Exceptions(try_catch, "Definitions");
-	scriptDef.Reset(isolate, handleScriptDef);
+        v8::TryCatch try_catch;
+        try_catch.SetVerbose(true);
 
-	Handle<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str());
-	Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
-	if (handleScriptFinished.IsEmpty())
-		checkV8Exceptions(try_catch, "After reading");
-	scriptFinished.Reset(isolate, handleScriptFinished);
+        Local<String> sourceInitial = String::NewFromUtf8(isolate, analysisConfig->customCodeInitial.toStdString().c_str(),NewStringType::kNormal).ToLocalChecked();
+        Local<Script> localScriptInitial = Script::Compile(context, sourceInitial).ToLocalChecked();
+        if (localScriptInitial.IsEmpty())
+            checkV8Exceptions(try_catch, "Initialization");
+        scriptInitial.Reset(isolate, localScriptInitial);
 
-	Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
-	for (int i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
-	{
-		Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
-		allChannelsStatsObject[i].Reset(isolate, localSampleStats);
-		context->Global()->Set(String::NewFromUtf8(isolate, "chStats" + QString::number(i).toLatin1()), localSampleStats);
-	}
+        Local<String> sourceDef = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str(),NewStringType::kNormal).ToLocalChecked();
+        Local<Script> localScriptDef = Script::Compile(context, sourceDef).ToLocalChecked();
+        if (localScriptDef.IsEmpty())
+            checkV8Exceptions(try_catch, "Initialization");
+        scriptDef.Reset(isolate, localScriptDef);
 
-	Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
-	sampleStatsObject.Reset(isolate, localSampleStats);
-	context->Global()->Set(String::NewFromUtf8(isolate, "currentChStats"), localSampleStats);
+        Local<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str(),NewStringType::kNormal).ToLocalChecked();
+        Local<Script> localScriptPre = Script::Compile(context, sourcePre).ToLocalChecked();
+        if (localScriptPre.IsEmpty())
+            checkV8Exceptions(try_catch, "Initialization");
+        scriptPre.Reset(isolate, localScriptPre);
 
-	Handle<ObjectTemplate> eventStatsTemplate = GetEventStatsTemplate(isolate);
-	Local<Object> localEventStats = eventStatsTemplate->NewInstance();
-	eventStatsObject.Reset(isolate, localEventStats);
-	context->Global()->Set(String::NewFromUtf8(isolate, "evStats"), localEventStats);
-	
+        Local<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str(),NewStringType::kNormal).ToLocalChecked();
+        Local<Script> localScriptPostChannel = Script::Compile(context, sourcePostChannel).ToLocalChecked();
+        if (localScriptPostChannel.IsEmpty())
+            checkV8Exceptions(try_catch, "Post-analysis (per channel)");
+        scriptPostChannel.Reset(isolate, localScriptPostChannel);
+
+        QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + analysisConfig->customCodePostEvent;
+        Local<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str(),NewStringType::kNormal).ToLocalChecked();
+        Local<Script> localScriptPostEvent = Script::Compile(context, sourcePostEvent).ToLocalChecked();
+        if (localScriptPostEvent.IsEmpty())
+            checkV8Exceptions(try_catch, "Post-analysis (per event)");
+        scriptPostEvent.Reset(isolate, localScriptPostEvent);
+
+
+        Local<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str(),NewStringType::kNormal).ToLocalChecked();
+        Local<Script> localScriptFinished = Script::Compile(context, sourceFinished).ToLocalChecked();
+        if (localScriptPostChannel.IsEmpty())
+            checkV8Exceptions(try_catch, "After reading");
+        scriptFinished.Reset(isolate, localScriptFinished);
+
+       /* Handle<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str());
+        Handle<Script> handleScriptPre = Script::Compile(sourcePre);
+        if (handleScriptPre.IsEmpty())
+            checkV8Exceptions(try_catch, "Pre-analysis");
+        scriptPre.Reset(isolate, handleScriptPre);
+
+        Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str());
+        Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
+        if (handleScriptPostChannel.IsEmpty())
+            checkV8Exceptions(try_catch, "Post-analysis (per channel)");
+        hasException = try_catch.HasCaught();
+        scriptPostChannel.Reset(isolate, handleScriptPostChannel);
+
+        //allow v8 code to access each channel stats via an array (channels 0-3)
+        QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + analysisConfig->customCodePostEvent;
+        Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str());
+        Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
+        if (handleScriptPostEvent.IsEmpty())
+            checkV8Exceptions(try_catch, "Post-analysis (per event)");
+        scriptPostEvent.Reset(isolate, handleScriptPostEvent);
+
+        Handle<String> sourceDef = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str());
+        Handle<Script> handleScriptDef = Script::Compile(sourceDef);
+        if (handleScriptDef.IsEmpty())
+            checkV8Exceptions(try_catch, "Definitions");
+        scriptDef.Reset(isolate, handleScriptDef);
+
+        Handle<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str());
+        Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
+        if (handleScriptFinished.IsEmpty())
+            checkV8Exceptions(try_catch, "After reading");
+        scriptFinished.Reset(isolate, handleScriptFinished);*/
+
+        Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
+        for (int i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
+        {
+            Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
+            allChannelsStatsObject[i].Reset(isolate, localSampleStats);
+            context->Global()->Set(String::NewFromUtf8(isolate, "chStats" + QString::number(i).toLatin1()), localSampleStats);
+        }
+
+        Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
+        sampleStatsObject.Reset(isolate, localSampleStats);
+        context->Global()->Set(String::NewFromUtf8(isolate, "currentChStats"), localSampleStats);
+
+        Handle<ObjectTemplate> eventStatsTemplate = GetEventStatsTemplate(isolate);
+        Local<Object> localEventStats = eventStatsTemplate->NewInstance();
+        eventStatsObject.Reset(isolate, localEventStats);
+        context->Global()->Set(String::NewFromUtf8(isolate, "evStats"), localEventStats);
+    }
 	v8Mutex.unlock();
 	v8RecompileRequired = false;
 
 	if (analysisConfig->bDefV8)
-		runV8CodeDefinitions();
+        runV8CodeDefinitions();
 }
 
 bool VxProcessThread::runV8CodeDefinitions()
 {
-	v8Mutex.lock();
+    v8Mutex.lock();
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
-	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
+    //Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
 	Handle<Context> context = Local<Context>::New(isolate, persContext);
 	Handle<Script> handleScript = Local<Script>::New(isolate, scriptDef);
-	Context::Scope context_scope(context);
-	handleScript->Run();
+    Context::Scope context_scope(context);
+    handleScript->Run();
 	v8Mutex.unlock();
 	return true;
 }
+
 bool VxProcessThread::runV8CodeInitial()
 {
-	v8Mutex.lock();
-	Isolate::Scope isolate_scope(isolate);
-	HandleScope handle_scope(isolate);
-	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
+    v8Mutex.lock();    
+    Isolate::Scope isolate_scope(isolate);
+    HandleScope handle_scope(isolate);
+    //Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
 	Handle<Context> context = Local<Context>::New(isolate, persContext);
 
-	Handle<Script> handleScript = Local<Script>::New(isolate, scriptInitial);
-	Context::Scope context_scope(context);
+    Handle<Script> handleScript = Local<Script>::New(isolate, scriptInitial);
+    Context::Scope context_scope(context);
 
-	handleScript->Run();
+    handleScript->Run();
 	v8Mutex.unlock();
 	return true;
 }
 
 bool VxProcessThread::runV8CodePreAnalysis()
 {
-	v8Mutex.lock();
+    v8Mutex.lock();
+
 	Isolate::Scope isolate_scope(isolate);
 	HandleScope handle_scope(isolate);
-	Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
-	Handle<Context> context = Local<Context>::New(isolate, persContext);
-	Handle<Script> handleScript = Local<Script>::New(isolate, scriptPre);
-	Context::Scope context_scope(context);
-	handleScript->Run();
+
+
+    Local<ObjectTemplate> global = Local<ObjectTemplate>::New(isolate, globalTemplate);
+    Handle<Context> context = Local<Context>::New(isolate, persContext);
+    Handle<Script> handleScript = Local<Script>::New(isolate, scriptPre);
+	Context::Scope context_scope(context);       
+    v8::TryCatch try_catch;
+    try_catch.SetVerbose(true);
+
+    //Handle<String> source1 = String::NewFromUtf8(isolate, "var x = 12;");
+    //Handle<Script> script1 = Script::Compile(source1);
+    //if (script1.IsEmpty())
+    //{
+        //v8::Handle<v8::Message> message = try_catch.Message();
+    //     v8::String::Utf8Value exception(try_catch.Exception());
+    //    qDebug() << *exception;
+    //}
+    //script1->Run();
+
+    handleScript->Run(context);
+    if (try_catch.HasCaught())
+    {
+        v8::String::Utf8Value exception(try_catch.Exception());
+        QString exceptionMessage = *exception;
+        int lineNumber = 0;
+
+        v8::Handle<v8::Message> message = try_catch.Message();
+        if (message->GetLineNumber())
+            lineNumber = message->GetLineNumber();
+        qDebug() << "Error in line " + QString::number(lineNumber);
+        qDebug() << exceptionMessage;
+    }
 	v8Mutex.unlock();
 	return true;
 }

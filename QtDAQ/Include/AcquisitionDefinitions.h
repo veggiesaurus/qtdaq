@@ -1,6 +1,8 @@
 #pragma once
 
+#ifdef WIN32
 #include <basetsd.h>
+#endif
 #include <time.h>
 #include <CAENDigitizer.h>
 
@@ -82,6 +84,7 @@ if (ptr != NULL)            \
 #define MAXINT64    ((INT64)(MAXUINT64 >> 1))
 #define MININT64    ((INT64)~MAXINT64)
 
+/*
 #ifndef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
@@ -89,6 +92,7 @@ if (ptr != NULL)            \
 #ifndef min
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
+*/
 #endif
 
 

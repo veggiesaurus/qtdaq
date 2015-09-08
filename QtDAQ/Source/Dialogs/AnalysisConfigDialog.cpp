@@ -1,4 +1,5 @@
 #include <QCheckBox>
+#include <include/libplatform/libplatform.h>
 #include "Dialogs/AnalysisConfigDialog.h"
 
 AnalysisConfigDialog::AnalysisConfigDialog (AnalysisConfig* s_config, QWidget * parent, Qt::WindowFlags f) : QDialog(parent, f)
@@ -248,8 +249,12 @@ void AnalysisConfigDialog::updateUI()
 }
 
 void AnalysisConfigDialog::codeChanged()
-{
-	Isolate* isolate = Isolate::New();
+{    
+    /*
+    // Create a new Isolate and make it the current one.   
+    Isolate::CreateParams create_params;
+    //create_params.array_buffer_allocator = &allocator;
+    Isolate* isolate = Isolate::New(create_params);
 	QPlainTextEdit* codeEdit = dynamic_cast<QPlainTextEdit*>(sender());
 	if (codeEdit)
 	{
@@ -279,6 +284,7 @@ void AnalysisConfigDialog::codeChanged()
 		connect(codeEdit, SIGNAL(textChanged()), this, SLOT(codeChanged()), Qt::QueuedConnection);
 	}
 	isolate->Dispose();
+    */
 }
 
 

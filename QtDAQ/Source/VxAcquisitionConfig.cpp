@@ -269,7 +269,7 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 			parseErrors.push_back({ VxParseError::WARNING, lineNum, "Invalid config option" });
 	}
 
-	for each (auto parseError in parseErrors)
+    for (auto parseError: parseErrors)
 	{
 		if (parseError.errorType == VxParseError::CRITICAL)
 		{
