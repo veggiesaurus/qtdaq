@@ -157,3 +157,4 @@ $RECYCLE.BIN/
 QtDAQ/GeneratedFiles/
 Win32/
 QtDAQ/Release_debug/
+build-QtDAQ-*/
