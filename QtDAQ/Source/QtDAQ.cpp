@@ -218,7 +218,7 @@ void QtDAQ::onVxInitClicked()
 	SAFE_DELETE_ARRAY(rawBuffer1);
 	SAFE_DELETE_ARRAY(rawBuffer2);
 	//for acq, small buffer length needed
-	bufferLength = 16;
+    bufferLength = 256;
 	rawBuffer1 = new EventVx[bufferLength];
 	rawBuffer2 = new EventVx[bufferLength];
 	memset(rawBuffer1, 0, sizeof(EventVx)*bufferLength);
@@ -243,6 +243,7 @@ void QtDAQ::onVxInitClicked()
 		vxAcquisitionThread->start();
 		vxProcessThread->start();
 		ui.actionVxStart->setEnabled(true);
+        ui.actionSetOutputFileVx->setEnabled(true);
 		if (statusBar())
 			statusBar()->showMessage("Successfully opened digitizer for acquisition.");
 	}
@@ -262,8 +263,10 @@ void QtDAQ::onVxStartClicked()
 		vxAcquisitionThread->setPaused(false);
 	ui.actionVxStop->setEnabled(true);
 	ui.actionVxReset->setEnabled(true);
+    ui.actionVxInit->setEnabled(false);
 	ui.actionVxStart->setEnabled(false);
 	ui.actionVxSoftTrigger->setEnabled(true);
+    ui.actionSetOutputFileVx->setEnabled(false);
 }
 
 void QtDAQ::onVxResetClicked()
@@ -279,6 +282,7 @@ void QtDAQ::onVxStopClicked()
 	ui.actionVxReset->setEnabled(false);
 	ui.actionVxStart->setEnabled(true);
 	ui.actionVxSoftTrigger->setEnabled(false);
+    ui.actionSetOutputFileVx->setEnabled(true);
 }
 
 
@@ -629,7 +633,27 @@ void QtDAQ::onReplayCurrentFileClicked()
 		finishedReading = false;
 		uiUpdateTimer.start();
 		acquisitionTime.start();
-	}
+    }
+}
+
+void QtDAQ::onSetOutputFileVxClicked()
+{
+    QFileDialog fileDialog(this, "Set raw data output file", "", "Compressed data (*.dtz);;All files (*.*)");
+    fileDialog.restoreState(settings.value("mainWindow/saveRawStateVx").toByteArray());
+    QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
+    QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
+    fileDialog.setDirectory(prevFileDir);
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    if (fileDialog.exec())
+    {
+        QString newRawFilename = fileDialog.selectedFiles().first();
+        settings.setValue("mainWindow/saveRawStateVx", fileDialog.saveState());
+        QFileInfo fileInfo(newRawFilename);
+        settings.setValue("mainWindow/prevVxRawDataDir", fileInfo.dir().absolutePath());
+        settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
+        if (vxAcquisitionThread)
+            vxAcquisitionThread->setFileOutput(newRawFilename);
+    }
 }
 
 void QtDAQ::onReadStatisticsFileClicked()

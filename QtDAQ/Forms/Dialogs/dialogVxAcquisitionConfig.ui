@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Digitizer Configuration (DRS)</string>
+   <string>Digitizer Configuration (Vx)</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

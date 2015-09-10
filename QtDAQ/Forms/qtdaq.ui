@@ -142,30 +142,30 @@
      <x>0</x>
      <y>0</y>
      <width>881</width>
-     <height>21</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Fi&amp;le</string>
     </property>
     <addaction name="actionReadFile"/>
     <addaction name="actionReadVxFile"/>
     <addaction name="actionReplayCurrentFile"/>
     <addaction name="separator"/>
     <addaction name="actionReadStatisticsFile"/>
-    <addaction name="actionSetOutputFile"/>
+    <addaction name="actionSetOutputFileVx"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuAcquisition">
     <property name="title">
-     <string>Acquisition</string>
+     <string>Ac&amp;quisition</string>
     </property>
     <widget class="QMenu" name="menuDRS4EvalBoard">
      <property name="title">
-      <string>DRS4 Eval board</string>
+      <string>&amp;DRS4 Eval board</string>
      </property>
      <addaction name="actionDRSLoadConfigFile"/>
      <addaction name="actionDRSSaveConfigFile"/>
@@ -182,7 +182,7 @@
     </widget>
     <widget class="QMenu" name="menuVx1761">
      <property name="title">
-      <string>Vx1761</string>
+      <string>&amp;Vx1761</string>
      </property>
      <addaction name="actionVxLoadConfigFile"/>
      <addaction name="actionVxEditConfigFile"/>
@@ -202,18 +202,18 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <widget class="QMenu" name="menuHistograms">
      <property name="title">
-      <string>Histograms</string>
+      <string>&amp;Histograms</string>
      </property>
      <addaction name="actionAddHistogram"/>
      <addaction name="actionAdd2DHistogram"/>
     </widget>
     <widget class="QMenu" name="menuOther">
      <property name="title">
-      <string>Other</string>
+      <string>&amp;Other</string>
      </property>
      <addaction name="actionAddSignalPlot"/>
      <addaction name="actionAddSortedPairPlot"/>
@@ -221,7 +221,7 @@
     </widget>
     <widget class="QMenu" name="menuMoveWindow">
      <property name="title">
-      <string>Move Window to...</string>
+      <string>&amp;Move Window to...</string>
      </property>
      <addaction name="actionPage1"/>
      <addaction name="actionPage2"/>
@@ -243,11 +243,11 @@
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
-     <string>Analysis</string>
+     <string>A&amp;nalysis</string>
     </property>
     <widget class="QMenu" name="menuLinearCuts">
      <property name="title">
-      <string>Linear Cuts</string>
+      <string>L&amp;inear Cuts</string>
      </property>
      <addaction name="actionLinearCutAdd"/>
      <addaction name="actionLinearCutEdit"/>
@@ -272,7 +272,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionDRSLoadConfigFile">
    <property name="text">
-    <string>Load Config File</string>
+    <string>&amp;Load Config File</string>
    </property>
    <property name="shortcut">
     <string>D, L</string>
@@ -283,7 +283,7 @@
   </action>
   <action name="actionDRSSaveConfigFile">
    <property name="text">
-    <string>Save Config File</string>
+    <string>&amp;Save Config File</string>
    </property>
    <property name="shortcut">
     <string>D, S</string>
@@ -294,7 +294,7 @@
   </action>
   <action name="actionDRSEditConfigFile">
    <property name="text">
-    <string>Edit Config File</string>
+    <string>&amp;Edit Config File</string>
    </property>
    <property name="shortcut">
     <string>D, E</string>
@@ -322,7 +322,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Stop</string>
+    <string>Sto&amp;p</string>
    </property>
    <property name="shortcut">
     <string>Q, X</string>
@@ -336,7 +336,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Reset</string>
+    <string>&amp;Reset</string>
    </property>
    <property name="shortcut">
     <string>Q, R</string>
@@ -345,9 +345,12 @@
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionSetOutputFile">
+  <action name="actionSetOutputFileVx">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>Set Output File</string>
+    <string>&amp;Set Output File (Vx)</string>
    </property>
    <property name="shortcut">
     <string>F, O</string>
@@ -355,7 +358,7 @@
   </action>
   <action name="actionReadFile">
    <property name="text">
-    <string>Read DRS File</string>
+    <string>&amp;Read DRS File</string>
    </property>
    <property name="shortcut">
     <string>F, D</string>
@@ -368,7 +371,7 @@
   </action>
   <action name="actionAddSignalPlot">
    <property name="text">
-    <string>Add Signal Plot</string>
+    <string>&amp;Add Signal Plot</string>
    </property>
    <property name="shortcut">
     <string>O, S</string>
@@ -379,7 +382,7 @@
   </action>
   <action name="actionEnergyCallibration">
    <property name="text">
-    <string>Energy Callibration</string>
+    <string>Energy &amp;Callibration</string>
    </property>
    <property name="shortcut">
     <string>A, C</string>
@@ -387,7 +390,7 @@
   </action>
   <action name="actionReplayCurrentFile">
    <property name="text">
-    <string>Replay Current File</string>
+    <string>Replay &amp;Current File</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -398,7 +401,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Init</string>
+    <string>&amp;Init</string>
    </property>
    <property name="shortcut">
     <string>Q, I</string>
@@ -409,7 +412,7 @@
   </action>
   <action name="actionSaveUI">
    <property name="text">
-    <string>Save UI</string>
+    <string>&amp;Save UI</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -417,7 +420,7 @@
   </action>
   <action name="actionRestoreUI">
    <property name="text">
-    <string>Restore UI</string>
+    <string>&amp;Restore UI</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -425,7 +428,7 @@
   </action>
   <action name="actionAddHistogram">
    <property name="text">
-    <string>Add Histogram</string>
+    <string>&amp;Add Histogram</string>
    </property>
    <property name="shortcut">
     <string>H, 1</string>
@@ -436,12 +439,12 @@
   </action>
   <action name="actionReadStatisticsFile">
    <property name="text">
-    <string>Read Statistics File</string>
+    <string>Read Statistics &amp;File</string>
    </property>
   </action>
   <action name="actionLinearCutAdd">
    <property name="text">
-    <string>Add</string>
+    <string>&amp;Add</string>
    </property>
    <property name="shortcut">
     <string>Shift+L, A</string>
@@ -452,7 +455,7 @@
   </action>
   <action name="actionLinearCutRemove">
    <property name="text">
-    <string>Remove</string>
+    <string>&amp;Remove</string>
    </property>
    <property name="shortcut">
     <string>Shift+L, R</string>
@@ -463,12 +466,12 @@
   </action>
   <action name="actionAddSortedPairPlot">
    <property name="text">
-    <string>Add Sorted Pair Plot</string>
+    <string>Add &amp;Sorted Pair Plot</string>
    </property>
   </action>
   <action name="actionAnalysisConfig">
    <property name="text">
-    <string>Edit Analysis Config</string>
+    <string>&amp;Edit Analysis Config</string>
    </property>
    <property name="shortcut">
     <string>A, E</string>
@@ -476,7 +479,7 @@
   </action>
   <action name="actionReadVxFile">
    <property name="text">
-    <string>Read Vx File</string>
+    <string>Read &amp;Vx File</string>
    </property>
    <property name="shortcut">
     <string>F, V</string>
@@ -484,7 +487,7 @@
   </action>
   <action name="actionAdd2DHistogram">
    <property name="text">
-    <string>Add Histogram (2D)</string>
+    <string>Add &amp;Histogram (2D)</string>
    </property>
    <property name="shortcut">
     <string>H, 2</string>
@@ -495,7 +498,7 @@
   </action>
   <action name="actionLinearCutEdit">
    <property name="text">
-    <string>Edit</string>
+    <string>&amp;Edit</string>
    </property>
    <property name="shortcut">
     <string>Shift+L, E</string>
@@ -506,7 +509,7 @@
   </action>
   <action name="actionAddFigureOfMeritPlot">
    <property name="text">
-    <string>Add Figure of Merit Plot</string>
+    <string>Add &amp;Figure of Merit Plot</string>
    </property>
    <property name="shortcut">
     <string>O, F</string>
@@ -517,12 +520,12 @@
   </action>
   <action name="actionSerialInterface">
    <property name="text">
-    <string>Serial Interface</string>
+    <string>&amp;Serial Interface</string>
    </property>
   </action>
   <action name="actionLoadAnalysisConfig">
    <property name="text">
-    <string>Load Analysis Config</string>
+    <string>&amp;Load Analysis Config</string>
    </property>
    <property name="shortcut">
     <string>A, L</string>
@@ -530,7 +533,7 @@
   </action>
   <action name="actionSaveAnalysisConfig">
    <property name="text">
-    <string>Save Analysis Config</string>
+    <string>&amp;Save Analysis Config</string>
    </property>
    <property name="shortcut">
     <string>A, S</string>
@@ -538,7 +541,7 @@
   </action>
   <action name="actionCascade">
    <property name="text">
-    <string>Cascade Windows</string>
+    <string>&amp;Cascade Windows</string>
    </property>
    <property name="shortcut">
     <string>V, C</string>
@@ -546,7 +549,7 @@
   </action>
   <action name="actionTileWindows">
    <property name="text">
-    <string>Tile Windows</string>
+    <string>&amp;Tile Windows</string>
    </property>
    <property name="shortcut">
     <string>V, T</string>
@@ -557,7 +560,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Pause File Reading</string>
+    <string>&amp;Pause File Reading</string>
    </property>
    <property name="shortcut">
     <string>Pause</string>
@@ -568,7 +571,7 @@
   </action>
   <action name="actionPage1">
    <property name="text">
-    <string>Page 1</string>
+    <string>&amp;Page 1</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+1</string>
@@ -576,7 +579,7 @@
   </action>
   <action name="actionPage2">
    <property name="text">
-    <string>Page 2</string>
+    <string>Page &amp;2</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+2</string>
@@ -584,7 +587,7 @@
   </action>
   <action name="actionPage3">
    <property name="text">
-    <string>Page 3</string>
+    <string>Page &amp;3</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+3</string>
@@ -595,7 +598,7 @@
   </action>
   <action name="actionRenamePage">
    <property name="text">
-    <string>Rename Page</string>
+    <string>R&amp;ename Page</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F2</string>
@@ -606,7 +609,7 @@
   </action>
   <action name="actionPage4">
    <property name="text">
-    <string>Page 4</string>
+    <string>Page &amp;4</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+4</string>
@@ -617,7 +620,7 @@
   </action>
   <action name="actionRestoreUILegacy">
    <property name="text">
-    <string>Restore UI (Legacy)</string>
+    <string>Restore &amp;UI (Legacy)</string>
    </property>
   </action>
   <action name="actionDRSSoftTrigger">
@@ -625,7 +628,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Soft Trigger</string>
+    <string>S&amp;oft Trigger</string>
    </property>
    <property name="shortcut">
     <string>Space</string>
@@ -642,7 +645,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Auto Trigger</string>
+    <string>&amp;Auto Trigger</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Space</string>
@@ -659,7 +662,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>ProjectorMode</string>
+    <string>&amp;ProjectorMode</string>
    </property>
    <property name="toolTip">
     <string>Projector mode</string>
@@ -670,12 +673,12 @@
   </action>
   <action name="actionLoadTemperatureLog">
    <property name="text">
-    <string>Load Temperature Log</string>
+    <string>L&amp;oad Temperature Log</string>
    </property>
   </action>
   <action name="actionVxLoadConfigFile">
    <property name="text">
-    <string>Load Config File</string>
+    <string>&amp;Load Config File</string>
    </property>
    <property name="shortcut">
     <string>X, L</string>
@@ -686,7 +689,7 @@
   </action>
   <action name="actionVxEditConfigFile">
    <property name="text">
-    <string>Edit Config File</string>
+    <string>&amp;Edit Config File</string>
    </property>
    <property name="shortcut">
     <string>X, E</string>
@@ -697,7 +700,7 @@
   </action>
   <action name="actionVxSaveConfigFile">
    <property name="text">
-    <string>Save Config File</string>
+    <string>&amp;Save Config File</string>
    </property>
    <property name="shortcut">
     <string>X, S</string>
@@ -727,7 +730,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Reset</string>
+    <string>&amp;Reset</string>
    </property>
    <property name="shortcut">
     <string>X, R</string>
@@ -738,7 +741,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Stop</string>
+    <string>Sto&amp;p</string>
    </property>
    <property name="shortcut">
     <string>X, X</string>
@@ -749,7 +752,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Soft Trigger</string>
+    <string>S&amp;oft Trigger</string>
    </property>
    <property name="shortcut">
     <string>X, Space</string>
@@ -757,7 +760,7 @@
   </action>
   <action name="actionVxInit">
    <property name="text">
-    <string>Init</string>
+    <string>&amp;Init</string>
    </property>
    <property name="shortcut">
     <string>X, I</string>
@@ -768,9 +771,7 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="../qtdaq.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>actionDRSEditConfigFile</sender>
@@ -1508,6 +1509,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSetOutputFileVx</sender>
+   <signal>triggered()</signal>
+   <receiver>QtDAQClass</receiver>
+   <slot>onSetOutputFileVxClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onDRSEditConfigFileClicked()</slot>
@@ -1558,5 +1575,6 @@
   <slot>onVxStopClicked()</slot>
   <slot>onVxSoftTriggerClicked()</slot>
   <slot>onVxInitClicked()</slot>
+  <slot>onSetOutputFileVxClicked()</slot>
  </slots>
 </ui>

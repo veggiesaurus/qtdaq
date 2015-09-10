@@ -6,6 +6,7 @@ VxAcquisitionThread::VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_ra
 	: QThread(parent)
 {
 	requiresPause = false;
+    outputFileCompressed = nullptr;
 
 	rawBuffers[0] = s_rawBuffer1;
 	rawBuffers[1] = s_rawBuffer2;
@@ -102,6 +103,16 @@ void VxAcquisitionThread::run()
 			{
 				digitizerMutex.lock();
 				auto retStop = CAEN_DGTZ_SWStopAcquisition(handle);
+
+                if (outputFileCompressed)
+                {
+                    gzflush(outputFileCompressed, Z_FINISH);
+                    gzclose(outputFileCompressed);
+                    outputFileCompressed=nullptr;
+                    qDebug()<<"Closing file "+filename;
+                }
+
+
 				digitizerStatus &= ~STATUS_RUNNING;
 				if (retStop)
 				{
@@ -123,6 +134,14 @@ void VxAcquisitionThread::run()
 		digitizerMutex.lock();
 		if (!(digitizerStatus & STATUS_RUNNING) && digitizerStatus & STATUS_READY)
 		{
+            auto retCalib = CAEN_DGTZ_Calibrate(handle);
+            if (retCalib)
+            {
+                qDebug()<<"Error calibrating digitizer";
+                CloseDigitizer();
+                digitizerStatus = STATUS_ERROR;
+                return;
+            }
 			auto retStart = CAEN_DGTZ_SWStartAcquisition(handle);
 			if (retStart)
 			{
@@ -200,8 +219,6 @@ void VxAcquisitionThread::run()
 			rawBuffers[currentBufferIndex][currentBufferPosition].loadFromInfoAndData(eventInfo, event16);
 			rawBuffers[currentBufferIndex][currentBufferPosition].processed = false;
 			rawBuffers[currentBufferIndex][currentBufferPosition].runIndex = runIndex;
-			currentBufferPosition++;
-
 
             if (outputFileCompressed)
             {
@@ -214,6 +231,11 @@ void VxAcquisitionThread::run()
                     return;
                 }
             }
+
+			currentBufferPosition++;
+
+
+
 
             //release and swap buffers when position overflows
             if (currentBufferPosition >= bufferLength)
@@ -300,12 +322,21 @@ void VxAcquisitionThread::stopAcquisition(bool forcedExit)
 
 bool VxAcquisitionThread::setFileOutput(QString s_filename)
 {
+    if (outputFileCompressed)
+    {
+        gzflush(outputFileCompressed, Z_FINISH);
+        gzclose(outputFileCompressed);
+        outputFileCompressed=nullptr;
+        qDebug()<<"Closing file "+filename;
+    }
+
     filename = s_filename;
     outputFileCompressed=gzopen(filename.toStdString().c_str(), "wb1f");
     if (!outputFileCompressed)
         return false;
     if (!WriteDataHeaderCompressed())
         return false;
+    qDebug()<<"Header written to file "+filename+" successfully";
 	return true;
 }
 

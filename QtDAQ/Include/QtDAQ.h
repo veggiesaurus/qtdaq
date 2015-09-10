@@ -74,6 +74,7 @@ public:
 	void onReadVxFileClicked();
 	void onReadStatisticsFileClicked();
 	void onReplayCurrentFileClicked();
+    void onSetOutputFileVxClicked();
 	//DRS acquisition
 	void onDRSInitClicked();
 	void onDRSStartClicked();

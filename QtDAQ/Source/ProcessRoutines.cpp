@@ -394,7 +394,7 @@ bool calculateIntegralsCorrected(float* inputData, int inputNumSamples, float in
 {
 
 	//check bounds
-	if (inputStartGate<0 || inputShortGateEnd<inputStartGate || inputShortGateEnd>inputLongGateEnd || inputLongGateEnd>=inputNumSamples)
+    if (isnan(inputBaseline) || isnan(inputStartGate) || isnan(inputShortGateEnd) || isnan(inputLongGateEnd) || inputStartGate<0 || inputShortGateEnd<inputStartGate || inputShortGateEnd>inputLongGateEnd || inputLongGateEnd>=inputNumSamples)
 		return false;
 
 	float shortIntegralUncorrected=0;
