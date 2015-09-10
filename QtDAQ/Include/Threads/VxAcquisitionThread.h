@@ -18,7 +18,7 @@ public:
 	VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	~VxAcquisitionThread();
 	CAENErrorCode initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int updateTime = 125);
-	bool setFileOutput(QString filename, bool useCompression = true);
+    bool setFileOutput(QString filename);
 	bool reInit(VxAcquisitionConfig* s_config);
 signals:
 	void newRawEvents(QVector<EventVx*>*);
@@ -27,12 +27,13 @@ signals:
 private:
 	void run();
 	void swapBuffers();
+    bool WriteDataHeaderCompressed();
+    bool AppendEventCompressed(EventVx* ev);
 	CAENErrorCode ResetDigitizer();
 	CAENErrorCode InitDigitizer();
 	CAENErrorCode ProgramDigitizer();
 	void CloseDigitizer(bool finalClose = false);
 	CAENErrorCode AllocateEventStorage();
-
 	CAEN_DGTZ_ErrorCode GetMoreBoardInfo();
 	CAEN_DGTZ_ErrorCode WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);
 
@@ -59,6 +60,7 @@ private:
 	DataHeader header;
 
 	QString filename;
+    gzFile outputFileCompressed;
 	int numEventsAcquired = 0;
 	bool isAcquiring;
 	bool requiresPause;

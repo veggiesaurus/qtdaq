@@ -87,8 +87,7 @@ void freeVxEvent(EventVx &ev)
 }
 
 DataHeader::DataHeader()
-{
-	int x = sizeof(DataHeader);
+{	
 	memset(this, 0, sizeof(DataHeader));
 	time(&dateTime);
 	sprintf(description, "Test output.");

@@ -6,9 +6,9 @@ VxProcessThread::VxProcessThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2
 	: QThread(parent)
 {
 	eventSize = 0;
-	file = NULL;
-	textStream = NULL;
-	dataStream = NULL;
+    file = NULL;
+    textStream = NULL;
+    dataStream = NULL;
 
 	sampleNextEvent = true;
 	outputCurrentChannel = false;
@@ -731,14 +731,13 @@ void VxProcessThread::compileV8()
     v8Mutex.lock();
 
     V8::InitializeICU();
-    //plat = platform::CreateDefaultPlatform();
-    //V8::InitializePlatform(plat);
     V8::Initialize();
 
     ArrayBufferAllocator allocator;
     Isolate::CreateParams create_params;
     create_params.array_buffer_allocator = &allocator;
     bool hasException = false;
+
     isolate = Isolate::New(create_params);
     {
         Isolate::Scope isolate_scope(isolate);

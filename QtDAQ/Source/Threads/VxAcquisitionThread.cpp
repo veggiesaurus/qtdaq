@@ -105,6 +105,7 @@ void VxAcquisitionThread::run()
 				digitizerStatus &= ~STATUS_RUNNING;
 				if (retStop)
 				{
+                    qDebug()<<"Error stopping acquisition";
 					CloseDigitizer();
 					digitizerStatus = STATUS_ERROR;
 					return;
@@ -125,6 +126,7 @@ void VxAcquisitionThread::run()
 			auto retStart = CAEN_DGTZ_SWStartAcquisition(handle);
 			if (retStart)
 			{
+                qDebug()<<"Error starting acquisition";
 				CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
 				return;
@@ -137,8 +139,9 @@ void VxAcquisitionThread::run()
 
 		/* Read data from the board */
 		auto ret = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &bufferSize);
-		if (ret) {
-
+        if (ret)
+        {
+            qDebug()<<"Error reading data";
 			CloseDigitizer();
 			digitizerStatus = STATUS_ERROR;
 			digitizerMutex.unlock();
@@ -148,7 +151,9 @@ void VxAcquisitionThread::run()
 		if (bufferSize != 0) 
 		{
 			ret = CAEN_DGTZ_GetNumEvents(handle, buffer, bufferSize, &numEvents);
-			if (ret) {
+            if (ret)
+            {
+                qDebug()<<"Error reading num events";
 				CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
 				digitizerMutex.unlock();
@@ -159,7 +164,9 @@ void VxAcquisitionThread::run()
 		{
 			uint32_t lstatus;
 			ret = CAEN_DGTZ_ReadRegister(handle, CAEN_DGTZ_ACQ_STATUS_ADD, &lstatus);
-			if (lstatus & (0x1 << 19)) {
+            if (lstatus & (0x1 << 19))
+            {
+                qDebug()<<"Register read error";
 				CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
 				digitizerMutex.unlock();
@@ -174,7 +181,8 @@ void VxAcquisitionThread::run()
 			ret = CAEN_DGTZ_GetEventInfo(handle, buffer, bufferSize, i, &eventInfo, &eventPtr);
 			if (ret) 
 			{
-				CloseDigitizer();
+                qDebug()<<"Event info error";
+                CloseDigitizer();
 				digitizerStatus = STATUS_ERROR;
 				digitizerMutex.unlock();
 				return;
@@ -183,18 +191,33 @@ void VxAcquisitionThread::run()
 			ret = CAEN_DGTZ_DecodeEvent(handle, eventPtr, (void**)&event16);
 			if (ret)
 			{
+                qDebug()<<"Event decode error";
 				ResetDigitizer();
 				break;
 			}
-			//release and swap buffers when position overflows
-			if (currentBufferPosition >= bufferLength)
-				swapBuffers();
 
 			//freeVxEvent(rawBuffers[currentBufferIndex][currentBufferPosition]);
 			rawBuffers[currentBufferIndex][currentBufferPosition].loadFromInfoAndData(eventInfo, event16);
 			rawBuffers[currentBufferIndex][currentBufferPosition].processed = false;
 			rawBuffers[currentBufferIndex][currentBufferPosition].runIndex = runIndex;
 			currentBufferPosition++;
+
+
+            if (outputFileCompressed)
+            {
+                if (!AppendEventCompressed(&rawBuffers[currentBufferIndex][currentBufferPosition]))
+                {
+                    CloseDigitizer();
+                    qDebug()<<"Error writing to file";
+                    digitizerStatus = STATUS_ERROR;
+                    digitizerMutex.unlock();
+                    return;
+                }
+            }
+
+            //release and swap buffers when position overflows
+            if (currentBufferPosition >= bufferLength)
+                swapBuffers();
 		}
 		digitizerMutex.unlock();
 	}
@@ -275,10 +298,39 @@ void VxAcquisitionThread::stopAcquisition(bool forcedExit)
 	digitizerMutex.unlock();
 }
 
-bool VxAcquisitionThread::setFileOutput(QString filename, bool useCompression)
+bool VxAcquisitionThread::setFileOutput(QString s_filename)
 {
+    filename = s_filename;
+    outputFileCompressed=gzopen(filename.toStdString().c_str(), "wb1f");
+    if (!outputFileCompressed)
+        return false;
+    if (!WriteDataHeaderCompressed())
+        return false;
 	return true;
 }
+
+
+bool VxAcquisitionThread::WriteDataHeaderCompressed()
+{
+    if (!gzwrite(outputFileCompressed, &header, sizeof(DataHeader)))
+        return false;
+    return true;
+}
+
+bool VxAcquisitionThread::AppendEventCompressed(EventVx* ev)
+{
+    if (!gzwrite(outputFileCompressed, &ev->info, sizeof(CAEN_DGTZ_EventInfo_t)))
+        return false;
+    if (!gzwrite(outputFileCompressed, ev->data.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE))
+        return false;
+    for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
+    {
+        if (ev->data.ChSize[i] && !gzwrite(outputFileCompressed, ev->data.DataChannel[i], sizeof(uint16_t) * ev->data.ChSize[i]))
+            return false;
+    }
+    return true;
+}
+
 
 CAENErrorCode VxAcquisitionThread::InitDigitizer()
 {

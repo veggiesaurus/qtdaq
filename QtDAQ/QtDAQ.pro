@@ -14,7 +14,7 @@ QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-deprecated-writable-strings -Wno-unk
 QMAKE_CXXFLAGS += -msse2 -msse4
 
 LIBS += -lqwt -lCAENDigitizer -lCAENComm -lfftw3f -lz -lusb-1.0
-LIBS += -lv8 -lrt -ldl -pthread
+LIBS += -Wl,--start-group /home/angus/v8/libs/libv8_base.a /home/angus/v8/libs/libv8_libbase.a /home/angus/v8/libs/libv8_nosnapshot.a /home/angus/v8/libs/libv8_libplatform.a -Wl,--end-group -lrt -ldl -pthread
 DEFINES += "HAVE_LIBUSB10"
 INCLUDEPATH += /home/angus/v8
 
