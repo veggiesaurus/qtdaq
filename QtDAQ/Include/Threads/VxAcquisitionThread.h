@@ -9,15 +9,13 @@
 #include "AcquisitionDefinitions.h"
 #include "VxAcquisitionConfig.h"
 
-#define BUFFER_SWAP_TIME 250
-
 class VxAcquisitionThread : public QThread
 {
 	Q_OBJECT
 public:
 	VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	~VxAcquisitionThread();
-	CAENErrorCode initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int updateTime = 125);
+    CAENErrorCode initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int s_updateTime = 125);
     bool setFileOutput(QString s_filename, bool s_packedOutput = false);
 	bool reInit(VxAcquisitionConfig* s_config);
 signals:
@@ -82,6 +80,7 @@ private:
 	int currentBufferIndex;
 	int currentBufferPosition;
 	QTime timeSinceLastBufferSwap;
+    int updateTime;
 
 	//run tracking
 	QMutex runIndexMutex;

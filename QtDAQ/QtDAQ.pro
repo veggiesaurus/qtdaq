@@ -16,6 +16,8 @@ QMAKE_CXXFLAGS += -msse2 -msse4
 LIBS += -lqwt -lCAENDigitizer -lCAENComm -lfftw3f -lz -lusb-1.0
 LIBS += -Wl,--start-group ${HOME}/v8/libs/libv8_base.a ${HOME}/v8/libs/libv8_libbase.a ${HOME}/v8/libs/libv8_nosnapshot.a ${HOME}/v8/libs/libv8_libplatform.a -Wl,--end-group -lrt -ldl -pthread
 DEFINES += "HAVE_LIBUSB10"
+#DEFINES += "DEBUG_LOCKS"
+
 INCLUDEPATH += ${HOME}/v8
 
 
