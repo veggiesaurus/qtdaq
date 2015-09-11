@@ -481,13 +481,12 @@ void QtDAQ::onReadDRSFileClicked()
 
 void QtDAQ::onReadVxFileClicked()
 {
-	QFileDialog fileDialog(this, "Set raw data input file", "", "Compressed data (*.dtz);;All files (*.*)");
-	fileDialog.restoreState(settings.value("mainWindow/loadRawStateVx").toByteArray());
-	QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
-	QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
-	fileDialog.setDirectory(prevFileDir);
-//	fileDialog.selectFile(prevFile);
-	fileDialog.setFileMode(QFileDialog::ExistingFile);
+    QFileDialog fileDialog(this, "Set raw data input file", "", "Compressed data (*.dtz);;Packed data (*.pcz);;All files (*.*)");
+    fileDialog.restoreState(settings.value("mainWindow/loadRawStateVx").toByteArray());
+    QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
+    QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
+    fileDialog.setDirectory(prevFileDir);
+    fileDialog.setFileMode(QFileDialog::ExistingFile);
 	if (fileDialog.exec())
 	{
 		QString newRawFilename = fileDialog.selectedFiles().first();
@@ -497,7 +496,7 @@ void QtDAQ::onReadVxFileClicked()
 		settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
 
 		rawFilename = newRawFilename;
-		bool compressedOutput = rawFilename.endsWith("dtz");
+        bool compressedOutput = rawFilename.endsWith("dtz") || rawFilename.endsWith("pcz");
 		clearAllPlots();
 		uiUpdateTimer.stop();
 		numUITimerTimeouts = 0;
@@ -512,6 +511,8 @@ void QtDAQ::onReadVxFileClicked()
 		dataMode = Vx_MODE;
 		ui.actionPauseFileReading->setChecked(false);
 	}
+    else
+        qDebug()<<"No file";
 
 }
 
@@ -638,7 +639,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 
 void QtDAQ::onSetOutputFileVxClicked()
 {
-    QFileDialog fileDialog(this, "Set raw data output file", "", "Compressed data (*.dtz);;All files (*.*)");
+    QFileDialog fileDialog(this, "Set raw data output file", "", "Compressed data (*.dtz);;Packed data (*.pcz);;All files (*.*)");
     fileDialog.restoreState(settings.value("mainWindow/saveRawStateVx").toByteArray());
     QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
     QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
@@ -651,8 +652,9 @@ void QtDAQ::onSetOutputFileVxClicked()
         QFileInfo fileInfo(newRawFilename);
         settings.setValue("mainWindow/prevVxRawDataDir", fileInfo.dir().absolutePath());
         settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
+        bool packedOutput = rawFilename.endsWith("pcz");
         if (vxAcquisitionThread)
-            vxAcquisitionThread->setFileOutput(newRawFilename);
+            vxAcquisitionThread->setFileOutput(newRawFilename, packedOutput);
     }
 }
 

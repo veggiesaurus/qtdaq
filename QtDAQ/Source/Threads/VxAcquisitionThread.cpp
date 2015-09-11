@@ -222,7 +222,12 @@ void VxAcquisitionThread::run()
 
             if (outputFileCompressed)
             {
-                if (!AppendEventCompressed(&rawBuffers[currentBufferIndex][currentBufferPosition]))
+                bool appendSuccess;
+                if (packedOutput)
+                    appendSuccess = AppendEventPacked(&rawBuffers[currentBufferIndex][currentBufferPosition]);
+                else
+                    appendSuccess = AppendEventCompressed(&rawBuffers[currentBufferIndex][currentBufferPosition]);
+                if (!appendSuccess)
                 {
                     CloseDigitizer();
                     qDebug()<<"Error writing to file";
@@ -320,8 +325,8 @@ void VxAcquisitionThread::stopAcquisition(bool forcedExit)
 	digitizerMutex.unlock();
 }
 
-bool VxAcquisitionThread::setFileOutput(QString s_filename)
-{
+bool VxAcquisitionThread::setFileOutput(QString s_filename, bool s_packedOutput)
+{    
     if (outputFileCompressed)
     {
         gzflush(outputFileCompressed, Z_FINISH);
@@ -331,12 +336,22 @@ bool VxAcquisitionThread::setFileOutput(QString s_filename)
     }
 
     filename = s_filename;
+    packedOutput = s_packedOutput;
     outputFileCompressed=gzopen(filename.toStdString().c_str(), "wb1f");
     if (!outputFileCompressed)
         return false;
-    if (!WriteDataHeaderCompressed())
-        return false;
-    qDebug()<<"Header written to file "+filename+" successfully";
+    if (packedOutput)
+    {
+        if (!WriteDataHeaderCompressed())
+            return false;
+        qDebug()<<"Header written to file "+filename+" successfully";
+    }
+    else
+    {
+        if (!WriteDataHeaderPacked())
+            return false;
+        qDebug()<<"Packed header written to file "+filename+" successfully";
+    }
 	return true;
 }
 
@@ -361,6 +376,53 @@ bool VxAcquisitionThread::AppendEventCompressed(EventVx* ev)
     }
     return true;
 }
+
+
+bool VxAcquisitionThread::WriteDataHeaderPacked()
+{
+    sprintf(header.magicNumber, "UCT001P");
+    if (!gzwrite(outputFileCompressed, &header, sizeof(DataHeader)))
+        return false;
+    return true;
+}
+
+bool VxAcquisitionThread::AppendEventPacked(EventVx* ev)
+{
+    if (!gzwrite(outputFileCompressed, &ev->info, sizeof(CAEN_DGTZ_EventInfo_t)))
+        return false;
+    if (!gzwrite(outputFileCompressed, ev->data.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE))
+        return false;
+    for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
+    {
+        if (!ev->data.ChSize[i])
+            continue;
+        if (ev->data.ChSize[i]-1 != packedDataLength)
+        {
+            SAFE_DELETE_ARRAY(packedData);
+            packedDataLength = ev->data.ChSize[i]-1;
+            packedData = new int8_t[packedDataLength];
+        }
+        packChannel(ev->data.DataChannel[i], ev->data.ChSize[i], packedData);
+        if (gzwrite(outputFileCompressed, &(ev->data.DataChannel[i][0]), sizeof(uint16_t)) && !gzwrite(outputFileCompressed, packedData, sizeof(u_int8_t) * packedDataLength))
+            return false;
+    }
+    return true;
+}
+
+bool VxAcquisitionThread::packChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* destData)
+{
+    for (auto i = 1; i<channelSize; i++)
+    {
+        if (chData[i]-chData[i-1]>MAXINT8)
+        {
+            qDebug()<<"Error packing channel data";
+            return false;
+        }
+        destData[i-1] = (int8_t)(chData[i]-chData[i-1]);
+    }
+    return true;
+}
+
 
 
 CAENErrorCode VxAcquisitionThread::InitDigitizer()

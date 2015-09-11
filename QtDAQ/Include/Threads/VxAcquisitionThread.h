@@ -18,7 +18,7 @@ public:
 	VxAcquisitionThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	~VxAcquisitionThread();
 	CAENErrorCode initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int updateTime = 125);
-    bool setFileOutput(QString s_filename);
+    bool setFileOutput(QString s_filename, bool s_packedOutput = false);
 	bool reInit(VxAcquisitionConfig* s_config);
 signals:
 	void newRawEvents(QVector<EventVx*>*);
@@ -27,8 +27,13 @@ signals:
 private:
 	void run();
 	void swapBuffers();
+
     bool WriteDataHeaderCompressed();
     bool AppendEventCompressed(EventVx* ev);
+    bool packChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* destData);
+    bool WriteDataHeaderPacked();
+    bool AppendEventPacked(EventVx* ev);
+
 	CAENErrorCode ResetDigitizer();
 	CAENErrorCode InitDigitizer();
 	CAENErrorCode ProgramDigitizer();
@@ -50,6 +55,8 @@ private:
 	uint32_t bufferSize;
 	uint32_t numEvents;
 	char* buffer = nullptr;
+    int8_t* packedData=nullptr;
+    int packedDataLength=-1;
 
 	CAEN_DGTZ_UINT16_EVENT_t* event16 = NULL;
 	char* eventPtr = nullptr;
@@ -61,6 +68,7 @@ private:
 
 	QString filename;
     gzFile outputFileCompressed;
+    bool packedOutput;
 	int numEventsAcquired = 0;
 	bool isAcquiring;
 	bool requiresPause;
@@ -74,8 +82,8 @@ private:
 	int currentBufferIndex;
 	int currentBufferPosition;
 	QTime timeSinceLastBufferSwap;
-	//run tracking
 
+	//run tracking
 	QMutex runIndexMutex;
 	std::atomic<int> runIndex;
 };

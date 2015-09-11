@@ -9,6 +9,7 @@
 #include "AnalysisConfig.h"
 #include <zlib.h>
 
+//#define DEBUG_PACKING
 
 class VxBinaryReaderThread : public QThread
 {
@@ -26,8 +27,14 @@ public:
 private:
     void run();
 	void swapBuffers();
-	qint64 getFileSize(QString filename);
- 
+    qint64 getFileSize(QString filename);
+    bool unpackChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* sourceData, u_int16_t firstVal);
+#ifdef DEBUG_PACKING
+    bool packChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* destData);
+    bool WriteDataHeaderPacked();
+    bool AppendEventPacked(EventVx* ev);
+    gzFile outputFileCompressed = nullptr;
+#endif
 public slots:
 	void stopReading(bool forceExit);
 	void rewindFile(int s_runIndex);
@@ -36,10 +43,13 @@ public slots:
 	
 private:
 	int eventIndex;
-	DataHeader header;
+	DataHeader header;    
 
-	gzFile inputFileCompressed;
+    gzFile inputFileCompressed = nullptr;
 	QString filename;
+    bool inputFilePacked;
+    int8_t* packedData=nullptr;
+    int packedDataLength=-1;
 	int numEventsInFile;
 	int numEventsRead;
 	QTimer updateTimer;

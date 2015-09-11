@@ -1,11 +1,11 @@
 #include <QFile>
+#include <QDebug>
 #include <time.h>
 #include "Threads/VxBinaryReaderThread.h"
 
 VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength, QObject *parent)
 	: QThread(parent)
-{
-	inputFileCompressed=NULL;
+{	
 	doRewindFile=false;
 	doExitReadLoop=false;
 	isReadingFile=false;
@@ -54,7 +54,16 @@ bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isC
 		inputFileCompressed=NULL;
 		return false;
 	}
-	
+#ifdef DEBUG_PACKING
+    if (filename.endsWith(".dtz"))
+    {
+        QString outputFilename = filename.replace(".dtz", ".pcz");
+        outputFileCompressed=gzopen(outputFilename.toStdString().c_str(), "wb1f");
+        WriteDataHeaderPacked();
+    }
+#endif
+    inputFilePacked = (strcmp(header.magicNumber, "UCT001P")==0);
+    qDebug()<<header.magicNumber;
 	numEventsRead=0;
 	updateTimer.stop();
 	updateTimer.disconnect();
@@ -127,7 +136,7 @@ void VxBinaryReaderThread::run()
 				inputFileCompressed=NULL;
 				break;
 				isReadingFile=true;
-			}			
+            }
 			numEventsRead=0;
 			doRewindFile=false;
 		}
@@ -242,19 +251,47 @@ void VxBinaryReaderThread::run()
 					ev.data.DataChannel[i]=new uint16_t[ev.data.ChSize[i]];
 				}
 
-				int s=gzread(inputFileCompressed, ev.data.DataChannel[i], sizeof(uint16_t) * ev.data.ChSize[i]);
-				if (s!=sizeof(uint16_t)*ev.data.ChSize[i])
+                bool readSuccess;
+                if (inputFilePacked)
+                {
+                    if (ev.data.ChSize[i]-1 != packedDataLength)
+                    {
+                        SAFE_DELETE_ARRAY(packedData);
+                        packedDataLength = ev.data.ChSize[i]-1;
+                        packedData = new int8_t[packedDataLength];
+                    }
+                    u_int16_t firstVal=0;
+                    readSuccess = gzread(inputFileCompressed, &firstVal, sizeof(u_int16_t))==sizeof(u_int16_t);
+                    readSuccess &= gzread(inputFileCompressed, packedData, sizeof(u_int8_t) * packedDataLength)==sizeof(u_int8_t) * packedDataLength;
+                    if (readSuccess)
+                        readSuccess&= unpackChannel(ev.data.DataChannel[i], ev.data.ChSize[i], packedData, firstVal);
+                }
+                else
+                    readSuccess = gzread(inputFileCompressed, ev.data.DataChannel[i], sizeof(uint16_t) * ev.data.ChSize[i])==sizeof(uint16_t)*ev.data.ChSize[i];
+
+                if (!readSuccess)
 				{
 					freeVxEvent(ev);
 					break;
 				}
 			}
-		}
-
+        }
+#ifdef DEBUG_PACKING
+        if (outputFileCompressed)
+            AppendEventPacked(&ev);
+#endif
 		ev.processed=false;
 		currentBufferPosition++;
 		numEventsRead++;		
-	}
+    }
+#ifdef DEBUG_PACKING
+    if (outputFileCompressed)
+    {
+        gzflush(outputFileCompressed, Z_FINISH);
+        gzclose(outputFileCompressed);
+        outputFileCompressed=nullptr;
+    }
+#endif
 	rawMutexes[currentBufferIndex]->unlock();
 	//swap and lock other buffer to prevent re-processing of data
 	currentBufferIndex=1-currentBufferIndex;
@@ -299,6 +336,64 @@ qint64 VxBinaryReaderThread::getFileSize(QString filename)
 	f.close();
 	return fileSize;
 }
+
+bool VxBinaryReaderThread::unpackChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* sourceData, u_int16_t firstVal)
+{
+    chData[0]=firstVal;
+    for (auto i = 0;i<channelSize-1;i++)
+        chData[i+1] = chData[i]+sourceData[i];
+    return true;
+}
+
+#ifdef DEBUG_PACKING
+
+bool VxBinaryReaderThread::WriteDataHeaderPacked()
+{
+    DataHeader newHeader = header;
+    sprintf(newHeader.magicNumber, "UCT001P");
+    if (!gzwrite(outputFileCompressed, &newHeader, sizeof(DataHeader)))
+        return false;
+    return true;
+}
+
+bool VxBinaryReaderThread::AppendEventPacked(EventVx* ev)
+{
+    if (!gzwrite(outputFileCompressed, &ev->info, sizeof(CAEN_DGTZ_EventInfo_t)))
+        return false;
+    if (!gzwrite(outputFileCompressed, ev->data.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE))
+        return false;
+    for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
+    {
+        if (!ev->data.ChSize[i])
+            continue;
+        if (ev->data.ChSize[i]-1 != packedDataLength)
+        {
+            SAFE_DELETE_ARRAY(packedData);
+            packedDataLength = ev->data.ChSize[i]-1;
+            packedData = new int8_t[packedDataLength];
+        }
+        packChannel(ev->data.DataChannel[i], ev->data.ChSize[i], packedData);
+        if (gzwrite(outputFileCompressed, &(ev->data.DataChannel[i][0]), sizeof(uint16_t)) && !gzwrite(outputFileCompressed, packedData, sizeof(u_int8_t) * packedDataLength))
+            return false;
+    }
+    return true;
+}
+
+bool VxBinaryReaderThread::packChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* destData)
+{
+    for (auto i = 1; i<channelSize; i++)
+    {
+        if (chData[i]-chData[i-1]>MAXINT8)
+        {
+            qDebug()<<"Error packing channel data";
+            return false;
+        }
+        destData[i-1] = (int8_t)(chData[i]-chData[i-1]);
+    }
+    return true;
+}
+
+#endif
 
 void VxBinaryReaderThread::swapBuffers()
 {
