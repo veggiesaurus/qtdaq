@@ -1,4 +1,5 @@
 #include <QFile>
+#include <QTime>
 #include <QDebug>
 #include <time.h>
 #include "Threads/VxBinaryReaderThread.h"
@@ -25,6 +26,7 @@ VxBinaryReaderThread::~VxBinaryReaderThread()
 
 bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedInput, int s_runIndex, int updateTime)
 {	
+    startTime.restart();
 	filename=s_filename;
 	runIndex = s_runIndex;
 
@@ -313,6 +315,7 @@ void VxBinaryReaderThread::setPaused(bool paused)
 
 void VxBinaryReaderThread::stopReading(bool forceExit)
 {
+    qDebug()<<numEventsRead<<" events read in "<<startTime.elapsed()<<" ms ("<<(1000.0*numEventsRead/qMax(startTime.elapsed(), 1))<<" events/s";
 	if (inputFileCompressed)
 	{
 		gzclose(inputFileCompressed);

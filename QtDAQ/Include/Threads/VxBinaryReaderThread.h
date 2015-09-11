@@ -2,6 +2,7 @@
 
 #include <QThread>
 #include <QTimer>
+#include <QTime>
 #include <QVector>
 #include <QMutex>
 #include <atomic>
@@ -53,6 +54,7 @@ private:
 	int numEventsInFile;
 	int numEventsRead;
 	QTimer updateTimer;
+    QTime startTime;
 	bool doRewindFile;
 	bool doExitReadLoop;
 	bool isReadingFile;
