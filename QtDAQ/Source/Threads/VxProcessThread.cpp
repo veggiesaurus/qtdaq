@@ -132,18 +132,30 @@ void VxProcessThread::run()
 	int eventCounter = 0;
 	int bufferCounter = 0;
 	while (true)
-	{
-		rawMutexes[currentBufferIndex]->lock();
+    {
+#ifdef DEBUG_LOCKS
+        qDebug()<<"Proc: Locking buffer "<<currentBufferIndex;
+#endif
+        rawMutexes[currentBufferIndex]->lock();
+#ifdef DEBUG_LOCKS
+        qDebug()<<"Proc: Locked buffer "<<currentBufferIndex;
+#endif
 		for (int i = 0; i < bufferLength; i++)
 		{
 			EventVx& ev = rawBuffers[currentBufferIndex][i];
 			if (ev.processed)
-				return;
+                break;
 			processEvent(&ev, sampleNextEvent);
 			ev.processed = true;
 			eventCounter++;
 		}
-		rawMutexes[currentBufferIndex]->unlock();
+#ifdef DEBUG_LOCKS
+        qDebug()<<"Proc: Releasing buffer "<<currentBufferIndex;
+#endif
+        rawMutexes[currentBufferIndex]->unlock();
+#ifdef DEBUG_LOCKS
+        qDebug()<<"Proc: Released buffer "<<currentBufferIndex;
+#endif
 		currentBufferIndex = 1 - currentBufferIndex;
 		bufferCounter++;
 	}

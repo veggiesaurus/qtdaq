@@ -398,11 +398,24 @@ bool VxBinaryReaderThread::packChannel(u_int16_t* chData, u_int16_t channelSize,
 
 #endif
 
+
 void VxBinaryReaderThread::swapBuffers()
 {
-	rawMutexes[currentBufferIndex]->unlock();
-	//swap
-	currentBufferIndex = 1 - currentBufferIndex;
-	rawMutexes[currentBufferIndex]->lock();
-	currentBufferPosition = 0;
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Releasing buffer "<<currentBufferIndex;
+#endif
+    rawMutexes[currentBufferIndex]->unlock();
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Released buffer "<<currentBufferIndex;
+#endif
+    //swap
+    currentBufferIndex = 1 - currentBufferIndex;
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Locking buffer "<<currentBufferIndex;
+#endif
+    rawMutexes[currentBufferIndex]->lock();
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Locked buffer "<<currentBufferIndex;
+#endif
+    currentBufferPosition = 0;
 }

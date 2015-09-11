@@ -138,11 +138,12 @@ void QtDAQ::onUiUpdateTimerTimeout()
 		}
 		else
 		{
-			int timeMillis = uiUpdateTimer.interval();
+			int timeMillis = uiUpdateTimer.interval();            
 			double rate = ((double)max(0, numEventsProcessed - prevNumEventsProcessed)) / timeMillis*1000.0;
 			prevNumEventsProcessed = numEventsProcessed;
-			numUITimerTimeouts++;			
-			statusBar()->showMessage(QString("Processing data: %1 events processed @ %2 events/s (%3%)").arg(QString::number(numEventsProcessed), QString::number(rate), QString::number(filePercent*100)));
+            numUITimerTimeouts++;
+            double averageRate = (double)(numEventsProcessed)/ (numUITimerTimeouts*timeMillis)*1000.0;
+            statusBar()->showMessage(QString("Processing data: %1 events processed @ %2 events/s [average: %3 events/s] (%4%)").arg(QString::number(numEventsProcessed), QString::number(rate), QString::number(averageRate), QString::number(filePercent*100)));
 		}
 	}
 

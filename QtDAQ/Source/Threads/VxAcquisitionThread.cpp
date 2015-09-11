@@ -20,7 +20,7 @@ VxAcquisitionThread::~VxAcquisitionThread()
 
 }
 
-CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int updateTime)
+CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* s_config, int s_runIndex, int s_updateTime)
 {	
 	if (digitizerStatus&STATUS_INITIALISED)
 	{
@@ -85,7 +85,8 @@ CAENErrorCode VxAcquisitionThread::initVxAcquisitionThread(VxAcquisitionConfig* 
 	rawMutexes[1]->unlock();
 	currentBufferIndex = 0;
 	currentBufferPosition = 0;
-	timeSinceLastBufferSwap.start();
+    updateTime = s_updateTime;
+    timeSinceLastBufferSwap.start();
 
 	return ERR_NONE;
 }
@@ -153,8 +154,6 @@ void VxAcquisitionThread::run()
 			timeSinceLastBufferSwap.restart();
 			digitizerStatus |= STATUS_RUNNING;
 		}
-		//if (timeSinceLastBufferSwap.elapsed() > BUFFER_SWAP_TIME)
-			//swapBuffers();
 
 		/* Read data from the board */
 		auto ret = CAEN_DGTZ_ReadData(handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &bufferSize);
@@ -243,7 +242,7 @@ void VxAcquisitionThread::run()
 
 
             //release and swap buffers when position overflows
-            if (currentBufferPosition >= bufferLength)
+            if (currentBufferPosition >= bufferLength || timeSinceLastBufferSwap.elapsed() > updateTime)
                 swapBuffers();
 		}
 		digitizerMutex.unlock();
@@ -253,11 +252,23 @@ void VxAcquisitionThread::run()
 
 void VxAcquisitionThread::swapBuffers()
 {
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Releasing buffer "<<currentBufferIndex;
+#endif
 	rawMutexes[currentBufferIndex]->unlock();
-	//swap
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Released buffer "<<currentBufferIndex;
+#endif
+    //swap
 	currentBufferIndex = 1 - currentBufferIndex;
-	rawMutexes[currentBufferIndex]->lock();
-	currentBufferPosition = 0;
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Locking buffer "<<currentBufferIndex;
+#endif
+    rawMutexes[currentBufferIndex]->lock();
+#ifdef DEBUG_LOCKS
+    qDebug()<<"Acq: Locked buffer "<<currentBufferIndex;
+#endif
+    currentBufferPosition = 0;
 	timeSinceLastBufferSwap.restart();
 }
 
