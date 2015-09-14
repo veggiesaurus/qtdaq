@@ -13,11 +13,15 @@ CONFIG += qwt
 QMAKE_CXXFLAGS += -Wno-unused-variable -Wno-deprecated-writable-strings -Wno-unknown-pragmas
 QMAKE_CXXFLAGS += -msse2 -msse4
 
-LIBS += -lqwt -lCAENDigitizer -lCAENComm -lfftw3f -lz -lusb-1.0
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
+
+LIBS += -lqwt -lCAENDigitizer -lCAENComm -lfftw3f -lz -lusb-1.0 -llzo2
 LIBS += -Wl,--start-group ${HOME}/v8/libs/libv8_base.a ${HOME}/v8/libs/libv8_libbase.a ${HOME}/v8/libs/libv8_nosnapshot.a ${HOME}/v8/libs/libv8_libplatform.a -Wl,--end-group -lrt -ldl -pthread
 DEFINES += "HAVE_LIBUSB10"
 #DEFINES += "DEBUG_LOCKS"
-
+#DEFINES += "DEBUG_PACKING"
+#DEFINES += "DEBUG_LZO"
 INCLUDEPATH += ${HOME}/v8
 
 

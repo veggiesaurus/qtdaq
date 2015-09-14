@@ -482,7 +482,7 @@ void QtDAQ::onReadDRSFileClicked()
 
 void QtDAQ::onReadVxFileClicked()
 {
-    QFileDialog fileDialog(this, "Set raw data input file", "", "Compressed data (*.dtz);;Packed data (*.pcz);;All files (*.*)");
+    QFileDialog fileDialog(this, "Set raw data input file", "", "Compressed data (*.dtz);;Packed data (*.pcz);;LZO Compressed data (*.dlz);;All files (*.*)");
     fileDialog.restoreState(settings.value("mainWindow/loadRawStateVx").toByteArray());
     QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
     QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
@@ -497,14 +497,14 @@ void QtDAQ::onReadVxFileClicked()
 		settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
 
 		rawFilename = newRawFilename;
-        bool compressedOutput = rawFilename.endsWith("dtz") || rawFilename.endsWith("pcz");
+        bool isCompressedHeader = rawFilename.endsWith("dtz") || rawFilename.endsWith("pcz");
 		clearAllPlots();
 		uiUpdateTimer.stop();
 		numUITimerTimeouts = 0;
 		numEventsProcessed = 0;
 		prevNumEventsProcessed = 0;
 
-		readVxFile(rawFilename, compressedOutput);
+        readVxFile(rawFilename, isCompressedHeader);
 				
 		finishedReading = false;
 		uiUpdateTimer.start();
@@ -517,7 +517,7 @@ void QtDAQ::onReadVxFileClicked()
 
 }
 
-void QtDAQ::readVxFile(QString filename, bool compressedInput)
+void QtDAQ::readVxFile(QString filename, bool isCompressedHeader)
 {
 	if (rawBuffer1Mutex && !finishedReading)
 	{
@@ -583,7 +583,7 @@ void QtDAQ::readVxFile(QString filename, bool compressedInput)
 	connect(vxReaderThread, SIGNAL(filePercentUpdate(float)), this, SLOT(onFilePercentUpdated(float)));
 
 	runIndex++;
-	vxReaderThread->initVxBinaryReaderThread(rawFilename, compressedInput, runIndex);
+    vxReaderThread->initVxBinaryReaderThread(rawFilename, isCompressedHeader, runIndex);
 	vxReaderThread->start();
 	vxProcessThread->start();
 
@@ -594,7 +594,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 	clearAllPlots();
 	if (!rawFilename.isEmpty())
 	{
-		bool compressedOutput = rawFilename.endsWith("dtz");
+        bool isCompressedHeader = rawFilename.endsWith("dtz") || rawFilename.endsWith("pcz");
 		
 		ui.actionPauseFileReading->setChecked(false);
 		if (dataMode == DRS_MODE)
@@ -610,7 +610,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 			connect(drsReaderThread, SIGNAL(eventReadingFinished()), this, SLOT(onEventReadingFinished()));
 
 			runIndex++;
-			drsReaderThread->initDRSBinaryReaderThread(rawFilename, compressedOutput, runIndex, analysisConfig);
+            drsReaderThread->initDRSBinaryReaderThread(rawFilename, isCompressedHeader, runIndex, analysisConfig);
 			drsReaderThread->start();
 		}
 		else if (dataMode == Vx_MODE)
@@ -624,7 +624,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 			}
 			else
 			{
-				readVxFile(rawFilename, compressedOutput);
+                readVxFile(rawFilename, isCompressedHeader);
 			}
 		}
 		ui.actionPauseFileReading->setChecked(false);
@@ -640,7 +640,7 @@ void QtDAQ::onReplayCurrentFileClicked()
 
 void QtDAQ::onSetOutputFileVxClicked()
 {
-    QFileDialog fileDialog(this, "Set raw data output file", "", "Compressed data (*.dtz);;Packed data (*.pcz);;All files (*.*)");
+    QFileDialog fileDialog(this, "Set raw data output file", "", "Compressed data (*.dtz);;Packed data (*.pcz);;LZO Compressed data (*.dlz);;All files (*.*)");
     fileDialog.restoreState(settings.value("mainWindow/saveRawStateVx").toByteArray());
     QString prevFile = settings.value("mainWindow/prevVxRawDataFile").toString();
     QString prevFileDir = settings.value("mainWindow/prevVxRawDataDir").toString();
@@ -653,9 +653,10 @@ void QtDAQ::onSetOutputFileVxClicked()
         QFileInfo fileInfo(newRawFilename);
         settings.setValue("mainWindow/prevVxRawDataDir", fileInfo.dir().absolutePath());
         settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
-        bool packedOutput = rawFilename.endsWith("pcz");
+
+        FileFormat fileFormat = rawFilename.endsWith("dtz")?GZIP_COMPRESSED:(rawFilename.endsWith("pcz")?GZIP_COMPRESSED_PACKED:LZO_COMPRESSED);
         if (vxAcquisitionThread)
-            vxAcquisitionThread->setFileOutput(newRawFilename, packedOutput);
+            vxAcquisitionThread->setFileOutput(newRawFilename, fileFormat);
     }
 }
 
@@ -756,7 +757,7 @@ void QtDAQ::onEditAnalysisConfigClicked()
 	if (vxProcessThread)
 		vxProcessThread->onAnalysisConfigChanged();
 	settings.setValue("analysis/previousSettings", QVariant::fromValue(*analysisConfig));
-	dialog->close();	
+    dialog->close();
 	SAFE_DELETE(dialog);
 }
 

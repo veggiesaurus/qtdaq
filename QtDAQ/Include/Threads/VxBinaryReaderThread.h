@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QTimer>
 #include <QTime>
+#include <QFile>
 #include <QVector>
 #include <QMutex>
 #include <atomic>
@@ -10,15 +11,13 @@
 #include "AnalysisConfig.h"
 #include <zlib.h>
 
-//#define DEBUG_PACKING
-
 class VxBinaryReaderThread : public QThread
-{
+{    
 	 Q_OBJECT
 public:
 	VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength = 1024, QObject *parent = 0);
 	 ~VxBinaryReaderThread();
-	 bool initVxBinaryReaderThread(QString filename, bool isCompressedInput, int s_runIndex, int updateTime = 250);
+     bool initVxBinaryReaderThread(QString filename, bool isCompressedHeader, int s_runIndex, int updateTime = 250);
 	bool isReading();
  signals:
 	 void newRawEvents(QVector<EventVx*>*);
@@ -36,6 +35,14 @@ private:
     bool AppendEventPacked(EventVx* ev);
     gzFile outputFileCompressed = nullptr;
 #endif
+
+#ifdef DEBUG_LZO
+    bool AppendEventLZO(EventVx* ev);
+    bool WriteDataHeaderLZO();
+
+    QFile* lzoFile=nullptr;
+#endif
+
 public slots:
 	void stopReading(bool forceExit);
 	void rewindFile(int s_runIndex);
@@ -44,11 +51,16 @@ public slots:
 	
 private:
 	int eventIndex;
+    FileFormat fileFormat;
 	DataHeader header;    
-
     gzFile inputFileCompressed = nullptr;
+    QFile* inputFileUncompressed = nullptr;
+    uchar* uncompressedBuffer=nullptr;
+    uchar* lzoBuffer=nullptr;
+    uchar* lzoWorkMem=nullptr;
+    int lzoBufferSize=-1;
+    int uncompressedBufferSize=-1;
 	QString filename;
-    bool inputFilePacked;
     int8_t* packedData=nullptr;
     int packedDataLength=-1;
 	int numEventsInFile;

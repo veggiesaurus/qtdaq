@@ -207,17 +207,17 @@ bool findMinMaxValue(float* inputData, int inputNumSamples, int inputStartIndex,
 	int positionOfMin=inputStartIndex;
 	int positionOfMax=inputStartIndex;
 	for (int i=inputStartIndex+1;i<inputEndIndex;i++)
-	{
-		if (inputData[i]<minVal)
-		{
-			minVal=inputData[i];
-			positionOfMin=i;
-		}
-		else if (inputData[i]>maxVal)
-		{
-			maxVal=inputData[i];
-			positionOfMax=i;
-		}
+    {
+        if (inputData[i]<minVal)
+        {
+            minVal=inputData[i];
+            positionOfMin=i;
+        }
+        else if (inputData[i]>maxVal)
+        {
+            maxVal=inputData[i];
+            positionOfMax=i;
+        }
 	}
 	outputMinValue=minVal;
 	outputPositionOfMin=positionOfMin;

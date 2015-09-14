@@ -1,7 +1,7 @@
-#include <QFile>
 #include <QTime>
 #include <QDebug>
 #include <time.h>
+#include <lzo/lzo1x.h>
 #include "Threads/VxBinaryReaderThread.h"
 
 VxBinaryReaderThread::VxBinaryReaderThread(QMutex* s_rawBuffer1Mutex, QMutex* s_rawBuffer2Mutex, EventVx* s_rawBuffer1, EventVx* s_rawBuffer2, int s_bufferLength, QObject *parent)
@@ -24,38 +24,58 @@ VxBinaryReaderThread::~VxBinaryReaderThread()
 
 }
 
-bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedInput, int s_runIndex, int updateTime)
+bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isCompressedHeader, int s_runIndex, int updateTime)
 {	
     startTime.restart();
 	filename=s_filename;
-	runIndex = s_runIndex;
+	runIndex = s_runIndex; 
 
-	if (isReadingFile)
-	{
-		gzclose(inputFileCompressed);
-		inputFileCompressed=NULL;
+    if (inputFileCompressed)
+    {
+        gzclose(inputFileCompressed);
+        SAFE_DELETE(inputFileCompressed);
+    }
+    if (inputFileUncompressed)
+    {
+        inputFileUncompressed->close();
+        SAFE_DELETE(inputFileUncompressed);
+    }
 
-		doExitReadLoop=true;
-	}
+	if (isReadingFile)	        
+        doExitReadLoop=true;
 
-	if (inputFileCompressed)
-		gzclose(inputFileCompressed);
+    if (isCompressedHeader)
+        fileFormat = GZIP_COMPRESSED;
+    else
+        fileFormat = LZO_COMPRESSED;
+
 	fileLength = getFileSize(filename);
-	inputFileCompressed = gzopen(filename.toLatin1(), "rb");
+
 	filePercent = 0;
 
-	if (!inputFileCompressed)
-	{
-		inputFileCompressed=NULL;
-		return false;
-	}
-	if (gzread(inputFileCompressed, &header, sizeof(DataHeader))!=sizeof(DataHeader))
-	{
-		//problem with the header file!
-		gzclose(inputFileCompressed);
-		inputFileCompressed=NULL;
-		return false;
-	}
+    if (fileFormat == GZIP_COMPRESSED || fileFormat == GZIP_COMPRESSED_PACKED)
+    {
+        inputFileCompressed = gzopen(filename.toLatin1(), "rb");
+        if (gzread(inputFileCompressed, &header, sizeof(DataHeader))!=sizeof(DataHeader))
+        {
+            //problem with the header file!
+            gzclose(inputFileCompressed);
+            SAFE_DELETE(inputFileUncompressed);
+            return false;
+        }
+    }
+    else
+    {
+        inputFileUncompressed=new QFile(filename);
+        inputFileUncompressed->open(QFile::ReadOnly);
+        if (inputFileUncompressed->read((char*)&header, (qint64)sizeof(DataHeader))!=sizeof(DataHeader))
+        {
+            //problem with the header file!
+            inputFileUncompressed->close();
+            SAFE_DELETE(inputFileUncompressed);
+            return false;
+        }
+    }
 #ifdef DEBUG_PACKING
     if (filename.endsWith(".dtz"))
     {
@@ -64,7 +84,17 @@ bool VxBinaryReaderThread::initVxBinaryReaderThread(QString s_filename, bool isC
         WriteDataHeaderPacked();
     }
 #endif
-    inputFilePacked = (strcmp(header.magicNumber, "UCT001P")==0);
+#ifdef DEBUG_LZO
+    if (filename.endsWith(".dtz"))
+    {
+        QString outputFilename = filename.replace(".dtz", ".dlz");
+        lzoFile = new QFile(outputFilename);
+        lzoFile->open(QFile::WriteOnly);
+        WriteDataHeaderLZO();
+    }
+#endif
+    if (inputFileCompressed)
+        fileFormat = (strcmp(header.magicNumber, "UCT001P")==0)?GZIP_COMPRESSED_PACKED:GZIP_COMPRESSED;
     qDebug()<<header.magicNumber;
 	numEventsRead=0;
 	updateTimer.stop();
@@ -115,7 +145,7 @@ void VxBinaryReaderThread::run()
 	currentBufferPosition=0;
 	int eventCounter=0;
 
-	while (inputFileCompressed && !gzeof(inputFileCompressed) && !doExitReadLoop)
+    while (((inputFileCompressed && !gzeof(inputFileCompressed)) || (inputFileUncompressed && !inputFileUncompressed->atEnd())) && !doExitReadLoop)
 	{
 		pauseMutex.lock();
 		if (requiresPause)
@@ -130,15 +160,31 @@ void VxBinaryReaderThread::run()
 		
 		if (doRewindFile)
 		{
-			gzrewind(inputFileCompressed);	
-			if (gzread(inputFileCompressed, &header, sizeof(DataHeader))!=sizeof(DataHeader))
-			{
-				//problem with the header file!
-				gzclose(inputFileCompressed);
-				inputFileCompressed=NULL;
-				break;
-				isReadingFile=true;
+            if (fileFormat == GZIP_COMPRESSED || fileFormat == GZIP_COMPRESSED_PACKED)
+            {
+                gzrewind(inputFileCompressed);
+                if (gzread(inputFileCompressed, &header, sizeof(DataHeader))!=sizeof(DataHeader))
+                {
+                    //problem with the header file!
+                    gzclose(inputFileCompressed);
+                    SAFE_DELETE(inputFileUncompressed);
+                    break;
+                    isReadingFile=true;
+                }
             }
+            else
+            {
+                inputFileUncompressed->reset();
+                if (inputFileUncompressed->read((char*)&header, (qint64)sizeof(DataHeader))!=sizeof(DataHeader))
+                {
+                    //problem with the header file!
+                    inputFileUncompressed->close();
+                    SAFE_DELETE(inputFileUncompressed);
+                    break;
+                    isReadingFile=true;
+                }
+            }
+
 			numEventsRead=0;
 			doRewindFile=false;
 		}
@@ -148,7 +194,11 @@ void VxBinaryReaderThread::run()
 		if (currentBufferPosition >= bufferLength)
 			swapBuffers();
 
-		qint64 byteCount = gzoffset64(inputFileCompressed);
+        qint64 byteCount;
+        if (inputFileCompressed)
+            byteCount = gzoffset64(inputFileCompressed);
+        else
+            byteCount = inputFileUncompressed->pos();
 		//overflow!
 		if (byteCount < 0)
 			byteCount += 2147483648;
@@ -158,103 +208,134 @@ void VxBinaryReaderThread::run()
 		uint32_t prevEventChSize[MAX_UINT16_CHANNEL_SIZE];
 		uint32_t prevEventChSizeFloat[MAX_UINT16_CHANNEL_SIZE];
 		memcpy(prevEventChSize, ev.data.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE);		
-		memcpy(prevEventChSizeFloat, ev.fData.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE);		
-		//ev.processed=false;		
-		if (gzread(inputFileCompressed, &ev.info, sizeof(CAEN_DGTZ_EventInfo_t))!=sizeof(CAEN_DGTZ_EventInfo_t))
-		{
-			freeVxEvent(ev);
-			break;
-		}
-		
-		ev.runIndex = runIndex.load();
-		//vx1742: BoardId of 2
-		if (ev.info.BoardId==2)
-		{
-			vx1742Mode=true;
-			//vx1742 in 1 GSPS mode by default
-			header.MSPS=1000;
+        memcpy(prevEventChSizeFloat, ev.fData.ChSize, sizeof(uint32_t)*MAX_UINT16_CHANNEL_SIZE);
 
-			uint8_t GrPresent[MAX_X742_GROUP_SIZE];
-			uint32_t ChSize[MAX_X742_CHANNEL_SIZE];
-			int adjustedChNum=0;
-			//read which groups are present
-			if (gzread(inputFileCompressed, GrPresent, sizeof(uint8_t) * MAX_X742_GROUP_SIZE)!= sizeof(uint8_t) * MAX_X742_GROUP_SIZE)
-			{
-				freeVxEvent(ev);
-				break;
-			}
-			for (int gr=0;gr<MAX_X742_GROUP_SIZE;gr++)
-			{
-				if (GrPresent[gr])
-				{
-					//if there is a group present, read the channel sizes out
-					if (gzread(inputFileCompressed, ChSize, sizeof(uint32_t) * MAX_X742_CHANNEL_SIZE)!= sizeof(uint32_t) * MAX_X742_CHANNEL_SIZE)
-					{
-						freeVxEvent(ev);
-						break;
-					}
+        if (inputFileUncompressed)
+        {
+            lzo_uint compressedSize;
+            uint32_t uncompressedSize;
+            inputFileUncompressed->read((char*)&compressedSize, (qint64)(sizeof(lzo_uint)));
+            inputFileUncompressed->read((char*)&uncompressedSize, (qint64)(sizeof(uint32_t)));
+            if ((int)compressedSize>lzoBufferSize)
+            {
+                SAFE_DELETE_ARRAY(lzoBuffer);
+                lzoBuffer = new uchar[compressedSize];
+                lzoBufferSize = compressedSize;
+            }
+            if ((int)uncompressedSize>uncompressedBufferSize)
+            {
+                SAFE_DELETE_ARRAY(uncompressedBuffer);
+                uncompressedBuffer = new uchar[uncompressedSize];
+                uncompressedBufferSize=uncompressedSize;
+            }
+            if (!lzoWorkMem)
+                lzoWorkMem=new uchar[LZO1X_1_MEM_COMPRESS];
 
-					//run through each channel, if channel is present, read data
-					for (int ch=0;ch<MAX_X742_CHANNEL_SIZE;ch++)
-					{
-						if (ChSize[ch])
-						{							
-							int i=gr*MAX_X742_CHANNEL_SIZE+ch;
-							ev.fData.ChSize[i]=ChSize[ch];
-							//clear and re-init array if size change is required
-							if (ev.fData.ChSize[i]!=prevEventChSizeFloat[i])
-							{
-								SAFE_DELETE_ARRAY(ev.fData.DataChannel[i]);
-								ev.fData.DataChannel[i]=new float[ev.fData.ChSize[i]];
-							}
-							int s=gzread(inputFileCompressed, ev.fData.DataChannel[i], sizeof(float) * ev.fData.ChSize[i]);
-							if (s!=sizeof(float)*ev.fData.ChSize[i])
-							{
-								freeVxEvent(ev);
-								break;
-							}
-						}
-					}
+            if (inputFileUncompressed->read((char*)lzoBuffer, compressedSize)!=compressedSize)
+            {
+                freeVxEvent(ev);
+                break;
+            }
+            lzo_uint decompressedSize;
+            lzo1x_decompress(lzoBuffer,lzoBufferSize,uncompressedBuffer,&decompressedSize,lzoWorkMem);
+            if (decompressedSize!=uncompressedSize)
+            {
+                freeVxEvent(ev);
+                break;
+            }
+            ev.runIndex = runIndex.load();
+            vx1742Mode=false;
+            header.MSPS=4000;
 
-				}
-			}
-		}
-		else
-		{
-			vx1742Mode=false;
-			header.MSPS=4000;
+            /*uint32_t uPos=0;
+            memcpy(&(uncompressedBuffer[uPos]), &ev->info, sizeof(CAEN_DGTZ_EventInfo_t));
+            uPos+=sizeof(CAEN_DGTZ_EventInfo_t);
+            memcpy(&(uncompressedBuffer[uPos]), ev->data.ChSize, sizeof(uint32_t)*numCh);
+            uPos+=(sizeof(uint32_t)*numCh);
 
-			if (gzread(inputFileCompressed, &ev.data.ChSize, sizeof(uint32_t) * MAX_UINT16_CHANNEL_SIZE)!= sizeof(uint32_t) * MAX_UINT16_CHANNEL_SIZE)
-			{
-				freeVxEvent(ev);
-				break;
-			}
-			//error handling: bad event
-			if (ev.info.BoardId>100 || ev.info.EventSize>200000)
-			{
-				freeVxEvent(ev);
-				break;
-			}
-			for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
-			{
-				if (!ev.data.ChSize[i])
-					continue;
-				//error handling: bad event
-				if (ev.data.ChSize[0]>75000)
-				{
-					freeVxEvent(ev);
-					break;
-				}
+            for (int i=0;i<numCh;i++)
+            {
+                if (ev->data.ChSize[i])
+                {
+                    memcpy(&(uncompressedBuffer[uPos]), ev->data.DataChannel[i], sizeof(uint16_t) * ev->data.ChSize[i]);
+                    uPos+=sizeof(uint16_t) * ev->data.ChSize[i];
+                }
+            }*/
 
-				//clear and re-init array if size change is required
-				if (ev.data.ChSize[i]!=prevEventChSize[i])
-				{
-					SAFE_DELETE_ARRAY(ev.data.DataChannel[i]);
-					ev.data.DataChannel[i]=new uint16_t[ev.data.ChSize[i]];
-				}
+            uint32_t uPos=0;
+            int numCh=2;
+            memcpy(&ev.info, &(uncompressedBuffer[uPos]), sizeof(CAEN_DGTZ_EventInfo_t));
+            uPos+=sizeof(CAEN_DGTZ_EventInfo_t);
+            memcpy(ev.data.ChSize, &(uncompressedBuffer[uPos]), sizeof(uint32_t)*numCh);
+            uPos+=(sizeof(uint32_t)*numCh);
+            for (int i=0;i<numCh;i++)
+            {
+                if (ev.data.ChSize[i])
+                {
+                    if (!ev.data.ChSize[i])
+                        continue;
+                    //error handling: bad event
+                    if (ev.data.ChSize[0]>75000)
+                    {
+                        freeVxEvent(ev);
+                        break;
+                    }
+
+                    //clear and re-init array if size change is required
+                    if (ev.data.ChSize[i]!=prevEventChSize[i])
+                    {
+                        SAFE_DELETE_ARRAY(ev.data.DataChannel[i]);
+                        ev.data.DataChannel[i]=new uint16_t[ev.data.ChSize[i]];
+                    }
+
+                    memcpy(ev.data.DataChannel[i], &(uncompressedBuffer[uPos]), sizeof(uint16_t) * ev.data.ChSize[i]);
+                    uPos+=sizeof(uint16_t) * ev.data.ChSize[i];
+                }
+            }           
+        }
+        else
+        {
+            if (gzread(inputFileCompressed, &ev.info, sizeof(CAEN_DGTZ_EventInfo_t))!=sizeof(CAEN_DGTZ_EventInfo_t))
+            {
+                freeVxEvent(ev);
+                break;
+            }
+
+            ev.runIndex = runIndex.load();
+            vx1742Mode=false;
+            header.MSPS=4000;
+
+            if (gzread(inputFileCompressed, &ev.data.ChSize, sizeof(uint32_t) * MAX_UINT16_CHANNEL_SIZE)!= sizeof(uint32_t) * MAX_UINT16_CHANNEL_SIZE)
+            {
+                freeVxEvent(ev);
+                break;
+            }
+            //error handling: bad event
+            if (ev.info.BoardId>100 || ev.info.EventSize>200000)
+            {
+                freeVxEvent(ev);
+                break;
+            }
+            for (int i=0;i<MAX_UINT16_CHANNEL_SIZE;i++)
+            {
+                if (!ev.data.ChSize[i])
+                    continue;
+                //error handling: bad event
+                if (ev.data.ChSize[0]>75000)
+                {
+                    freeVxEvent(ev);
+                    break;
+                }
+
+                //clear and re-init array if size change is required
+                if (ev.data.ChSize[i]!=prevEventChSize[i])
+                {
+                    SAFE_DELETE_ARRAY(ev.data.DataChannel[i]);
+                    ev.data.DataChannel[i]=new uint16_t[ev.data.ChSize[i]];
+                }
 
                 bool readSuccess;
-                if (inputFilePacked)
+                if (fileFormat == GZIP_COMPRESSED_PACKED)
                 {
                     if (ev.data.ChSize[i]-1 != packedDataLength)
                     {
@@ -272,15 +353,20 @@ void VxBinaryReaderThread::run()
                     readSuccess = gzread(inputFileCompressed, ev.data.DataChannel[i], sizeof(uint16_t) * ev.data.ChSize[i])==sizeof(uint16_t)*ev.data.ChSize[i];
 
                 if (!readSuccess)
-				{
-					freeVxEvent(ev);
-					break;
-				}
-			}
+                {
+                    freeVxEvent(ev);
+                    break;
+                }
+            }
         }
+
 #ifdef DEBUG_PACKING
         if (outputFileCompressed)
             AppendEventPacked(&ev);
+#endif
+#ifdef DEBUG_LZO
+        if (lzoFile)
+            AppendEventLZO(&ev);
 #endif
 		ev.processed=false;
 		currentBufferPosition++;
@@ -292,6 +378,13 @@ void VxBinaryReaderThread::run()
         gzflush(outputFileCompressed, Z_FINISH);
         gzclose(outputFileCompressed);
         outputFileCompressed=nullptr;
+    }
+#endif
+#ifdef DEBUG_LZO
+    if (lzoFile)
+    {
+        lzoFile->close();
+        lzoFile=nullptr;
     }
 #endif
 	rawMutexes[currentBufferIndex]->unlock();
@@ -419,3 +512,61 @@ void VxBinaryReaderThread::swapBuffers()
 #endif
     currentBufferPosition = 0;
 }
+
+#ifdef DEBUG_LZO
+
+bool VxBinaryReaderThread::WriteDataHeaderLZO()
+{
+    if (lzoFile)
+    {
+        DataHeader newHeader = header;
+        sprintf(newHeader.magicNumber, "UCT001L");
+        lzoFile->write((const char*)&newHeader, (qint64)sizeof(DataHeader));
+        return true;
+    }
+    else
+        return false;
+}
+
+bool VxBinaryReaderThread::AppendEventLZO(EventVx* ev)
+{
+    //hack for two channels
+    int numCh=2;
+    int newUncompressedSize=sizeof(CAEN_DGTZ_EventInfo_t)+sizeof(uint32_t)*numCh+numCh*(qMax(ev->data.ChSize[0], ev->data.ChSize[1])*sizeof(uint16_t));
+    int newLzoSize=(newUncompressedSize + newUncompressedSize / 16 + 64 + 3);
+    if (newUncompressedSize!=uncompressedBufferSize)
+    {
+        SAFE_DELETE_ARRAY(uncompressedBuffer);
+        uncompressedBuffer=new uchar[newUncompressedSize];
+        uncompressedBufferSize=newUncompressedSize;
+    }
+    if (newLzoSize!=lzoBufferSize)
+    {
+        SAFE_DELETE_ARRAY(lzoBuffer);
+        lzoBuffer=new uchar[newLzoSize];
+        lzoBufferSize=newLzoSize;
+    }
+    if (!lzoWorkMem)
+        lzoWorkMem=new uchar[LZO1X_1_MEM_COMPRESS];
+    uint32_t uPos=0;
+    memcpy(&(uncompressedBuffer[uPos]), &ev->info, sizeof(CAEN_DGTZ_EventInfo_t));
+    uPos+=sizeof(CAEN_DGTZ_EventInfo_t);
+    memcpy(&(uncompressedBuffer[uPos]), ev->data.ChSize, sizeof(uint32_t)*numCh);
+    uPos+=(sizeof(uint32_t)*numCh);
+
+    for (int i=0;i<numCh;i++)
+    {
+        if (ev->data.ChSize[i])
+        {
+            memcpy(&(uncompressedBuffer[uPos]), ev->data.DataChannel[i], sizeof(uint16_t) * ev->data.ChSize[i]);
+            uPos+=sizeof(uint16_t) * ev->data.ChSize[i];
+        }
+    }
+    lzo_uint compressedSize;
+    lzo1x_1_compress(uncompressedBuffer, uPos, lzoBuffer, &compressedSize, lzoWorkMem);
+    lzoFile->write((const char*)&compressedSize, (qint64)(sizeof(lzo_uint)));
+    lzoFile->write((const char*)&uPos, (qint64)(sizeof(uint32_t)));
+    lzoFile->write((const char*)lzoBuffer, (qint64)compressedSize);
+    return true;
+}
+#endif

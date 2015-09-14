@@ -143,8 +143,15 @@ void VxProcessThread::run()
 		for (int i = 0; i < bufferLength; i++)
 		{
 			EventVx& ev = rawBuffers[currentBufferIndex][i];
-			if (ev.processed)
-                break;
+            if (ev.processed)
+            {
+                //empty buffer: acquisition or reading finished
+                if (i==0)
+                    return;
+                //partially filled buffer: acquisition timeout occured.
+                else
+                    break;
+            }
 			processEvent(&ev, sampleNextEvent);
 			ev.processed = true;
 			eventCounter++;
@@ -814,40 +821,7 @@ void VxProcessThread::compileV8()
         Local<Script> localScriptFinished = Script::Compile(context, sourceFinished).ToLocalChecked();
         if (localScriptPostChannel.IsEmpty())
             checkV8Exceptions(try_catch, "After reading");
-        scriptFinished.Reset(isolate, localScriptFinished);
-
-       /* Handle<String> sourcePre = String::NewFromUtf8(isolate, analysisConfig->customCodePreAnalysis.toStdString().c_str());
-        Handle<Script> handleScriptPre = Script::Compile(sourcePre);
-        if (handleScriptPre.IsEmpty())
-            checkV8Exceptions(try_catch, "Pre-analysis");
-        scriptPre.Reset(isolate, handleScriptPre);
-
-        Handle<String> sourcePostChannel = String::NewFromUtf8(isolate, analysisConfig->customCodePostChannel.toStdString().c_str());
-        Handle<Script> handleScriptPostChannel = Script::Compile(sourcePostChannel);
-        if (handleScriptPostChannel.IsEmpty())
-            checkV8Exceptions(try_catch, "Post-analysis (per channel)");
-        hasException = try_catch.HasCaught();
-        scriptPostChannel.Reset(isolate, handleScriptPostChannel);
-
-        //allow v8 code to access each channel stats via an array (channels 0-3)
-        QString prependedPostEventCode = "var chStats = [chStats0, chStats1, chStats2, chStats3];" + analysisConfig->customCodePostEvent;
-        Handle<String> sourcePostEvent = String::NewFromUtf8(isolate, prependedPostEventCode.toStdString().c_str());
-        Handle<Script> handleScriptPostEvent = Script::Compile(sourcePostEvent);
-        if (handleScriptPostEvent.IsEmpty())
-            checkV8Exceptions(try_catch, "Post-analysis (per event)");
-        scriptPostEvent.Reset(isolate, handleScriptPostEvent);
-
-        Handle<String> sourceDef = String::NewFromUtf8(isolate, analysisConfig->customCodeDef.toStdString().c_str());
-        Handle<Script> handleScriptDef = Script::Compile(sourceDef);
-        if (handleScriptDef.IsEmpty())
-            checkV8Exceptions(try_catch, "Definitions");
-        scriptDef.Reset(isolate, handleScriptDef);
-
-        Handle<String> sourceFinished = String::NewFromUtf8(isolate, analysisConfig->customCodeFinal.toStdString().c_str());
-        Handle<Script> handleScriptFinished = Script::Compile(sourceFinished);
-        if (handleScriptFinished.IsEmpty())
-            checkV8Exceptions(try_catch, "After reading");
-        scriptFinished.Reset(isolate, handleScriptFinished);*/
+        scriptFinished.Reset(isolate, localScriptFinished);     
 
         Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
         for (int i = 0; i < NUM_DIGITIZER_CHANNELS; i++)

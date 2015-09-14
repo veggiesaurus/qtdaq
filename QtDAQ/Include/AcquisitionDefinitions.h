@@ -177,6 +177,12 @@ enum CAENErrorCode {
 	ERR_DUMMY_LAST,
 };
 
+enum FileFormat
+{
+    GZIP_COMPRESSED,
+    GZIP_COMPRESSED_PACKED,
+    LZO_COMPRESSED
+};
 
 #pragma endregion 
 

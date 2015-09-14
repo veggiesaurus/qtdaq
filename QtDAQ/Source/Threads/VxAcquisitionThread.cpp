@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <lzo/lzo1x.h>
 #include "globals.h"
 #include "Threads/VxAcquisitionThread.h"
 
@@ -219,13 +220,15 @@ void VxAcquisitionThread::run()
 			rawBuffers[currentBufferIndex][currentBufferPosition].processed = false;
 			rawBuffers[currentBufferIndex][currentBufferPosition].runIndex = runIndex;
 
-            if (outputFileCompressed)
+            if (outputFileCompressed || lzoFile)
             {
                 bool appendSuccess;
-                if (packedOutput)
+                if (fileFormat==GZIP_COMPRESSED_PACKED)
                     appendSuccess = AppendEventPacked(&rawBuffers[currentBufferIndex][currentBufferPosition]);
-                else
+                else if (fileFormat==GZIP_COMPRESSED)
                     appendSuccess = AppendEventCompressed(&rawBuffers[currentBufferIndex][currentBufferPosition]);
+                else
+                    appendSuccess = AppendEventLZO(&rawBuffers[currentBufferIndex][currentBufferPosition]);
                 if (!appendSuccess)
                 {
                     CloseDigitizer();
@@ -336,8 +339,9 @@ void VxAcquisitionThread::stopAcquisition(bool forcedExit)
 	digitizerMutex.unlock();
 }
 
-bool VxAcquisitionThread::setFileOutput(QString s_filename, bool s_packedOutput)
-{    
+bool VxAcquisitionThread::setFileOutput(QString s_filename, FileFormat s_fileFormat)
+{
+    fileFormat=s_fileFormat;
     if (outputFileCompressed)
     {
         gzflush(outputFileCompressed, Z_FINISH);
@@ -345,23 +349,41 @@ bool VxAcquisitionThread::setFileOutput(QString s_filename, bool s_packedOutput)
         outputFileCompressed=nullptr;
         qDebug()<<"Closing file "+filename;
     }
-
-    filename = s_filename;
-    packedOutput = s_packedOutput;
-    outputFileCompressed=gzopen(filename.toStdString().c_str(), "wb1f");
-    if (!outputFileCompressed)
-        return false;
-    if (packedOutput)
+    if (lzoFile)
     {
-        if (!WriteDataHeaderCompressed())
+        lzoFile->close();
+        SAFE_DELETE(lzoFile);
+        qDebug()<<"Closing file "+filename;
+    }
+
+    filename = s_filename;    
+
+    if (fileFormat==GZIP_COMPRESSED || fileFormat == GZIP_COMPRESSED_PACKED)
+    {
+        outputFileCompressed=gzopen(filename.toStdString().c_str(), "wb1f");
+        if (!outputFileCompressed)
             return false;
-        qDebug()<<"Header written to file "+filename+" successfully";
+        if (fileFormat == GZIP_COMPRESSED)
+        {
+            if (!WriteDataHeaderCompressed())
+                return false;
+            qDebug()<<"Header written to file "+filename+" successfully";
+        }
+        else
+        {
+            if (!WriteDataHeaderPacked())
+                return false;
+            qDebug()<<"Packed header written to file "+filename+" successfully";
+        }
     }
     else
     {
-        if (!WriteDataHeaderPacked())
+        lzoFile = new QFile(filename);
+        if (!lzoFile->open(QFile::WriteOnly))
             return false;
-        qDebug()<<"Packed header written to file "+filename+" successfully";
+        if (!WriteDataHeaderLZO())
+            return false;
+        qDebug()<<"LZO Header written to file "+filename+" successfully";
     }
 	return true;
 }
@@ -434,6 +456,60 @@ bool VxAcquisitionThread::packChannel(u_int16_t* chData, u_int16_t channelSize, 
     return true;
 }
 
+bool VxAcquisitionThread::WriteDataHeaderLZO()
+{
+    if (lzoFile)
+    {
+        DataHeader newHeader = header;
+        sprintf(newHeader.magicNumber, "UCT001L");
+        lzoFile->write((const char*)&newHeader, (qint64)sizeof(DataHeader));
+        return true;
+    }
+    else
+        return false;
+}
+
+bool VxAcquisitionThread::AppendEventLZO(EventVx* ev)
+{
+    //hack for two channels
+    int numCh=2;
+    int newUncompressedSize=sizeof(CAEN_DGTZ_EventInfo_t)+sizeof(uint32_t)*numCh+numCh*(qMax(ev->data.ChSize[0], ev->data.ChSize[1])*sizeof(uint16_t));
+    int newLzoSize=(newUncompressedSize + newUncompressedSize / 16 + 64 + 3);
+    if (newUncompressedSize!=uncompressedBufferSize)
+    {
+        SAFE_DELETE_ARRAY(uncompressedBuffer);
+        uncompressedBuffer=new uchar[newUncompressedSize];
+        uncompressedBufferSize=newUncompressedSize;
+    }
+    if (newLzoSize!=lzoBufferSize)
+    {
+        SAFE_DELETE_ARRAY(lzoBuffer);
+        lzoBuffer=new uchar[newLzoSize];
+        lzoBufferSize=newLzoSize;
+    }
+    if (!lzoWorkMem)
+        lzoWorkMem=new uchar[LZO1X_1_MEM_COMPRESS];
+    uint32_t uPos=0;
+    memcpy(&(uncompressedBuffer[uPos]), &ev->info, sizeof(CAEN_DGTZ_EventInfo_t));
+    uPos+=sizeof(CAEN_DGTZ_EventInfo_t);
+    memcpy(&(uncompressedBuffer[uPos]), ev->data.ChSize, sizeof(uint32_t)*numCh);
+    uPos+=(sizeof(uint32_t)*numCh);
+
+    for (int i=0;i<numCh;i++)
+    {
+        if (ev->data.ChSize[i])
+        {
+            memcpy(&(uncompressedBuffer[uPos]), ev->data.DataChannel[i], sizeof(uint16_t) * ev->data.ChSize[i]);
+            uPos+=sizeof(uint16_t) * ev->data.ChSize[i];
+        }
+    }
+    lzo_uint compressedSize;
+    lzo1x_1_compress(uncompressedBuffer, uPos, lzoBuffer, &compressedSize, lzoWorkMem);
+    lzoFile->write((const char*)&compressedSize, (qint64)(sizeof(lzo_uint)));
+    lzoFile->write((const char*)&uPos, (qint64)(sizeof(uint32_t)));
+    lzoFile->write((const char*)lzoBuffer, (qint64)compressedSize);
+    return true;
+}
 
 
 CAENErrorCode VxAcquisitionThread::InitDigitizer()

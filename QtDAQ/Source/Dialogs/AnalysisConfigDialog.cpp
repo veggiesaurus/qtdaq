@@ -28,7 +28,14 @@ AnalysisConfigDialog::AnalysisConfigDialog (AnalysisConfig* s_config, QWidget * 
 	highlighters[5] = new JSHighlighter(ui.plainTextEditFinalCode->document());
 #pragma endregion
 
-	setUIFromConfig(config);
+    setUIFromConfig(config);
+}
+
+AnalysisConfigDialog::~AnalysisConfigDialog()
+{
+    V8::Dispose();
+    for (auto h:highlighters)
+        SAFE_DELETE(h);
 }
 /////////////////////////////////////////////////
 // initialises the UI based on a config object
@@ -250,11 +257,6 @@ void AnalysisConfigDialog::updateUI()
 
 void AnalysisConfigDialog::codeChanged()
 {    
-    /*
-    // Create a new Isolate and make it the current one.   
-    Isolate::CreateParams create_params;
-    //create_params.array_buffer_allocator = &allocator;
-    Isolate* isolate = Isolate::New(create_params);
 	QPlainTextEdit* codeEdit = dynamic_cast<QPlainTextEdit*>(sender());
 	if (codeEdit)
 	{
@@ -264,27 +266,37 @@ void AnalysisConfigDialog::codeChanged()
 		cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 		QTextCharFormat highlightFormat;
 		highlightFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
-		cursor.mergeCharFormat(highlightFormat);
+        cursor.mergeCharFormat(highlightFormat);
 
-		Isolate::Scope isolate_scope(isolate);
-		HandleScope handle_scope(isolate);
-		Local<ObjectTemplate> global = ObjectTemplate::New();
-		Handle<Context> context = Context::New(isolate, NULL, global);
-		Context::Scope context_scope(context);
+        v8Mutex.lock();
+        V8::Initialize();
+        V8::InitializeICU();
 
-		v8::TryCatch try_catch;
-		try_catch.SetVerbose(true);
-		QString errorMessage;
-		
-		Handle<String> source = String::NewFromUtf8(isolate, codeEdit->toPlainText().toStdString().c_str());
-		Handle<Script> handleScript = Script::Compile(source);
-		if (handleScript.IsEmpty())
-			underlineError(codeEdit, getCompileErrorLine(try_catch, errorMessage)-1);
+        ArrayBufferAllocator allocator;
+        Isolate::CreateParams create_params;
+        create_params.array_buffer_allocator = &allocator;
+        isolate = Isolate::New(create_params);
+        {
+            Isolate::Scope isolate_scope(isolate);
+            HandleScope handle_scope(isolate);
+
+
+            Local<Context> context = Context::New(isolate);
+            Context::Scope context_scope(context);
+
+            v8::TryCatch try_catch;
+            try_catch.SetVerbose(true);
+            QString errorMessage;
+            Local<String> source = String::NewFromUtf8(isolate, codeEdit->toPlainText().toStdString().c_str(),NewStringType::kNormal).ToLocalChecked();
+            auto script = Script::Compile(context, source);
+            if (script.IsEmpty())
+                underlineError(codeEdit, getCompileErrorLine(try_catch, errorMessage)-1);
+        }
+        isolate->Dispose();
+        v8Mutex.unlock();
 
 		connect(codeEdit, SIGNAL(textChanged()), this, SLOT(codeChanged()), Qt::QueuedConnection);
-	}
-	isolate->Dispose();
-    */
+	}	
 }
 
 
