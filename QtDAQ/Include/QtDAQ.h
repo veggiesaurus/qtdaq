@@ -71,7 +71,7 @@ public:
 	void onFilePercentUpdated(float filePercent);
 	//file slots
 	void onReadDRSFileClicked();
-	void onReadVxFileClicked();
+	void onReadVxFileClicked();    
 	void onReadStatisticsFileClicked();
 	void onReplayCurrentFileClicked();
     void onSetOutputFileVxClicked();

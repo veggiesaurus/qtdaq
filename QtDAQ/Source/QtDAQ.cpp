@@ -496,9 +496,12 @@ void QtDAQ::onReadVxFileClicked()
 		settings.setValue("mainWindow/prevVxRawDataDir", fileInfo.dir().absolutePath());
 		settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
 
+        //ask for confirmation on clear if there's an existing file
+        if (!rawFilename.isEmpty() && QMessageBox::question(this, "Clear plots", "Clear all plots before reading?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                clearAllPlots();
 		rawFilename = newRawFilename;
         bool isCompressedHeader = rawFilename.endsWith("dtz") || rawFilename.endsWith("pcz");
-		clearAllPlots();
+
 		uiUpdateTimer.stop();
 		numUITimerTimeouts = 0;
 		numEventsProcessed = 0;
@@ -950,7 +953,7 @@ void QtDAQ::onSaveUIClicked()
 		//Newly introducted in UI Version 0x03: End
 
 		//write calibration values
-		stream.writeRawData((const char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
+        stream.writeRawData((const char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
 
 		//write cuts
 		stream << cuts;
@@ -958,7 +961,7 @@ void QtDAQ::onSaveUIClicked()
 
 		//write windows 
 		int numHists = histograms.count();
-		stream << numHists;
+        stream << numHists;
 		for (int i = 0; i<numHists; i++)
 			stream << *histograms[i];
 
@@ -1472,10 +1475,10 @@ void QtDAQ::onSerialInterfaceClicked()
 		return;
 	}
 	QList<QString> strList;
-	QList<QSerialPortInfo>::iterator i;
-	for (i = list.begin(); i != list.end(); ++i)
-		strList.append(i->portName());
-	QString selectedPort = QInputDialog::getItem(this, tr("Select serial port"),
+    for (auto i:list)
+        strList.append(i.portName());
+
+    QString selectedPort = QInputDialog::getItem(this, tr("Select serial port"),
 		tr("Port:"), strList, 0, false, &ok);
 	if (ok && !selectedPort.isEmpty())
 	{
@@ -1540,25 +1543,14 @@ void QtDAQ::serialReadData()
 }
 void QtDAQ::clearAllPlots()
 {
-	for (QVector<HistogramWindow*>::iterator it = histograms.begin(); it != histograms.end(); it++)
-	{
-		(*it)->clearValues();
-	}
-
-	for (QVector<Histogram2DWindow*>::iterator it = histograms2D.begin(); it != histograms2D.end(); it++)
-	{
-		(*it)->clearValues();
-	}
-
-	for (QVector<FoMWindow*>::iterator it = fomPlots.begin(); it != fomPlots.end(); it++)
-	{
-		(*it)->clearValues();
-	}
-
-	for (QVector<SortedPairPlotWindow*>::iterator it = sortedPairPlots.begin(); it != sortedPairPlots.end(); it++)
-	{
-		(*it)->clearValues();
-	}
+    for (auto plot:histograms)
+        plot->clearValues();
+    for (auto plot:histograms2D)
+        plot->clearValues();
+    for (auto plot:fomPlots)
+        plot->clearValues();
+    for (auto plot:sortedPairPlots)
+        plot->clearValues();
 }
 
 void QtDAQ::onMoveToPage1Clicked(){ moveCurrentWindowToPage(0); }
