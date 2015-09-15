@@ -2,6 +2,7 @@
 
 #ifdef WIN32
 #include <basetsd.h>
+#include <Windows.h>
 #endif
 #include <time.h>
 #include <CAENDigitizer.h>
@@ -50,6 +51,22 @@ if (ptr != NULL)            \
 #ifndef uint64_t
 #define uint64_t UINT64
 #endif
+
+#define MAXUINT8    ((UINT8)~((UINT8)0))
+#define MAXINT8     ((INT8)(MAXUINT8 >> 1))
+#define MININT8     ((INT8)~MAXINT8)
+
+#define MAXUINT16   ((UINT16)~((UINT16)0))
+#define MAXINT16    ((INT16)(MAXUINT16 >> 1))
+#define MININT16    ((INT16)~MAXINT16)
+
+#define MAXUINT32   ((UINT32)~((UINT32)0))
+#define MAXINT32    ((INT32)(MAXUINT32 >> 1))
+#define MININT32    ((INT32)~MAXINT32)
+
+#define MAXUINT64   ((UINT64)~((UINT64)0))
+#define MAXINT64    ((INT64)(MAXUINT64 >> 1))
+#define MININT64    ((INT64)~MAXINT64)
 #endif
 
 #ifdef WIN32

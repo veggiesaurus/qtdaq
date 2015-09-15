@@ -1,0 +1,783 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{0f1cde9b-3254-4461-81cc-ed72f13b70d3}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{90ae0589-f8ba-4305-88c5-c8799c6c58c5}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Source Files\DRS4">
+      <UniqueIdentifier>{4ae54824-b69b-4d1c-8f12-39f70bf9c27d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Dialogs">
+      <UniqueIdentifier>{91f51f73-2f19-48e8-8bbf-a646466ece39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\curvefit">
+      <UniqueIdentifier>{c04a07ff-7986-4893-905a-813f9be6b6ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Windows">
+      <UniqueIdentifier>{b89cc3bd-6b75-4cfd-9113-e0826aa1804b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Threads">
+      <UniqueIdentifier>{905353c5-41bb-4132-8713-fab27888041c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Plots">
+      <UniqueIdentifier>{c367b79e-f73f-45ca-8526-34564c263fae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vector">
+      <UniqueIdentifier>{9a841b75-2545-4f8b-a02c-294661fe7b68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\V8">
+      <UniqueIdentifier>{ea092fae-5c17-43fa-99fd-92557190f566}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DRS4">
+      <UniqueIdentifier>{5b68f52d-41be-4811-b93a-27ef11397c2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\V8">
+      <UniqueIdentifier>{abe5ce85-8df3-493f-a2cf-6abcf7d02505}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\curvefit">
+      <UniqueIdentifier>{c49bf5f9-f979-4414-b7d0-19d6f57a1811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Windows">
+      <UniqueIdentifier>{b8165ae1-8828-40ee-a9c5-d861c6b2e64e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Threads">
+      <UniqueIdentifier>{8806b3d6-d677-4239-a21f-2d978601c695}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Dialogs">
+      <UniqueIdentifier>{2acfa6e5-32d3-46c3-93f0-246585fbd298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Plots">
+      <UniqueIdentifier>{bfe82ad9-8719-451d-aa50-5cb7b71a7d19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\vector">
+      <UniqueIdentifier>{54d1094f-8d64-4d8b-a8b8-444aa6e7bb2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Form Files\Dialogs">
+      <UniqueIdentifier>{f4c6d341-6fcb-4d6c-87d5-9b42eea79fc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Form Files\Windows">
+      <UniqueIdentifier>{6b6c2579-c057-41b3-9802-7e66549b4902}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files\Release_debug">
+      <UniqueIdentifier>{9ab6352b-fecc-477a-b2fa-dfa8aa4eccf7}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_qtdaq.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AnalysisConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Cuts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\globals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ProcessRoutines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\ActiveCutsDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\AnalysisConfigDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\CalibrationDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\LinearCutDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\LinearCutEditDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\PolygonalCutDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\PolygonalCutEditDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Plots\CalibratedPlot.cpp">
+      <Filter>Source Files\Plots</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Plots\Histogram2DPlot.cpp">
+      <Filter>Source Files\Plots</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Plots\HistogramPlot.cpp">
+      <Filter>Source Files\Plots</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Plots\SortedPairPlot.cpp">
+      <Filter>Source Files\Plots</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SignalPlot.cpp">
+      <Filter>Source Files\Plots</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Threads\DRSAcquisitionThread.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Threads\DRSBinaryReaderThread.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Threads\VxBinaryReaderThread.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Threads\VxProcessThread.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\FoMWindow.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\Histogram2DWindow.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\HistogramWindow.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\SortedPairPlotWindow.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\SignalPlotWindow.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\PlotWindow.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\curvefit\lmcurve.c">
+      <Filter>Source Files\curvefit</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\curvefit\lmmin.c">
+      <Filter>Source Files\curvefit</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\curvefit\mpfit.c">
+      <Filter>Source Files\curvefit</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DRS4\mxml.c">
+      <Filter>Source Files\DRS4</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DRS4\musbstd.c">
+      <Filter>Source Files\DRS4</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DRS4\DRS.cpp">
+      <Filter>Source Files\DRS4</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\vector\instrset_detect.cpp">
+      <Filter>Source Files\vector</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\V8\V8Wrapper.cpp">
+      <Filter>Source Files\V8</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DRS4\strlcpy.c">
+      <Filter>Source Files\curvefit</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\curvefit\fitting.cpp">
+      <Filter>Source Files\curvefit</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\AcquisitionConfigDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxProcessThread.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VxProcessThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxProcessThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxBinaryReaderThread.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VxBinaryReaderThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxBinaryReaderThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_SortedPairPlotWindow.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SortedPairPlotWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SortedPairPlotWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_SignalPlotWindow.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SignalPlotWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SignalPlotWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_SignalPlot.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SignalPlot.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SignalPlot.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_PolygonalCutEditDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PolygonalCutEditDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PolygonalCutEditDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_PolygonalCutDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PolygonalCutDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PolygonalCutDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_PlotWindow.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PlotWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PlotWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_LinearCutEditDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_LinearCutEditDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_LinearCutEditDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_LinearCutDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_LinearCutDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_LinearCutDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_HistogramWindow.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_HistogramWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_HistogramWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_HistogramPlot.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_HistogramPlot.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_HistogramPlot.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_Histogram2DWindow.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Histogram2DWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Histogram2DWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_Histogram2DPlot.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Histogram2DPlot.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Histogram2DPlot.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_FoMWindow.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_FoMWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_FoMWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_DRSBinaryReaderThread.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_DRSBinaryReaderThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_DRSBinaryReaderThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_DRSAcquisitionThread.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_DRSAcquisitionThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_DRSAcquisitionThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_CalibrationDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_CalibrationDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_CalibrationDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_CalibratedPlot.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_CalibratedPlot.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_CalibratedPlot.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_AnalysisConfigDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AnalysisConfigDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AnalysisConfigDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_ActiveCutsDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ActiveCutsDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ActiveCutsDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_AcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_AcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_AcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\QtDAQ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\JSHighlighter.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\VxAcquisitionConfigDialog.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dialogs\VxHighlighter.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_QtDAQ.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_JSHighlighter.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_JSHighlighter.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_JSHighlighter.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxAcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VxAcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxAcquisitionConfigDialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxHighlighter.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VxHighlighter.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxHighlighter.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DRSAcquisitionConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AcquisitionDefinitions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Threads\VxAcquisitionThread.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release_debug\moc_VxAcquisitionThread.cpp">
+      <Filter>Generated Files\Release_debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VxAcquisitionThread.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VxAcquisitionThread.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\VxAcquisitionConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="qtdaq.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\ActiveCutsDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\AnalysisConfigDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\CalibrationDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\PolygonalCutEditDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\PolygonalCutDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\LinearCutDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\LinearCutEditDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Threads\DRSAcquisitionThread.h">
+      <Filter>Header Files\Threads</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Threads\DRSBinaryReaderThread.h">
+      <Filter>Header Files\Threads</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Threads\VxProcessThread.h">
+      <Filter>Header Files\Threads</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Threads\VxBinaryReaderThread.h">
+      <Filter>Header Files\Threads</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Windows\HistogramWindow.h">
+      <Filter>Header Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Windows\Histogram2DWindow.h">
+      <Filter>Header Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Windows\FoMWindow.h">
+      <Filter>Header Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Windows\SortedPairPlotWindow.h">
+      <Filter>Header Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Windows\SignalPlotWindow.h">
+      <Filter>Header Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Windows\PlotWindow.h">
+      <Filter>Header Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogActiveCuts.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogAnalysisConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogBins.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogCalibration.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogHistogram2DConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogHistogramConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogLinearCut.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogLinearCutEdit.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogOutputConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogPolygonalCut.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogPolygonalCutEdit.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogRun.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogSignalPlotConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogSortedPairPlotConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Windows\window2DHistogramPlot.ui">
+      <Filter>Form Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Windows\windowFoMPlot.ui">
+      <Filter>Form Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Windows\windowHistogramPlot.ui">
+      <Filter>Form Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Windows\windowSignalPlot.ui">
+      <Filter>Form Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Windows\windowSortedPairPlot.ui">
+      <Filter>Form Files\Windows</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\qtdaq.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Plots\CalibratedPlot.h">
+      <Filter>Header Files\Plots</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Plots\Histogram2DPlot.h">
+      <Filter>Header Files\Plots</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Plots\HistogramPlot.h">
+      <Filter>Header Files\Plots</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Plots\SignalPlot.h">
+      <Filter>Header Files\Plots</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogAcquisitionConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\AcquisitionConfigDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Forms\Dialogs\dialogVxAcquisitionConfig.ui">
+      <Filter>Form Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\QtDAQ.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\JSHighlighter.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\VxAcquisitionConfigDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Dialogs\VxHighlighter.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Include\Threads\VxAcquisitionThread.h">
+      <Filter>Header Files\Threads</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\ProcessRoutines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\AnalysisConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Cuts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\DRS4\DRS.h">
+      <Filter>Header Files\DRS4</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\curvefit\fitting.h">
+      <Filter>Header Files\curvefit</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\instrset.h">
+      <Filter>Header Files\curvefit</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\curvefit\lmcurve.h">
+      <Filter>Header Files\curvefit</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\curvefit\lmmin.h">
+      <Filter>Header Files\curvefit</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\curvefit\lmstruct.h">
+      <Filter>Header Files\curvefit</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\curvefit\mpfit.h">
+      <Filter>Header Files\curvefit</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\DRS4\usb.h">
+      <Filter>Header Files\DRS4</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\strlcpy.h">
+      <Filter>Header Files\DRS4</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\DRS4\mxml.h">
+      <Filter>Header Files\DRS4</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\DRS4\musbstd.h">
+      <Filter>Header Files\DRS4</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\V8\V8Wrapper.h">
+      <Filter>Header Files\V8</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\vectorclass.h">
+      <Filter>Header Files\vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\vectorf128.h">
+      <Filter>Header Files\vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\vectorf256.h">
+      <Filter>Header Files\vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\vectorf256e.h">
+      <Filter>Header Files\vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\vectori128.h">
+      <Filter>Header Files\vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\vectori256.h">
+      <Filter>Header Files\vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\vector\vectori256e.h">
+      <Filter>Header Files\vector</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogActiveCuts.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogAnalysisConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogBins.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogCalibration.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogHistogram2DConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogHistogramConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogLinearCut.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogLinearCutEdit.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogOutputConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogPolygonalCut.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogPolygonalCutEdit.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogRun.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogSignalPlotConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogSortedPairPlotConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_window2DHistogramPlot.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_windowFoMPlot.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_windowHistogramPlot.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_windowSignalPlot.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_windowSortedPairPlot.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtdaq.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Plots\SortedPairPlot.h">
+      <Filter>Header Files\Plots</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogAcquisitionConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_dialogVxAcquisitionConfig.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\AcquisitionDefinitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\DRSAcquisitionConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\VxAcquisitionConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

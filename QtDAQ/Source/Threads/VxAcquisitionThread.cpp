@@ -442,13 +442,13 @@ bool VxAcquisitionThread::AppendEventPacked(EventVx* ev)
             packedData = new int8_t[packedDataLength];
         }
         packChannel(ev->data.DataChannel[i], ev->data.ChSize[i], packedData);
-        if (gzwrite(outputFileCompressed, &(ev->data.DataChannel[i][0]), sizeof(uint16_t)) && !gzwrite(outputFileCompressed, packedData, sizeof(u_int8_t) * packedDataLength))
+		if (gzwrite(outputFileCompressed, &(ev->data.DataChannel[i][0]), sizeof(uint16_t)) && !gzwrite(outputFileCompressed, packedData, sizeof(uint16_t) * packedDataLength))
             return false;
     }
     return true;
 }
 
-bool VxAcquisitionThread::packChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* destData)
+bool VxAcquisitionThread::packChannel(uint16_t* chData, uint16_t channelSize, int8_t* destData)
 {
     for (auto i = 1; i<channelSize; i++)
     {

@@ -29,7 +29,7 @@ private:
 
     bool WriteDataHeaderCompressed();
     bool AppendEventCompressed(EventVx* ev);
-    bool packChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* destData);
+	bool packChannel(uint16_t* chData, uint16_t channelSize, int8_t* destData);
     bool WriteDataHeaderPacked();
     bool AppendEventPacked(EventVx* ev);
     bool WriteDataHeaderLZO();
