@@ -293,8 +293,8 @@ void SignalPlot::shiftSample(float* V, int numSamples, int shift)
 		memcpy(vShifted, V, sizeof(float)*numSamples);
 		return;
 	}
-    int startPoint = std::max(-shift, 0);
-    int endPoint = std::min(numSamples, numSamples - shift);
+    int startPoint = qMax(-shift, 0);
+    int endPoint = qMin(numSamples, numSamples - shift);
 	for (int i = startPoint; i < endPoint; i++)
 		vShifted[i] = V[i + shift];
 	//padding

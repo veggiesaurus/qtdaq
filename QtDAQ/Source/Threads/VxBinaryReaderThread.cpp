@@ -343,9 +343,9 @@ void VxBinaryReaderThread::run()
                         packedDataLength = ev.data.ChSize[i]-1;
                         packedData = new int8_t[packedDataLength];
                     }
-                    u_int16_t firstVal=0;
-                    readSuccess = gzread(inputFileCompressed, &firstVal, sizeof(u_int16_t))==sizeof(u_int16_t);
-                    readSuccess &= gzread(inputFileCompressed, packedData, sizeof(u_int8_t) * packedDataLength)==sizeof(u_int8_t) * packedDataLength;
+					uint16_t firstVal = 0;
+					readSuccess = gzread(inputFileCompressed, &firstVal, sizeof(uint16_t)) == sizeof(uint16_t);
+					readSuccess &= gzread(inputFileCompressed, packedData, sizeof(uint8_t) * packedDataLength) == sizeof(uint8_t) * packedDataLength;
                     if (readSuccess)
                         readSuccess&= unpackChannel(ev.data.DataChannel[i], ev.data.ChSize[i], packedData, firstVal);
                 }
@@ -433,7 +433,7 @@ qint64 VxBinaryReaderThread::getFileSize(QString filename)
 	return fileSize;
 }
 
-bool VxBinaryReaderThread::unpackChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* sourceData, u_int16_t firstVal)
+bool VxBinaryReaderThread::unpackChannel(uint16_t* chData, uint16_t channelSize, int8_t* sourceData, uint16_t firstVal)
 {
     chData[0]=firstVal;
     for (auto i = 0;i<channelSize-1;i++)

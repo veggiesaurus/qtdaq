@@ -28,7 +28,8 @@ private:
     void run();
 	void swapBuffers();
     qint64 getFileSize(QString filename);
-    bool unpackChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* sourceData, u_int16_t firstVal);
+
+	bool unpackChannel(uint16_t* chData, uint16_t channelSize, int8_t* sourceData, uint16_t firstVal);
 #ifdef DEBUG_PACKING
     bool packChannel(u_int16_t* chData, u_int16_t channelSize, int8_t* destData);
     bool WriteDataHeaderPacked();
