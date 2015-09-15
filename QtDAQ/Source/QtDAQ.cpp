@@ -657,7 +657,7 @@ void QtDAQ::onSetOutputFileVxClicked()
         settings.setValue("mainWindow/prevVxRawDataDir", fileInfo.dir().absolutePath());
         settings.setValue("mainWindow/prevVxRawDataFile", fileInfo.fileName());
 
-        FileFormat fileFormat = rawFilename.endsWith("dtz")?GZIP_COMPRESSED:(rawFilename.endsWith("pcz")?GZIP_COMPRESSED_PACKED:LZO_COMPRESSED);
+        FileFormat fileFormat = newRawFilename.endsWith("dtz")?GZIP_COMPRESSED:(newRawFilename.endsWith("pcz")?GZIP_COMPRESSED_PACKED:LZO_COMPRESSED);
         if (vxAcquisitionThread)
             vxAcquisitionThread->setFileOutput(newRawFilename, fileFormat);
     }
