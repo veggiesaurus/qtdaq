@@ -113,6 +113,12 @@ void VxAcquisitionThread::run()
                     outputFileCompressed=nullptr;
                     qDebug()<<"Closing file "+filename;
                 }
+                if (lzoFile)
+                {
+                    lzoFile->close();
+                    SAFE_DELETE(lzoFile);
+                    qDebug()<<"Closing file "+filename;
+                }
 
 
 				digitizerStatus &= ~STATUS_RUNNING;
