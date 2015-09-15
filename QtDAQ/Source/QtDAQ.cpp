@@ -1617,19 +1617,21 @@ void QtDAQ::closeEvent(QCloseEvent*)
 {
 	if (vxAcquisitionThread)
 	{
+        vxAcquisitionThread->setPaused(true);
 		vxAcquisitionThread->stopAcquisition(true);
 		vxAcquisitionThread->disconnect();
 		vxAcquisitionThread->exit();
 		vxAcquisitionThread->wait(100);
 		vxAcquisitionThread->terminate();
+        vxAcquisitionThread->wait(100);
 		SAFE_DELETE(vxAcquisitionThread);
 	}
 
 
 	if (rawBuffer1Mutex && !finishedReading)
 	{
-		rawBuffer1Mutex->lock();
-		rawBuffer2Mutex->lock();
+        //rawBuffer1Mutex->lock();
+        //rawBuffer2Mutex->lock();
 	}
 	
 	if (drsReaderThread)
@@ -1639,6 +1641,7 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		drsReaderThread->exit();
 		drsReaderThread->wait(100);
 		drsReaderThread->terminate();
+        drsReaderThread->wait(100);
 		SAFE_DELETE(drsReaderThread);
 	}
 
@@ -1648,6 +1651,7 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		drsAcquisitionThread->exit();
 		drsAcquisitionThread->wait(100);
 		drsAcquisitionThread->terminate();
+        drsAcquisitionThread->wait(100);
 		SAFE_DELETE(drsAcquisitionThread);
 	}
 
@@ -1658,6 +1662,7 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		vxReaderThread->exit();
 		vxReaderThread->wait(100);
 		vxReaderThread->terminate();
+        vxReaderThread->wait(100);
 		SAFE_DELETE(vxReaderThread);
 	}
 
@@ -1668,6 +1673,7 @@ void QtDAQ::closeEvent(QCloseEvent*)
 		vxProcessThread->exit();
 		vxProcessThread->wait(100);
 		vxProcessThread->terminate();
+        vxProcessThread->wait(100);
 		SAFE_DELETE(vxProcessThread);
 	}
 
