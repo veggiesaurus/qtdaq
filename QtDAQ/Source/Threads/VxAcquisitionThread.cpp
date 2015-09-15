@@ -215,8 +215,8 @@ void VxAcquisitionThread::run()
 			/* decode the event */
 			ret = CAEN_DGTZ_DecodeEvent(handle, eventPtr, (void**)&event16);
 			if (ret)
-			{
-                qDebug()<<"Event decode error";
+			{                
+                qDebug()<<QTime::currentTime()<<" Event decode error";
 				ResetDigitizer();
 				break;
 			}
@@ -704,4 +704,5 @@ void VxAcquisitionThread::CloseDigitizer(bool finalClose)
 	if (handle >= 0)
 		CAEN_DGTZ_CloseDigitizer(handle);
 	SAFE_DELETE(boardInfo);
+    qDebug()<<QTime::currentTime()<<" Digitizer closed";
 }

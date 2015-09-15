@@ -268,6 +268,7 @@ void QtDAQ::onVxStartClicked()
 	ui.actionVxStart->setEnabled(false);
 	ui.actionVxSoftTrigger->setEnabled(true);
     ui.actionSetOutputFileVx->setEnabled(false);
+    qDebug()<<QTime::currentTime()<<" ACQ started";
 }
 
 void QtDAQ::onVxResetClicked()
@@ -284,6 +285,7 @@ void QtDAQ::onVxStopClicked()
 	ui.actionVxStart->setEnabled(true);
 	ui.actionVxSoftTrigger->setEnabled(false);
     ui.actionSetOutputFileVx->setEnabled(true);
+    qDebug()<<QTime::currentTime()<<" ACQ stopped";
 }
 
 

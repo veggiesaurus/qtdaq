@@ -33,7 +33,7 @@ AnalysisConfigDialog::AnalysisConfigDialog (AnalysisConfig* s_config, QWidget * 
 
 AnalysisConfigDialog::~AnalysisConfigDialog()
 {
-    V8::Dispose();
+    //V8::Dispose();
     for (auto h:highlighters)
         SAFE_DELETE(h);
 }
