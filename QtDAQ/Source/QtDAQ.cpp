@@ -235,6 +235,7 @@ void QtDAQ::onVxInitClicked()
 
 
 	vxAcquisitionThread = new VxAcquisitionThread(rawBuffer1Mutex, rawBuffer2Mutex, rawBuffer1, rawBuffer2, bufferLength, this);
+    connect(this, SIGNAL(temperatureUpdated(float)), vxAcquisitionThread, SLOT(onTemperatureUpdated(float)), Qt::QueuedConnection);
 
 	runIndex++;
 	CAENErrorCode errorCode = vxAcquisitionThread->initVxAcquisitionThread(vxConfig, runIndex);
@@ -1534,9 +1535,9 @@ void QtDAQ::serialReadData()
 		int index = serialString.indexOf('\n');
 		QString line = serialString.mid(0, serialString.indexOf('\n'));
 		serialString.remove(0, index + 1);
-		QString tempString = line.mid(0, line.indexOf(';'));
+        //QString tempString = line.mid(0, line.indexOf(';'));
 		bool validTemp = false;
-		float temp = tempString.toFloat(&validTemp);
+        float temp = line.toFloat(&validTemp);
 		if (validTemp)
 			emit(temperatureUpdated(temp));
 

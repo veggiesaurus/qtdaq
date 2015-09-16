@@ -48,6 +48,7 @@ private:
 public slots:
 	void setPaused(bool paused);
 	void stopAcquisition(bool forceExit);
+    void onTemperatureUpdated(float newTemp);
 private:
 	VxAcquisitionConfig* config = nullptr;
 	int handle = -1; 
@@ -96,6 +97,7 @@ private:
     int updateTime;
 
 	//run tracking
+    uint32_t currentTemp=0;
 	QMutex runIndexMutex;
 	std::atomic<int> runIndex;
 };

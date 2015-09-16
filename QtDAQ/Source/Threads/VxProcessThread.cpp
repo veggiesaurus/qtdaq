@@ -519,6 +519,8 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 			memset(tempMedianArray, 0, sizeof(float)*numSamples);
 		}
 		stats->channelStatistics[ch].channelNumber = ch;
+        //temperature readings saved in event counter variable
+        stats->channelStatistics[ch].temperature = (rawEvent->info.EventCounter)/1000.0f;
 		if (analysisConfig->bitsDropped)
 		{
 			int bitdropFactor = 1 << analysisConfig->bitsDropped;

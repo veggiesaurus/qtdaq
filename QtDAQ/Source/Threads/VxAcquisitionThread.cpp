@@ -220,7 +220,8 @@ void VxAcquisitionThread::run()
 				ResetDigitizer();
 				break;
 			}
-
+            //store the current temperature in the event counter (as a uint32)
+            eventInfo.EventCounter=currentTemp;
 			//freeVxEvent(rawBuffers[currentBufferIndex][currentBufferPosition]);
 			rawBuffers[currentBufferIndex][currentBufferPosition].loadFromInfoAndData(eventInfo, event16);
 			rawBuffers[currentBufferIndex][currentBufferPosition].processed = false;
@@ -342,7 +343,15 @@ void VxAcquisitionThread::stopAcquisition(bool forcedExit)
 {
 	digitizerMutex.lock();	
 	CloseDigitizer(forcedExit);
-	digitizerMutex.unlock();
+    digitizerMutex.unlock();
+}
+
+void VxAcquisitionThread::onTemperatureUpdated(float newTemp)
+{
+    if (newTemp>=0)
+        currentTemp=newTemp*1000;
+    else
+        currentTemp=0;
 }
 
 bool VxAcquisitionThread::setFileOutput(QString s_filename, FileFormat s_fileFormat)
