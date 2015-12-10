@@ -12,6 +12,9 @@
 #include "AnalysisConfig.h"
 #include "V8/V8Wrapper.h"
 
+#define DT5730_ID 31
+#define VX1761_ID 6
+#define VX1742_ID 2
 
 using namespace v8;
 
@@ -34,7 +37,7 @@ public:
  private:
 
 	 void processEvent(EventVx* rawEvent, bool outputSample);
-	 bool processChannel(bool vx1742Mode, EventVx* rawEvent, int ch, EventStatistics* stats, float GSPS, EventSampleData* sample, float  cfdOverrideTime=-1);
+	 bool processChannel(uint32_t boardId, EventVx* rawEvent, int ch, EventStatistics* stats, float GSPS, EventSampleData* sample, float  cfdOverrideTime=-1);
 
 
 	//v8

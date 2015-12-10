@@ -179,18 +179,31 @@ VxAcquisitionConfig* VxAcquisitionConfig::parseConfigString(QString configString
 		}
 		else if (QRegularExpression("WRITE_REGISTER", QRegularExpression::CaseInsensitiveOption).match(line).hasMatch())
 		{
+			auto matchWriteRegisterPatternMasked = QRegularExpression("WRITE_REGISTER\\s+([0-9 A-F]+)\\s+([0-9 A-F]+)\\s+([0-9 A-F]+)", QRegularExpression::CaseInsensitiveOption).match(line);
 			auto matchWriteRegisterPattern = QRegularExpression("WRITE_REGISTER\\s+([0-9 A-F]+)\\s+([0-9 A-F]+)", QRegularExpression::CaseInsensitiveOption).match(line);
-			if (matchWriteRegisterPattern.hasMatch())
+
+			if (matchWriteRegisterPatternMasked.hasMatch())
 			{
-				int writeAddress = matchWriteRegisterPattern.captured(1).toInt(0, 16);
-				int writeData = matchWriteRegisterPattern.captured(3).toInt(0, 16);
+				uint32_t writeAddress = matchWriteRegisterPatternMasked.captured(1).toUInt(0, 16);
+				uint32_t writeData = matchWriteRegisterPatternMasked.captured(2).toUInt(0, 16);
+				uint32_t writeMask = matchWriteRegisterPatternMasked.captured(3).toUInt(0, 16);
 				config->GWaddr[config->GWn] = writeAddress;
 				config->GWdata[config->GWn] = writeData;
+				config->GWmask[config->GWn] = writeMask;
+				config->GWn++;
+			}
+			else if (matchWriteRegisterPattern.hasMatch())
+			{
+				uint32_t writeAddress = matchWriteRegisterPattern.captured(1).toUInt(0, 16);
+				uint32_t writeData = matchWriteRegisterPattern.captured(2).toUInt(0, 16);
+				config->GWaddr[config->GWn] = writeAddress;
+				config->GWdata[config->GWn] = writeData;
+				config->GWmask[config->GWn] = 0xFFFFFFFF;
 				config->GWn++;
 			}
 			else
 				parseErrors.push_back({ VxParseError::WARNING, lineNum, "Invalid WRITE_REGISTER command. Format is 'WRITE_REGISTER #ADDR #DATA'" });
-		}
+		}		
 		else if (QRegularExpression("ENABLE_INPUT", QRegularExpression::CaseInsensitiveOption).match(line).hasMatch())
 		{
 			auto matchEnableInputPattern = QRegularExpression("ENABLE_INPUT\\s+(YES|NO)", QRegularExpression::CaseInsensitiveOption).match(line);

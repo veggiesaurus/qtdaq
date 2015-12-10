@@ -337,11 +337,9 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	EventStatistics* stats = new EventStatistics();
 	stats->timestamp.millisecond = rawEvent->info.TriggerTimeTag;
 	stats->runIndex = rawEvent->runIndex;
-	bool vx1742Mode = false;
-	if (rawEvent->info.BoardId == 2)
-		vx1742Mode = true;
 
-	//timing
+
+	uint32_t boardId = rawEvent->info.BoardId;
 
 	//check for wraparound (once every 35s?)
 	rawEvent->info.TriggerTimeTag %= INT32_MAX;
@@ -374,25 +372,36 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 		memset(sample, 0, sizeof(EventSampleData));
 	}
 	//4GSPS for Vx1761
-	float GSPS = 4.0 / analysisConfig->samplingReductionFactor;
-	//1GSPS for Vx1742
-	if (vx1742Mode)
+	float GSPS;
+	
+	switch (boardId)
+	{
+	case DT5730_ID:
+		GSPS = 0.5 / analysisConfig->samplingReductionFactor;
+		break;
+	case VX1742_ID:
 		GSPS = 1.0 / analysisConfig->samplingReductionFactor;
-	bool foundNumSamples = false;
+		break;
+	case VX1761_ID:
+	default:
+		GSPS = 4.0 / analysisConfig->samplingReductionFactor;
+		break;
+	}
 
+	bool foundNumSamples = false;
 	int primaryCFDChannel = -1;
 
 	float cfdOverrideTime = -1;
 	if (primaryCFDChannel >= 0 && primaryCFDChannel < NUM_DIGITIZER_CHANNELS)
 	{
-		processSuccess = processChannel(vx1742Mode, rawEvent, primaryCFDChannel, stats, GSPS, sample);
+		processSuccess = processChannel(boardId, rawEvent, primaryCFDChannel, stats, GSPS, sample);
 		cfdOverrideTime = stats->channelStatistics[primaryCFDChannel].timeOfCFDCrossing;
 	}
 	for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS; ch++)
 	{
 		stats->channelStatistics[ch].temperature = currentTemperature;
 		if (ch != primaryCFDChannel)
-			processSuccess = processChannel(vx1742Mode, rawEvent, ch, stats, GSPS, sample, cfdOverrideTime);
+			processSuccess = processChannel(boardId, rawEvent, ch, stats, GSPS, sample, cfdOverrideTime);
 		stats->channelStatistics[ch].secondsFromFirstEvent = stats->triggerTimeAdjustedMillis / 1000.0f;
 	}
 
@@ -489,11 +498,11 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 
 }
 
-bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch, EventStatistics* stats, float GSPS, EventSampleData* sample, float cfdOverrideTime)
+bool VxProcessThread::processChannel(uint32_t boardId, EventVx* rawEvent, int ch, EventStatistics* stats, float GSPS, EventSampleData* sample, float cfdOverrideTime)
 {
 	bool processSuccess = true;
 	int chSize;
-	if (vx1742Mode)
+	if (boardId == VX1742_ID)
 		chSize = rawEvent->fData.ChSize[ch];
 	else
 		chSize = rawEvent->data.ChSize[ch];
@@ -525,7 +534,7 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 		{
 			int bitdropFactor = 1 << analysisConfig->bitsDropped;
 
-			if (vx1742Mode)
+			if (boardId == VX1742_ID)
 			{
 				for (int i = 0; i < numSamples; i++)
 				{
@@ -535,16 +544,17 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 			}
 			else
 			{
+				float scaleFactor = boardId == DT5730_ID ? 1.0f / 16 : 1.0f;
 				for (int i = 0; i < numSamples; i++)
 				{
 					int index = (i)*analysisConfig->samplingReductionFactor;
-					tempValArray[i] = bitdropFactor*((int)rawEvent->data.DataChannel[ch][index] / bitdropFactor);
+					tempValArray[i] = scaleFactor*bitdropFactor*((int)rawEvent->data.DataChannel[ch][index] / bitdropFactor);
 				}
 			}
 		}
 		else
 		{
-			if (vx1742Mode)
+			if (boardId == VX1742_ID)
 			{
 				for (int i = 0; i < numSamples; i++)
 				{
@@ -554,10 +564,11 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 			}
 			else
 			{
+				float scaleFactor = boardId == DT5730_ID ? 1.0f / 16 : 1.0f;
 				for (int i = 0; i < numSamples; i++)
 				{
 					int index = (i)*analysisConfig->samplingReductionFactor;
-					tempValArray[i] = ((float)rawEvent->data.DataChannel[ch][index]);
+					tempValArray[i] = scaleFactor*((float)rawEvent->data.DataChannel[ch][index]);
 				}
 			}
 		}
@@ -636,7 +647,6 @@ bool VxProcessThread::processChannel(bool vx1742Mode, EventVx* rawEvent, int ch,
 		if (stats->channelStatistics[ch].indexOfHalfRise>0 && stats->channelStatistics[ch].indexOfHalfRise < numSamples)
 			stats->channelStatistics[ch].timeOfHalfRise = stats->channelStatistics[ch].indexOfHalfRise / GSPS;
 
-		//0.25 ns per sample
 		int samplesPerMicrosecond = (int)(1000 * GSPS);
 		int startOffset = (analysisConfig->startGate*samplesPerMicrosecond) / 1000;
 		int shortGateOffset = (analysisConfig->shortGate*samplesPerMicrosecond) / 1000;
