@@ -35,6 +35,6 @@ private:
 	DRS* drs;
 	DRSBoard* board;
 	//UI arrays
-	QCheckBox* checkBoxEnabled[NUM_DIGITIZER_CHANNELS];
-	QCheckBox* checkBoxTriggerEnabled[NUM_DIGITIZER_CHANNELS];
+	QCheckBox* checkBoxEnabled[NUM_DIGITIZER_CHANNELS_DRS];
+	QCheckBox* checkBoxTriggerEnabled[NUM_DIGITIZER_CHANNELS_DRS];
 };

@@ -25,7 +25,7 @@ AcquisitionConfigDialog::AcquisitionConfigDialog(DRSAcquisitionConfig* s_config,
 #pragma endregion (converting from names in Qt Designer UI file to an array for ease of use)
 
 #pragma region connections (connection UI elements to slots)
-	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
+	for (int i=0;i<NUM_DIGITIZER_CHANNELS_DRS;i++)
 	{
 		connect(checkBoxEnabled[i], SIGNAL(stateChanged(int)), this, SLOT(onChannelCheckBoxChanged()));
 		connect(checkBoxTriggerEnabled[i], SIGNAL(stateChanged(int)), this, SLOT(onChannelTriggerCheckBoxChanged()));
@@ -152,7 +152,7 @@ void AcquisitionConfigDialog::setUIFromConfig(DRSAcquisitionConfig* s_config)
 	//////////////////////////////
 	// channels
 	//////////////////////////////
-	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
+	for (int i=0;i<NUM_DIGITIZER_CHANNELS_DRS;i++)
 	{
 		checkBoxEnabled[i]->setChecked(config->channelEnabled[i]);
 		//conditions for being allowed to select trigger: channel enabled and self triggering enabled
@@ -167,7 +167,7 @@ void AcquisitionConfigDialog::setUIFromConfig(DRSAcquisitionConfig* s_config)
 void AcquisitionConfigDialog::updateUI()
 {		
 	//update channels
-	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
+	for (int i=0;i<NUM_DIGITIZER_CHANNELS_DRS;i++)
 	{		
 		//conditions for being allowed to select trigger: channel enabled and self triggering enabled
 		checkBoxTriggerEnabled[i]->setEnabled(checkBoxEnabled[i]->checkState() && ui.comboBoxSelfTriggering->currentIndex());		
@@ -219,7 +219,7 @@ void AcquisitionConfigDialog::updateConfig()
 	// channels
 	//////////////////////////////
 
-	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
+	for (int i=0;i<NUM_DIGITIZER_CHANNELS_DRS;i++)
 	{				
 		config->channelEnabled[i]=checkBoxEnabled[i]->isChecked();
 		config->channelSelfTriggerEnabled[i]=checkBoxTriggerEnabled[i] && checkBoxEnabled[i]->isChecked();

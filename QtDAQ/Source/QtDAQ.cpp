@@ -92,7 +92,7 @@ QtDAQ::QtDAQ(QWidget *parent)
 	}
 
 	//initially uncalibrated
-	memset(calibrationValues, 0, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
+	memset(calibrationValues, 0, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS_DAQ);
 	ui.mdiArea1->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	ui.mdiArea1->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
@@ -425,7 +425,7 @@ void QtDAQ::onNewEventSample(EventSampleData* sample)
 		(*it)->onNewEventSample(sample);
 	}
 	SAFE_DELETE_ARRAY(sample->tValues);
-	for (int ch = 0; ch<NUM_DIGITIZER_CHANNELS; ch++)
+	for (int ch = 0; ch<NUM_DIGITIZER_CHANNELS_DAQ; ch++)
 	{
 		SAFE_DELETE_ARRAY(sample->fValues[ch]);
 	}
@@ -956,7 +956,7 @@ void QtDAQ::onSaveUIClicked()
 		//Newly introducted in UI Version 0x03: End
 
 		//write calibration values
-        stream.writeRawData((const char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
+		stream.writeRawData((const char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS_DAQ);
 
 		//write cuts
 		stream << cuts;
@@ -1093,7 +1093,7 @@ void QtDAQ::restoreUI(bool legacy)
 			//Newly introducted in UI Version 0x03: End
 		}
 		//read calibration values
-		stream.readRawData((char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS);
+		stream.readRawData((char*)&calibrationValues, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS_DAQ);
 
 		//read cuts
 		stream >> cuts;

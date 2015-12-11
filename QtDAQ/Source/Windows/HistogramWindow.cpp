@@ -14,8 +14,8 @@ HistogramWindow::HistogramWindow (QWidget * parent, HistogramParameter s_paramet
 	displayMeanAndFWHM=displayFoM=false;
 	autoFitGaussian=autoFitDoubleGaussian=false;
 
-	FWHM=0;
-	mean=0;
+	mean = FWHM = FoM = 0;
+	uMean = uFWHM = uFoM = 0;
 
 	plot=ui.qwtPlotHistogram;
 	ui.qwtPlotHistogram->setLogScale(logScale);
@@ -140,7 +140,7 @@ void HistogramWindow::updateTitleAndAxis()
 	if (displayMeanAndFWHM)
 		windowTitle+=" Mean: "+QString::number(mean)+", FWHM: "+QString::number(FWHM);
 	else if (displayFoM)
-		windowTitle+=" Figure of Merit: "+QString::number(fom);
+		windowTitle+=" Figure of Merit: "+QString::number(FoM);
 	setWindowTitle(windowTitle);
 	ui.qwtPlotHistogram->setAxisTitle(QwtPlot::xBottom, axisName);
 }
@@ -348,9 +348,9 @@ void HistogramWindow::onFitGaussianClicked()
 		}
 		ui.qwtPlotHistogram->setFittedValues(numFittedPoints, xVals, yVals);
 		FWHM=2.35482*fittedSigma*parameterInterval;
-		double u_FWHM=2.35482*u_sigma*parameterInterval;
+		uFWHM=2.35482*u_sigma*parameterInterval;
 		mean=parameterMin+parameterInterval*fittedX_C;
-		double u_mean=parameterInterval*u_x_c;
+		uMean=parameterInterval*u_x_c;
 		displayMeanAndFWHM=true;
 		displayFoM=false;
 		autoFitGaussian=true;
@@ -430,7 +430,7 @@ void HistogramWindow::onFitDoubleGaussianClicked()
 			yVals[i]+=A2*exp(-0.5*pow((index-x_c2)/sigma2, 2));
 		}
 		ui.qwtPlotHistogram->setFittedValues(numFittedPoints, xVals, yVals);
-		fom=abs(x_c1-x_c2)/(2.35482*(sigma1+sigma2));
+		FoM=abs(x_c1-x_c2)/(2.35482*(sigma1+sigma2));
 		mean=parameterMin+parameterInterval*x_c1;
 		displayMeanAndFWHM=false;
 		displayFoM=true;

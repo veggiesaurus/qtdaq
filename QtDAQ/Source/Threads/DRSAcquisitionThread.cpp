@@ -6,7 +6,7 @@
 DRSAcquisitionThread::DRSAcquisitionThread(QObject *parent)
 	: QThread(parent)
 {
-	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
+	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS_DRS);
 	tempValArray=new float[NUM_DIGITIZER_SAMPLES_DRS];
 	tempFilteredValArray=new float[NUM_DIGITIZER_SAMPLES_DRS];
 	memset(tempValArray, 0, sizeof(float)*NUM_DIGITIZER_SAMPLES_DRS);
@@ -41,7 +41,7 @@ DRSAcquisitionThread::~DRSAcquisitionThread()
 bool DRSAcquisitionThread::initDRSAcquisitionThread(DRS* s_drs, DRSBoard* s_board, DRSAcquisitionConfig* s_config, AnalysisConfig* s_analysisConfig, int updateTime)
 {
 	drsObjectMutex.lock();
-	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
+	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS_DRS);
 	memset(&rawData, 0, sizeof(EventRawData));
 	config=s_config;
 	analysisConfig=s_analysisConfig;
@@ -83,7 +83,7 @@ void DRSAcquisitionThread::run()
 	//find which is the first channel to read out, and which is the last
 	//(only read out channels that are required, to improve throughput)
 	configMutex.lock();
-	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
+	for (int i=0;i<NUM_DIGITIZER_CHANNELS_DRS;i++)
 	{
 		if (config->channelEnabled[i])
 		{
@@ -152,7 +152,7 @@ void DRSAcquisitionThread::run()
 		rawData.timestamp=&timeStamp;
 		/* decode waveform (Y) array first channel in mV */
 		configMutex.lock();
-		for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
+		for (int i=0;i<NUM_DIGITIZER_CHANNELS_DRS;i++)
 		{
 			if (config->channelEnabled[i])
 			{
@@ -245,12 +245,12 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 		sample=new EventSampleData();
 		//set null pointers for channel initially
 		memset(sample, 0, sizeof(EventSampleData));
-		memset(sample->fValues, 0, NUM_DIGITIZER_CHANNELS*sizeof(float*));
+		memset(sample->fValues, 0, NUM_DIGITIZER_CHANNELS_DRS*sizeof(float*));
 		sample->tValues=new float[NUM_DIGITIZER_SAMPLES_DRS];
 		processSuccess&=clone(rawEvent.tValues, NUM_DIGITIZER_SAMPLES_DRS, sample->tValues);
 	}
 	
-	for (int ch=0;ch<NUM_DIGITIZER_CHANNELS;ch++)
+	for (int ch=0;ch<NUM_DIGITIZER_CHANNELS_DRS;ch++)
 	{		
 		if (rawEvent.fValues[ch])
 		{
@@ -394,11 +394,11 @@ void DRSAcquisitionThread::processEvent(EventRawData rawEvent, bool outputSample
 				else
 					processSuccess &= clone(tempValArray, NUM_DIGITIZER_SAMPLES_DRS, sample->fValues[ch]);
 
-				sample->baseline = stats->channelStatistics[ch].baseline;
-				sample->indexStart = timeOffset + startOffset;
-				sample->indexShortEnd = timeOffset + shortGateOffset;
-				sample->indexLongEnd = timeOffset + longGateOffset;
-				sample->cfdTime = timeOffset / (sampleRateMSPS / 1000.0f);
+				sample->baseline[ch] = stats->channelStatistics[ch].baseline;
+				sample->indexStart[ch] = timeOffset + startOffset;
+				sample->indexShortEnd[ch] = timeOffset + shortGateOffset;
+				sample->indexLongEnd[ch] = timeOffset + longGateOffset;
+				sample->cfdTime[ch] = timeOffset / (sampleRateMSPS / 1000.0f);
 			}
 
 			}

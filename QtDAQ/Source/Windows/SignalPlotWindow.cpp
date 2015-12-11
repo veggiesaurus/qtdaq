@@ -26,10 +26,10 @@ void SignalPlotWindow::onNewEventSample(EventSampleData* sample)
 	if ((chPrimary>=0 && sample->fValues[chPrimary]) ||(chSecondary>=0 && sample->fValues[chSecondary]))
 	{
 		float sampleTime=1000.0/sample->MSPS;
-		float offset=sample->cfdTime-0.1f*sampleTime*sample->numSamples;
+		float offset = sample->cfdTime[chPrimary] - 0.1f*sampleTime*sample->numSamples;
 		ui.qwtPlotSignal->setData(sample->tValues, chPrimary>=0?sample->fValues[chPrimary]:NULL, chSecondary>=0?sample->fValues[chSecondary]:NULL, sample->numSamples, sampleTime, offset);	
-		ui.qwtPlotSignal->setBaseline(sample->baseline);
-		ui.qwtPlotSignal->setGates(sample->indexStart, sample->indexShortEnd, sample->indexLongEnd, sample->indexOfTOFStartPulse, sample->indexOfTOFEndPulse);
+		ui.qwtPlotSignal->setBaseline(sample->baseline[chPrimary]);
+		ui.qwtPlotSignal->setGates(sample->indexStart[chPrimary], sample->indexShortEnd[chPrimary], sample->indexLongEnd[chPrimary], sample->indexOfTOFStartPulse, sample->indexOfTOFEndPulse);
 		ui.qwtPlotSignal->replot();
 	}
 }

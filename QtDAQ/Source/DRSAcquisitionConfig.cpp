@@ -15,8 +15,8 @@ DRSAcquisitionConfig::DRSAcquisitionConfig()
 	selfTriggeringEnabled=false;
 	voltageOffset=0;
 	triggerThreshold=0;
-	memset (channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
-	memset (channelSelfTriggerEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
+	memset (channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS_DRS);
+	memset (channelSelfTriggerEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS_DRS);
 }
 
 DRSAcquisitionConfig::~DRSAcquisitionConfig()
@@ -51,7 +51,7 @@ bool DRSAcquisitionConfig::apply(DRSBoard* board)
 	board->SetTriggerLevel(triggerThreshold/1000.0, triggerPolarityIsNegative); 
 	board->SetTriggerDelayPercent(postTriggerDelay);
 	int triggerSourceFlag=0;
-	for (int i=0;i<NUM_DIGITIZER_CHANNELS;i++)
+	for (int i=0;i<NUM_DIGITIZER_CHANNELS_DRS;i++)
 	{		
 		if (channelSelfTriggerEnabled[i])
 			triggerSourceFlag|=(1<<i);
@@ -67,8 +67,8 @@ QDataStream &operator<<(QDataStream &out, const DRSAcquisitionConfig &obj)
 	out << ACQUISITION_SAVE_VERSION;
 	out << obj.correctionLevel << obj.samplesPerEvent << obj.sampleRateMSPS << obj.voltageOffset;
 	out << obj.externalTriggeringEnabled << obj.selfTriggeringEnabled << obj.triggerPolarityIsNegative << obj.postTriggerDelay << obj.triggerThreshold;
-	out << (quint32)NUM_DIGITIZER_CHANNELS;
-	for (auto i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
+	out << (quint32)NUM_DIGITIZER_CHANNELS_DRS;
+	for (auto i = 0; i < NUM_DIGITIZER_CHANNELS_DRS; i++)
 	{
 		out << obj.channelEnabled[i] << obj.channelSelfTriggerEnabled[i];
 	}
@@ -92,7 +92,7 @@ QDataStream &operator>>(QDataStream &in, DRSAcquisitionConfig &obj)
 	{
 		bool chEnabled, chTriggerEnabled;
 		in >> chEnabled >> chTriggerEnabled;
-		if (i < NUM_DIGITIZER_CHANNELS)
+		if (i < NUM_DIGITIZER_CHANNELS_DRS)
 		{
 			obj.channelEnabled[i] = chEnabled;
 			obj.channelSelfTriggerEnabled[i] = chEnabled;

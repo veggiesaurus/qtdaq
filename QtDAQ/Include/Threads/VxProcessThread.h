@@ -95,7 +95,7 @@ private:
 	Persistent<ObjectTemplate> globalTemplate;
 	Persistent<Object> sampleStatsObject;
 	Persistent<Object> eventStatsObject;
-	Persistent<Object> allChannelsStatsObject[NUM_DIGITIZER_CHANNELS];
+	Persistent<Object> allChannelsStatsObject[NUM_DIGITIZER_CHANNELS_DAQ];
 	Persistent<Context> persContext;
     Persistent<Script> scriptInitial, scriptFinished, scriptPre, scriptPostChannel, scriptPostEvent, scriptDef;
 

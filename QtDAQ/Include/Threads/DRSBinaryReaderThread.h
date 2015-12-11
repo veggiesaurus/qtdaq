@@ -46,7 +46,7 @@ private:
 	char* buffer=nullptr;
 	float* tempValArray;
 	float* tempFilteredValArray;
-	bool channelEnabled[NUM_DIGITIZER_CHANNELS];
+	bool channelEnabled[NUM_DIGITIZER_CHANNELS_DRS];
     QVector<EventStatistics*>* processedEvents;
 	FILE* inputFile=nullptr;
 	bool compressedInput;

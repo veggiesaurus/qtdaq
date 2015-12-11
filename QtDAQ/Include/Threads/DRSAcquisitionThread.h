@@ -42,7 +42,7 @@ private:
 	EventRawData rawData;
 	float* tempValArray;
 	float* tempFilteredValArray;
-	bool channelEnabled[NUM_DIGITIZER_CHANNELS];
+	bool channelEnabled[NUM_DIGITIZER_CHANNELS_DRS];
 	QVector<EventStatistics*>* processedEvents;
 	QTimer* updateTimer = nullptr;
 	bool sampleNextEvent = true;

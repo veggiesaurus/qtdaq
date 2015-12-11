@@ -30,8 +30,8 @@ public:
 	float triggerThreshold;
 	
 	//individual settings
-	bool channelEnabled[NUM_DIGITIZER_CHANNELS];
-	bool channelSelfTriggerEnabled[NUM_DIGITIZER_CHANNELS];
+	bool channelEnabled[NUM_DIGITIZER_CHANNELS_DRS];
+	bool channelSelfTriggerEnabled[NUM_DIGITIZER_CHANNELS_DRS];
 
 	//send config to the board
 	bool apply(DRSBoard* board);

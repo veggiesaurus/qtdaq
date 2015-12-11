@@ -6,7 +6,7 @@
 DRSBinaryReaderThread::DRSBinaryReaderThread(QObject *parent)
 	: QThread(parent)
 {
-	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
+	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS_DRS);
 	
 	//tempValArray=new float[NUM_DIGITIZER_SAMPLES];
 	tempValArray=(float*)qMallocAligned(sizeof(float)*NUM_DIGITIZER_SAMPLES_DRS, 16);
@@ -43,7 +43,7 @@ bool DRSBinaryReaderThread::initDRSBinaryReaderThread(QString filename, bool isC
 	runIndex = s_runIndex;
 	eventSize=0;
 	analysisConfig=s_analysisConfig;
-	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS);
+	memset(channelEnabled, 0, sizeof(bool)*NUM_DIGITIZER_CHANNELS_DRS);
 	memset(rawData, 0, sizeof(EventRawData)*NUM_BUFFERED_EVENTS);
 
 	compressedInput=isCompressedInput;
@@ -132,7 +132,7 @@ bool DRSBinaryReaderThread::initDRSBinaryReaderThread(QString filename, bool isC
 		//move past time array
 		offset+=NUM_DIGITIZER_SAMPLES_DRS*4;
 		//run over each channel
-		for (int ch=0;ch<NUM_DIGITIZER_CHANNELS;ch++)
+		for (int ch=0;ch<NUM_DIGITIZER_CHANNELS_DRS;ch++)
 		{
 			if (channelEnabled[ch])
 			{
@@ -298,13 +298,13 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 		sample=new EventSampleData();
 		//set null pointers for channel initially
 		memset(sample, 0, sizeof(EventSampleData));
-		memset(sample->fValues, 0, NUM_DIGITIZER_CHANNELS*sizeof(float*));		
+		memset(sample->fValues, 0, NUM_DIGITIZER_CHANNELS_DRS*sizeof(float*));		
 	}
 
 
 	//analysisConfig->displayCFDSignal = true;
 
-	for (int ch=0;ch<NUM_DIGITIZER_CHANNELS;ch++)
+	for (int ch=0;ch<NUM_DIGITIZER_CHANNELS_DRS;ch++)
 	{		
 		if (rawEvent.fValues[ch])
 		{
@@ -448,11 +448,11 @@ void DRSBinaryReaderThread::processEvent(EventRawData rawEvent, bool outputSampl
 				else
 					processSuccess &= clone(tempValArray, NUM_DIGITIZER_SAMPLES_DRS, sample->fValues[ch]);
 
-				sample->baseline = stats->channelStatistics[ch].baseline;
-				sample->indexStart = timeOffset + startOffset;
-				sample->indexShortEnd = timeOffset + shortGateOffset;
-				sample->indexLongEnd = timeOffset + longGateOffset;
-				sample->cfdTime = timeOffset / (sampleRateMSPS/1000.0f);
+				sample->baseline[ch] = stats->channelStatistics[ch].baseline;
+				sample->indexStart[ch] = timeOffset + startOffset;
+				sample->indexShortEnd[ch] = timeOffset + shortGateOffset;
+				sample->indexLongEnd[ch] = timeOffset + longGateOffset;
+				sample->cfdTime[ch] = timeOffset / (sampleRateMSPS / 1000.0f);
 			}
 
 		}

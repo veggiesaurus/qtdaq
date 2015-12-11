@@ -22,7 +22,8 @@ if (ptr != NULL)            \
 }
 
 
-#define NUM_DIGITIZER_CHANNELS 4
+#define NUM_DIGITIZER_CHANNELS_DRS 4
+#define NUM_DIGITIZER_CHANNELS_DAQ 8
 #define NUM_DIGITIZER_SAMPLES_DRS 1024
 
 
@@ -297,7 +298,7 @@ struct EventStatistics
 	int runIndex;
 	bool isValid;
 	float custom1, custom2, custom3, custom4, custom5;
-	SampleStatistics channelStatistics[NUM_DIGITIZER_CHANNELS];
+	SampleStatistics channelStatistics[NUM_DIGITIZER_CHANNELS_DAQ];
 };
 
 struct EventRawData
@@ -305,7 +306,7 @@ struct EventRawData
 	EventTimestamp* timestamp;
 	int* serial;
 	float* tValues;
-	unsigned short* fValues[NUM_DIGITIZER_CHANNELS];
+	unsigned short* fValues[NUM_DIGITIZER_CHANNELS_DAQ];
 	void* additional;
 };
 
@@ -315,9 +316,9 @@ struct EventSampleData
 	int numSamples;
 	int MSPS;
 	float* tValues;
-	float* fValues[NUM_DIGITIZER_CHANNELS];
-	float baseline;
-	float cfdTime;
-	int indexStart, indexShortEnd, indexLongEnd;
+	float* fValues[NUM_DIGITIZER_CHANNELS_DAQ];
+	float baseline[NUM_DIGITIZER_CHANNELS_DAQ];
+	float cfdTime[NUM_DIGITIZER_CHANNELS_DAQ];
+	int indexStart[NUM_DIGITIZER_CHANNELS_DAQ], indexShortEnd[NUM_DIGITIZER_CHANNELS_DAQ], indexLongEnd[NUM_DIGITIZER_CHANNELS_DAQ];
 	int indexOfTOFStartPulse, indexOfTOFEndPulse;
 };

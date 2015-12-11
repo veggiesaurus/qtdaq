@@ -52,7 +52,8 @@ private:
 	double* binVals;
 	bool displayMeanAndFWHM, displayFoM, delta, logScale;
 	bool autoFitGaussian, autoFitDoubleGaussian;
-	double FWHM, mean, fom;
+	double FWHM, mean, FoM;
+	double uMean, uFWHM, uFoM;
 
 	//fitting variables
 	double A1, A2;

@@ -202,9 +202,6 @@
     <ClCompile Include="Source\V8\V8Wrapper.cpp">
       <Filter>Source Files\V8</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DRS4\strlcpy.c">
-      <Filter>Source Files\curvefit</Filter>
-    </ClCompile>
     <ClCompile Include="Source\curvefit\fitting.cpp">
       <Filter>Source Files\curvefit</Filter>
     </ClCompile>
@@ -478,6 +475,9 @@
     <ClCompile Include="Source\VxAcquisitionConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DRS4\strlcpy.c">
+      <Filter>Source Files\DRS4</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtdaq.qrc">
@@ -664,12 +664,6 @@
     </ClInclude>
     <ClInclude Include="Include\curvefit\mpfit.h">
       <Filter>Header Files\curvefit</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\DRS4\usb.h">
-      <Filter>Header Files\DRS4</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\strlcpy.h">
-      <Filter>Header Files\DRS4</Filter>
     </ClInclude>
     <ClInclude Include="Include\DRS4\mxml.h">
       <Filter>Header Files\DRS4</Filter>

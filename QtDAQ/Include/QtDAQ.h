@@ -185,7 +185,7 @@ private:
 	QString vxAcquisitionConfigString;
 	VxAcquisitionConfig* vxConfig;
 	AnalysisConfig* analysisConfig;
-	EnergyCalibration calibrationValues[NUM_DIGITIZER_CHANNELS];
+	EnergyCalibration calibrationValues[NUM_DIGITIZER_CHANNELS_DAQ];
 	QVector<SignalPlotWindow*> signalPlots;
 	QVector<HistogramWindow*> histograms;
 	QVector<Histogram2DWindow*> histograms2D;

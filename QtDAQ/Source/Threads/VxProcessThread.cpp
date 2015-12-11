@@ -392,12 +392,12 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 	int primaryCFDChannel = -1;
 
 	float cfdOverrideTime = -1;
-	if (primaryCFDChannel >= 0 && primaryCFDChannel < NUM_DIGITIZER_CHANNELS)
+	if (primaryCFDChannel >= 0 && primaryCFDChannel < NUM_DIGITIZER_CHANNELS_DAQ)
 	{
 		processSuccess = processChannel(boardId, rawEvent, primaryCFDChannel, stats, GSPS, sample);
 		cfdOverrideTime = stats->channelStatistics[primaryCFDChannel].timeOfCFDCrossing;
 	}
-	for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS; ch++)
+	for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS_DAQ; ch++)
 	{
 		stats->channelStatistics[ch].temperature = currentTemperature;
 		if (ch != primaryCFDChannel)
@@ -417,7 +417,7 @@ void VxProcessThread::processEvent(EventVx* rawEvent, bool outputSample)
 			sample->fValues[chTOF] = new float[numSamples];
 			processSuccess &= clone(tempValArray, numSamples, sample->fValues[chTOF]);
 		}
-		for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS; ch++)
+		for (int ch = 0; ch < NUM_DIGITIZER_CHANNELS_DAQ; ch++)
 		{
 			SampleStatistics& statsCh = stats->channelStatistics[ch];
 			//ignore empty and stop pulse channels
@@ -728,11 +728,11 @@ bool VxProcessThread::processChannel(uint32_t boardId, EventVx* rawEvent, int ch
 			else
 				processSuccess &= clone(tempValArray, numSamples, sample->fValues[ch]);
 
-			sample->baseline = stats->channelStatistics[ch].baseline;
-			sample->indexStart = timeOffset + startOffset;
-			sample->indexShortEnd = timeOffset + shortGateOffset;
-			sample->indexLongEnd = timeOffset + longGateOffset;
-			sample->cfdTime = timeOffset / GSPS;
+			sample->baseline[ch] = stats->channelStatistics[ch].baseline;
+			sample->indexStart[ch] = timeOffset + startOffset;
+			sample->indexShortEnd[ch] = timeOffset + shortGateOffset;
+			sample->indexLongEnd[ch] = timeOffset + longGateOffset;
+			sample->cfdTime[ch] = timeOffset / GSPS;
 		}
 
 		if (analysisConfig->bPostChannelV8)
@@ -836,7 +836,7 @@ void VxProcessThread::compileV8()
         scriptFinished.Reset(isolate, localScriptFinished);     
 
         Handle<ObjectTemplate> sampleStatsTemplate = GetSampleStatsTemplate(isolate);
-        for (int i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
+		for (int i = 0; i < NUM_DIGITIZER_CHANNELS_DAQ; i++)
         {
             Local<Object> localSampleStats = sampleStatsTemplate->NewInstance();
             allChannelsStatsObject[i].Reset(isolate, localSampleStats);
@@ -959,9 +959,9 @@ bool VxProcessThread::runV8CodePostEventAnalysis(EventStatistics* evStats)
 	Local<Object> obj = Local<Object>::New(isolate, eventStatsObject);
 	obj->SetInternalField(0, External::New(isolate, evStats));
 
-	Local<Object> objsCh[NUM_DIGITIZER_CHANNELS];
+	Local<Object> objsCh[NUM_DIGITIZER_CHANNELS_DAQ];
 
-	for (int i = 0; i < NUM_DIGITIZER_CHANNELS; i++)
+	for (int i = 0; i < NUM_DIGITIZER_CHANNELS_DAQ; i++)
 	{
 		objsCh[i] = Local<Object>::New(isolate, allChannelsStatsObject[i]);
 		objsCh[i]->SetInternalField(0, External::New(isolate, &evStats->channelStatistics[i]));

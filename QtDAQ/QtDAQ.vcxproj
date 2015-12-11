@@ -704,7 +704,6 @@
     <ClInclude Include="Include\DRS4\DRS.h" />
     <ClInclude Include="Include\DRS4\musbstd.h" />
     <ClInclude Include="Include\DRS4\mxml.h" />
-    <ClInclude Include="Include\DRS4\usb.h" />
     <CustomBuild Include="Include\Threads\DRSAcquisitionThread.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing DRSAcquisitionThread.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -834,7 +833,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQWT_DLL -DQT_QML_LIB -DHAVE_USB -DHAVE_LIBUSB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtQml"</Command>
     </CustomBuild>
-    <ClInclude Include="Include\strlcpy.h" />
     <CustomBuild Include="Include\Threads\VxAcquisitionThread.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release_debug|Win32'">Moc%27ing VxAcquisitionThread.h...</Message>
