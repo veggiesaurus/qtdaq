@@ -91,6 +91,19 @@ QtDAQ::QtDAQ(QWidget *parent)
 		initSerial(serialPort);
 	}
 
+	//UDP settings
+	int prevPort = settings.value("temperature/udpPort").toInt();
+	if (prevPort > 10000 && prevPort < 99999)
+		udpPort = prevPort;
+	else
+		settings.setValue("temperature/udpPort", udpPort);
+	udpSocket = new QUdpSocket(this);
+	udpSocket->bind(udpPort, QUdpSocket::ShareAddress);
+
+	connect(udpSocket, SIGNAL(readyRead()), this, SLOT(onUDPRecieved()));
+
+
+
 	//initially uncalibrated
 	memset(calibrationValues, 0, sizeof(EnergyCalibration)*NUM_DIGITIZER_CHANNELS_DAQ);
 	ui.mdiArea1->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -1544,6 +1557,23 @@ void QtDAQ::serialReadData()
 	}
 
 }
+
+void QtDAQ::onUDPRecieved()
+{
+	while (udpSocket->hasPendingDatagrams()) {
+		QByteArray datagram;
+		datagram.resize(udpSocket->pendingDatagramSize());
+		udpSocket->readDatagram(datagram.data(), datagram.size());
+		bool validTemp = false;
+		float temp = QString(datagram.data()).toFloat(&validTemp);
+		if (validTemp)
+			emit(temperatureUpdated(temp));
+	}
+}
+
+
+
+
 void QtDAQ::clearAllPlots()
 {
     for (auto plot:histograms)

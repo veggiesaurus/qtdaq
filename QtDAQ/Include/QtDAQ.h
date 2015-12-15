@@ -4,6 +4,7 @@
 #include <QTime>
 #include <QSettings>
 #include <QtSerialPort/QSerialPort>
+#include <QtNetwork>
 #ifdef WIN32
 #include <QtWinExtras/QWinTaskbarProgress>
 #endif
@@ -154,6 +155,7 @@ public:
 	void onExitClicked();
 	//temperature sensor
 	void serialReadData();
+	void onUDPRecieved();
 protected:
 	void closeEvent(QCloseEvent *event);
 
@@ -219,6 +221,9 @@ private:
 	QString serialString;
 	float currentTemp;
 
+	//UDP network interface
+	QUdpSocket *udpSocket;
+	int udpPort = 54545;
 	//buffers and mutexes
 	//raw 
 	QMutex* rawBuffer1Mutex;
