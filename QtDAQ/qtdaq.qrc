@@ -1,4 +1,5 @@
 <RCC>
-    <qresource prefix="QtDAQ">
+    <qresource prefix="/QtDAQ">
+        <file>Resources/buildings.png</file>
     </qresource>
 </RCC>

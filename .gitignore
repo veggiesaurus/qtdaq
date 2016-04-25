@@ -158,3 +158,5 @@ QtDAQ/GeneratedFiles/
 Win32/
 QtDAQ/Release_debug/
 build-QtDAQ-*/
+QtDAQ/OptDebug/
+QtDAQ.VC.db
